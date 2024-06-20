@@ -1,0 +1,78 @@
+# template.yaml
+Transform: AWS::Serverless-2016-10-31
+
+Globals:
+  Function:
+    Timeout: 30
+  Api:
+    Cors:
+      AllowOrigin: "'*'"
+      AllowCredentials: true
+      AllowMethods: "'POST'"
+      AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
+
+Resources:
+  MonthlyGetLmbda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./monthly/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /monthly
+            Method: GET
+            RestApiId:
+              Ref: ArinkoAPI
+
+  MonthlyDialyGetLmbda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./monthly/daily/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /monthly/daily
+            Method: GET
+            RestApiId:
+              Ref: ArinkoAPI
+
+  MonthlyDialyPostLmbda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./monthly/daily/post
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /monthly/daily
+            Method: POST
+            RestApiId:
+              Ref: ArinkoAPI
+
+  ArinkoAPI: # API Gateway
+    Type: AWS::Serverless::Api
+    Properties:
+      Name: arinko_api
+      Cors: "'*'"
+      DefinitionBody:
+        Fn::Transform:
+          Name: AWS::Include
+          Parameters:
+            Location: api-v1-oas30-apigateway.yaml
+      OpenApiVersion: 3.0.1
+      StageName: development
+      EndpointConfiguration: REGIONAL
