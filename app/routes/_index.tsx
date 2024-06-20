@@ -1,38 +1,83 @@
 import type { MetaFunction } from "@remix-run/node";
+import {
+  useNavigate,
+  ClientLoaderFunctionArgs,
+  useLoaderData,
+  useLocation,
+  useRouteLoaderData
+} from "@remix-run/react";
+import { list } from "postcss";
+import { getData } from "~/api/fetchApi";
 
 export const meta: MetaFunction = () => {
   return [
-    { title: "New Remix SPA" },
-    { name: "description", content: "Welcome to Remix (SPA Mode)!" },
+    { title: "大阪市学童補助金支援ツール Ver.0.1" },
+    { name: "description", content: "補助金の申請って大変だよね!" },
   ];
 };
 
+export const clientLoader = async ({
+  params,
+}: ClientLoaderFunctionArgs) => {
+  // データを取ってくる
+  const today = new Date()
+  const ym = !params.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : params.ym
+  const data = await getData("/monthly?ym=" + ym)
+  return data;
+};
+
+
 export default function Index() {
+  const data = useLoaderData<typeof clientLoader>()
+  const navigate = useNavigate();
+  const editClick = (dt:string) => {
+    navigate("/edit/" + dt);
+  };
+
   return (
-    <div className="font-sans p-4">
-      <h1 className="text-3xl">Welcome to Remix (SPA Mode)</h1>
-      <ul className="list-disc mt-4 pl-6 space-y-2">
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/guides/spa-mode"
-            rel="noreferrer"
-          >
-            SPA Mode Guide
-          </a>
-        </li>
-        <li>
-          <a
-            className="text-blue-700 underline visited:text-purple-900"
-            target="_blank"
-            href="https://remix.run/docs"
-            rel="noreferrer"
-          >
-            Remix Docs
-          </a>
-        </li>
-      </ul>
+    <div>
+      <table className="table table-bordered text-center">
+        <thead>
+          <tr>
+              <th rowSpan={2}>日付</th>
+              <th rowSpan={2}>曜日</th>
+              <th colSpan={3}>児童数</th>
+              <th colSpan={2}>開所時職員数</th>
+              <th colSpan={2}>閉所時職員数</th>
+              <th rowSpan={2}></th>
+          </tr>
+          <tr>
+              <th></th>
+              <th>内、障がい児</th>
+              <th>内、医ケア児</th>
+              <th>支援員数</th>
+              <th>支援員以外</th>
+              <th>支援員数</th>
+              <th>支援員以外</th>
+          </tr>
+        </thead>
+
+        <tbody>
+          {data.list.map((i:any) => (
+            <tr key={i[0]}>
+              <td>{i[1]}</td>
+              <td>{i[2]}</td>
+              <td>{i[3]}</td>
+              <td>{i[4]}</td>
+              <td>{i[5]}</td>
+              <td>{i[6]}</td>
+              <td>{i[7]}</td>
+              <td>{i[8]}</td>
+              <td>{i[9]}</td>
+              <td>
+                <button type="button" className="btn btn-primary" onClick={() => editClick(i[0])}>
+                  入力
+                </button>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }
