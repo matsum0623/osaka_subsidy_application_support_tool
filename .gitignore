@@ -5,3 +5,4 @@ node_modules
 /public/build
 .env
 apigateway/.aws-sam/
+dynamodb/docker/dynamodb/shared-local-instance.db
