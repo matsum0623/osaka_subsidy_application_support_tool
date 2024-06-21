@@ -30,7 +30,8 @@ export default function Edit() {
   const params = useParams()
   const navigate = useNavigate()
   const data = useLoaderData<typeof clientLoader>()
-  const [instData, setInstData] = useState(useLoaderData<typeof clientLoader>().instructors)
+  const [instData, setInstData] = useState(data.instructors)
+  const [sumHours, setSumHours] = useState(data.summary.hours)
   const [ct, setCt] = useState(0) // 再描画用のState
 
   const setHour = (e: { target: any; }) => {
@@ -38,27 +39,44 @@ export default function Edit() {
     const [id, k] = target.name.split('.')
     const start_time = (k == 'start') ? target.value : instData[id].start
     const end_time = (k == 'end') ? target.value : instData[id].end
-    if (!start_time || !end_time || start_time >= end_time){
+    if (!start_time || !end_time){
+      instData[id].start = start_time
+      instData[id].end = end_time
+    }else if (start_time >= end_time){
       console.log("エラー")
+      console.log(start_time, end_time)
       instData[id].hours = ''
     }else{
       const [start_hour, start_min] = start_time.split(':').map((i:any) => (parseInt(i)))
       const [end_hour, end_min] = end_time.split(':').map((i:any) => (parseInt(i)))
       const hour_min = start_min > end_min ? end_min - start_min + 60 : end_min - start_min
       const hour_hour = start_min > end_min ? end_hour - start_hour - 1 : end_hour - start_hour
-      instData[id].hours = hour_hour + ':' + ( '00' + hour_min ).slice( -2 );
+      instData[id].hours = hour_hour + ':' + ( '00' + hour_min ).slice( -2 )
       instData[id].start = start_time
       instData[id].end = end_time
     }
     setInstData(instData)
+
+    let sum_hour = 0
+    let sum_min = 0
+    instData.map((inst:any) => {
+      if (inst.hours){
+        const [hour, min] = inst.hours.split(':')
+        sum_hour += parseInt(hour)
+        sum_min += parseInt(min)
+      }
+    })
+    sum_hour += Math.floor(sum_min / 60)
+    sum_min = sum_min % 60
+    setSumHours(sum_hour + ':' + ( '00' + sum_min ).slice( -2 ))
     setCt(ct + 1)
   }
   return (
     <Form method="post">
-      <p>
+      <p className="fs-2">
         {params.dt}
       </p>
-      <h1>児童情報</h1>
+      <h1 className="fs2">児童情報</h1>
       <table className="table table-bordered text-center">
         <thead>
           <tr>
@@ -76,7 +94,7 @@ export default function Edit() {
         </tbody>
 
       </table>
-      <h1>指導員情報</h1>
+      <h1 className="fs2">指導員情報</h1>
       <table className="table table-bordered text-center">
         <thead>
           <tr>
@@ -101,7 +119,7 @@ export default function Edit() {
             <td>合計</td>
             <td></td>
             <td></td>
-            <td>{data.summary.hours}</td>
+            <td>{sumHours}</td>
           </tr>
         </tbody>
       </table>
