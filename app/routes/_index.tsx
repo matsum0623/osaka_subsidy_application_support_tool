@@ -1,20 +1,9 @@
-import type { MetaFunction } from "@remix-run/node";
 import {
   useNavigate,
   ClientLoaderFunctionArgs,
   useLoaderData,
-  useLocation,
-  useRouteLoaderData
 } from "@remix-run/react";
-import { list } from "postcss";
 import { getData } from "~/api/fetchApi";
-
-export const meta: MetaFunction = () => {
-  return [
-    { title: "大阪市学童補助金支援ツール Ver.0.1" },
-    { name: "description", content: "補助金の申請って大変だよね!" },
-  ];
-};
 
 export const clientLoader = async ({
   params,

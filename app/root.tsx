@@ -1,12 +1,20 @@
 import {
   Links,
   Meta,
+  MetaFunction,
   Outlet,
   Scripts,
   ScrollRestoration,
 } from "@remix-run/react";
 import { LinksFunction } from "@remix-run/node";
 import stylesheet from "./globals.css?url"
+
+export const meta: MetaFunction = () => {
+  return [
+    { title: "大阪市学童補助金支援ツール Ver.0.1" },
+    { name: "description", content: "補助金の申請って大変だよね!" },
+  ];
+};
 
 export const links: LinksFunction = () => [
   {rel: "stylesheet", href: "https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"},
