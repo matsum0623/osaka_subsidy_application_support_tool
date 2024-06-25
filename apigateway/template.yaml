@@ -4,6 +4,8 @@ Transform: AWS::Serverless-2016-10-31
 Globals:
   Function:
     Timeout: 30
+    Layers:
+      - !Ref CommonLayer
   Api:
     Cors:
       AllowOrigin: "'*'"
@@ -12,7 +14,15 @@ Globals:
       AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
 
 Resources:
-  MonthlyGetLmbda: # Lambda
+  CommonLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs18.x
+      LayerName: "CommonLayer"
+      ContentUri: layers
+
+  MonthlyGetLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./monthly/get
@@ -29,7 +39,7 @@ Resources:
             RestApiId:
               Ref: ArinkoAPI
 
-  MonthlyDialyGetLmbda: # Lambda
+  MonthlyDailyGetLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./monthly/daily/get
@@ -46,7 +56,7 @@ Resources:
             RestApiId:
               Ref: ArinkoAPI
 
-  MonthlyDialyPostLmbda: # Lambda
+  MonthlyDailyPostLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./monthly/daily/post

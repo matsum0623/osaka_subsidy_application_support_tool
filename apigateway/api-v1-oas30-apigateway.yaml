@@ -24,10 +24,10 @@ paths:
                 $ref: "#/components/schemas/Empty"
       security:
         - IPFilter: []
-      x-amazon-apigateway-request-validator: "クエリ文字列パラメータおよびヘッダーの検証"
+      x-amazon-apigateway-request-validator: "Validating query string parameters and headers"
       x-amazon-apigateway-integration:
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MonthlyGetLmbda.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MonthlyGetLambda.Arn}/invocations
         responses:
           default:
             statusCode: "200"
@@ -59,10 +59,10 @@ paths:
                 $ref: "#/components/schemas/Empty"
       security:
         - IPFilter: []
-      x-amazon-apigateway-request-validator: "クエリ文字列パラメータおよびヘッダーの検証"
+      x-amazon-apigateway-request-validator: "Validating query string parameters and headers"
       x-amazon-apigateway-integration:
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MonthlyDialyGetLmbda.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MonthlyDailyGetLambda.Arn}/invocations
         responses:
           default:
             statusCode: "200"
@@ -103,10 +103,10 @@ paths:
                 $ref: "#/components/schemas/Empty"
       security:
         - IPFilter: []
-      x-amazon-apigateway-request-validator: "クエリ文字列パラメータおよびヘッダーの検証"
+      x-amazon-apigateway-request-validator: "Validating query string parameters and headers"
       x-amazon-apigateway-integration:
         uri:
-          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MonthlyDialyPostLmbda.Arn}/invocations
+          Fn::Sub: arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${MonthlyDailyPostLambda.Arn}/invocations
         responses:
           default:
             statusCode: "200"
@@ -183,7 +183,7 @@ x-amazon-apigateway-gateway-responses:
     responseParameters:
       gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
     responseTemplates:
-      application/json: '{"result": null, "error": {"code": "400000", "message": "不正なパラメータ"}}'
+      application/json: '{"result": null, "error": {"code": "400000", "message": "invalid parameter"}}'
   INVALID_SIGNATURE:
     statusCode: 403
     responseParameters:
@@ -224,7 +224,7 @@ x-amazon-apigateway-gateway-responses:
     responseParameters:
       gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
     responseTemplates:
-      application/json: '{"result": null, "error": {"code": "400000", "message": "不正なパラメータ"}}'
+      application/json: '{"result": null, "error": {"code": "400000", "message": "invalid parameter"}}'
   API_CONFIGURATION_ERROR:
     statusCode: 500
     responseParameters:
@@ -273,9 +273,9 @@ x-amazon-apigateway-gateway-responses:
     responseTemplates:
       application/json: '{"result": null, "error": {"code": "401000", "message": $context.error.messageString}}'
 x-amazon-apigateway-request-validators:
-  本文、クエリ文字列パラメータ、およびヘッダーの検証:
+  Validating the body, query string parameters, and headers:
     validateRequestParameters: true
     validateRequestBody: true
-  クエリ文字列パラメータおよびヘッダーの検証:
+  Validating query string parameters and headers:
     validateRequestParameters: true
     validateRequestBody: false
