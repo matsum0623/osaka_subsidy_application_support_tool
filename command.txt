@@ -1,0 +1,11 @@
+WEBサイト立ち上げ
+npm run dev
+
+APIGateway立ち上げ
+cd ./apigateway/
+sam build
+sam local start-api --warm-containers EAGER
+
+DynamoDB立ち上げ
+cd ./dynamodb/
+docker-compose up
