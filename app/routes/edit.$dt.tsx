@@ -125,7 +125,7 @@ export default function Edit() {
       </table>
       <p>
         <button type="submit" className="btn btn-primary">Save</button>
-        <button onClick={() => navigate("/")} type="button" className="btn btn-danger">Cancel</button>
+        <button onClick={() => navigate("/monthly")} type="button" className="btn btn-danger">Cancel</button>
       </p>
     </Form>
   )

@@ -1,0 +1,50 @@
+DynamoDBに登録するデータの形式を検討する
+
+# ユーザ情報
+PK:#METADATA#USER
+SK:USER#<USER_ID>
+    after_schools:list      対象の学童
+
+
+# 学童情報
+PK:#METADATA#AFTER_SCHOOL
+SK:AFTER_SCHOOL#<SCHOOL_ID>
+    ・指導員ID一覧
+    ・児童ID一覧
+
+# 指導員情報
+PK:AFTER_SCHOOL#<SCHOOL_ID>
+SK:INSTRUCTOR#<指導員ID>
+    名称
+    指導員資格
+    加配フラグ
+
+# 児童情報
+PK:AFTER_SCHOOL#<SCHOOL_ID>
+SK:CHILDREN#<児童ID>
+
+# 勤務情報
+PK:AFTER_SCHOOL#<SCHOOL_ID>
+SK:DAILY#<YYYY-MM-DD>
+    開所タイプ:integer
+    児童数合計:integer
+    障がい児合計:integer
+    医ケア児合計:integer
+    勤務情報:list
+        {name:text, start:text, end: text, hours:text, 資格保有フラグ:boolean, 障がい加算フラグ:boolean}
+
+# 開所タイプ設定
+PK:AFTER_SCHOOL#<SCHOOL_ID>
+SK:CONFIG#OPEN_TYPE
+    types:{
+        "0": {
+            "open": <time>,
+            "close": <time>,
+        },
+        "1": {
+            "open": <time>,
+            "close": <time>,
+        },
+        ・
+        ・
+    }

@@ -1,0 +1,61 @@
+{
+  "test-table": [
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "#METADATA#AFTER_SCHOOL"},
+      "SK": {"S" : "AFTER_SCHOOL#0001"},
+      "Name": {"S": "Šw“¶‚P"},
+      "InstructorIds": {"L": []},
+      "Children": {"L": []}
+    }}},
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "#METADATA#AFTER_SCHOOL"},
+      "SK": {"S" : "AFTER_SCHOOL#0002"},
+      "Name": {"S": "Šw“¶‚Q"},
+      "InstructorIds": {"L": []},
+      "Children": {"L": []}
+    }}},
+
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "AFTER_SCHOOL#0001"},
+      "SK": {"S" : "INSTRUCTOR#0001"},
+      "Name": {"S": "Žw“±ˆõ‚P"},
+      "Qualification": {"BOOL": true},
+      "Additional": {"BOOL": true}
+    }}},
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "AFTER_SCHOOL#0001"},
+      "SK": {"S" : "INSTRUCTOR#0002"},
+      "Name": {"S": "Žw“±ˆõ‚Q"},
+      "Qualification": {"BOOL": true},
+      "Additional": {"BOOL": false}
+    }}},
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "AFTER_SCHOOL#0001"},
+      "SK": {"S" : "INSTRUCTOR#0003"},
+      "Name": {"S": "Žw“±ˆõ‚R"},
+      "Qualification": {"BOOL": false},
+      "Additional": {"BOOL": false}
+    }}},
+
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "AFTER_SCHOOL#0001"},
+      "SK": {"S" : "DAILY#2024-06-01"},
+      "OpenType": {"N": "0"},
+      "Children": {"N": "20"},
+      "Disability": {"N": "1"},
+      "MedicalCare": {"N": "0"},
+      "OpenInstructor": {"M": {"Qualification":{"N": "2"}, "NonQualification": {"N": "0"}}},
+      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}}
+    }}},
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "AFTER_SCHOOL#0001"},
+      "SK": {"S" : "DAILY#2024-06-02"},
+      "OpenType": {"N": "0"},
+      "Children": {"N": "19"},
+      "Disability": {"N": "0"},
+      "MedicalCare": {"N": "0"},
+      "OpenInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}},
+      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}}
+    }}}
+  ]
+}

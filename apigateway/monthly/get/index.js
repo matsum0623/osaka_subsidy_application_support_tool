@@ -5,31 +5,58 @@ const { DynamoDBClient, ListTablesCommand } = require('@aws-sdk/client-dynamodb'
 const client = new DynamoDBClient({ region: 'localhost', endpoint: 'http://host.docker.internal:8000' });
 
 exports.handler = async (event, context) => {
-    const command = new ListTablesCommand({});
+    const today = new Date()
+    const qsp = event.queryStringParameters
+    const ym = !qsp.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : qsp.ym
 
-    const r = await client.send(command);
-    console.log(r)
     console.log("test")
-    const params = {
-        TableName: 'test-table',
-    };
+    const daily_dict = {}
     try {
         // DynamoDBにscanでアクセス
-        const result = await dynamo.scan(params).promise();
-        // 正常に取得できたらその値を返す
-        console.log(JSON.stringify(result.Items))
+        const result = await dynamo.query({
+            TableName: 'test-table',
+            KeyConditionExpression: 'PK = :p_key AND begins_with(SK, :s_key)',
+            ExpressionAttributeValues: {
+              ':p_key': "AFTER_SCHOOL#0001",
+              ':s_key': "DAILY#" + ym,
+            },
+          }).promise();
+        // 結果を日付をキーにしたオブジェクトに変換
+        result.Items.forEach(item => {
+            daily_dict[item.SK.slice(-10)] = item
+        });
     } catch (error) {
         console.log(error.message)
         // エラーが発生したらエラー情報を返す
     }
     console.log("test")
 
-    const today = new Date()
-    console.log(JSON.stringify(event))
-    console.log(event.queryStringParameters)
-    const qsp = event.queryStringParameters
-    const dt = !qsp.date ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) + '-' + ('0' + today.getDate()).slice(-2) : qsp.date
-    console.log(dt)
+    const start_date = new Date(ym + '-01')
+    let dt = start_date
+    const res_list = []
+    while (true) {
+        dt_str = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2)
+        if (dt_str in daily_dict){
+            console.log(daily_dict[dt_str])
+        }
+        res_list.push([
+            dt_str,
+            dt.getDate().toString() + '日',
+            dt.getDay(),
+            dt_str in daily_dict ? daily_dict[dt_str]['Children'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['Disability'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['MedicalCare'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['OpenInstructor']['Qualification'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['OpenInstructor']['NonQualification'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['CloseInstructor']['Qualification'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['CloseInstructor']['NonQualification'] : "",
+        ])
+        dt = new Date(dt.setDate(dt.getDate() + 1));
+        if (dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) != ym){
+            break
+        }
+    }
+
     const response = {
         statusCode: 200, // HTTP 200 OK
         headers: {
@@ -38,15 +65,9 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
             data: {
-                "list": [
-                    ["2024-05-01", "1日", "土", "20", "1", "0", "2", "1", "1", "1",],
-                    ["2024-05-02", "2日", "日", "20", "1", "0", "2", "1", "1", "1",],
-                    ["2024-05-03", "3日", "月", "20", "1", "0", "2", "1", "1", "1",],
-                    ["2024-05-04", "4日", "火", "20", "1", "0", "2", "1", "1", "1",],
-                    ["2024-05-05", "5日", "水", "20", "1", "0", "2", "1", "1", "1",],
-                    ["2024-05-06", "6日", "木", "20", "1", "0", "2", "1", "1", "1",],
-                ],
-                "summary": [361, 16, 0, 39, 12, 32, 19]
+                "list": res_list,
+                "summary": [361, 16, 0, 39, 12, 32, 19],
+                "test": res_list
             },
         })
     };
