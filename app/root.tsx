@@ -8,6 +8,11 @@ import {
 } from "@remix-run/react";
 import { LinksFunction } from "@remix-run/node";
 import stylesheet from "./globals.css?url"
+import { Amplify } from "aws-amplify"
+import awsExports from '~/aws-exports';
+Amplify.configure(awsExports);
+
+import { getIdToken } from "./api/auth";
 
 export const meta: MetaFunction = () => {
   return [
@@ -22,6 +27,7 @@ export const links: LinksFunction = () => [
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
+  const idToken = getIdToken()
   return (
     <html lang="en">
       <head>

@@ -1,72 +1,60 @@
 import {
-  useNavigate,
-  ClientLoaderFunctionArgs,
-  useLoaderData,
+  Form,
+  ClientActionFunctionArgs,
+  redirect,
+  useSearchParams
 } from "@remix-run/react";
-import { getData } from "~/api/fetchApi";
+import { signIn, signOut, fetchAuthSession } from 'aws-amplify/auth'
 
-export const clientLoader = async ({
-  params,
-}: ClientLoaderFunctionArgs) => {
-  // データを取ってくる
-  const today = new Date()
-  const ym = !params.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : params.ym
-  const data = await getData("/monthly?ym=" + ym)
-  return data;
+export const clientLoader = async () => {
+  // この画面にくる場合はサインアウトさせる
+  await signOut({ global: true })
+  return []
 };
 
+export const clientAction = async({
+  request,
+}: ClientActionFunctionArgs) => {
+  const formData = await request.formData()
+  const isLogin = await signIn({
+    username: formData.get("username")?.toString() ?? "",
+    password: formData.get("password")?.toString() ?? "",
+  }).then((res)=>{
+    return true
+  }).catch((e) => {
+    return false
+  })
+  if (isLogin){
+    return redirect(`/monthly`);
+  }else{
+    return redirect(`/?auth_error`)
+  }
+}
 
 export default function Index() {
-  const data = useLoaderData<typeof clientLoader>()
-  const navigate = useNavigate();
-  const editClick = (dt:string) => {
-    navigate("/edit/" + dt);
-  };
-
+  const [searchParams, setSearchParams] = useSearchParams();
   return (
-    <div>
-      <table className="table table-bordered text-center">
-        <thead>
-          <tr>
-              <th rowSpan={2}>日付</th>
-              <th rowSpan={2}>曜日</th>
-              <th colSpan={3}>児童数</th>
-              <th colSpan={2}>開所時職員数</th>
-              <th colSpan={2}>閉所時職員数</th>
-              <th rowSpan={2}></th>
-          </tr>
-          <tr>
-              <th></th>
-              <th>内、障がい児</th>
-              <th>内、医ケア児</th>
-              <th>支援員数</th>
-              <th>支援員以外</th>
-              <th>支援員数</th>
-              <th>支援員以外</th>
-          </tr>
-        </thead>
+    <main className="form-signin w-100 m-auto">
+      <Form method="post" className="text-center">
+        <h1 className="h3 mb-3 fw-normal">ログイン</h1>
+        <div className="form-floating">
+          <input type="email" className="form-control" id="floatingInput" name="username" placeholder="name@example.com" required/>
+          <label htmlFor="floatingInput">Emailアドレス</label>
+        </div>
+        <div className="form-floating">
+          <input type="password" className="form-control" id="floatingPassword" name="password" placeholder="パスワード" required/>
+          <label htmlFor="floatingPassword">パスワード</label>
+        </div>
+        <p className="text-danger">{searchParams.has('auth_error') && "ユーザ、またはパスワードが間違っています。"}</p>
 
-        <tbody>
-          {data.list.map((i:any) => (
-            <tr key={i[0]}>
-              <td>{i[1]}</td>
-              <td>{i[2]}</td>
-              <td>{i[3]}</td>
-              <td>{i[4]}</td>
-              <td>{i[5]}</td>
-              <td>{i[6]}</td>
-              <td>{i[7]}</td>
-              <td>{i[8]}</td>
-              <td>{i[9]}</td>
-              <td>
-                <button type="button" className="btn btn-primary" onClick={() => editClick(i[0])}>
-                  入力
-                </button>
-              </td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
-    </div>
+        <div className="form-check text-start my-3">
+          <input className="form-check-input" type="checkbox" value="remember-me" id="flexCheckDefault" />
+          <label className="form-check-label" htmlFor="flexCheckDefault">
+            状態を記憶する
+          </label>
+        </div>
+        <button className="btn btn-primary w-100 py-2" type="submit">サインイン</button>
+      </Form>
+    </main>
   );
 }
