@@ -17,10 +17,10 @@ exports.handler = async (event, context) => {
             TableName: 'test-table',
             KeyConditionExpression: 'PK = :p_key AND begins_with(SK, :s_key)',
             ExpressionAttributeValues: {
-              ':p_key': "AFTER_SCHOOL#0001",
-              ':s_key': "DAILY#" + ym,
+                ':p_key': "AFTER_SCHOOL#0001",
+                ':s_key': "DAILY#" + ym,
             },
-          }).promise();
+        }).promise();
         // 結果を日付をキーにしたオブジェクトに変換
         result.Items.forEach(item => {
             daily_dict[item.SK.slice(-10)] = item
@@ -65,9 +65,7 @@ exports.handler = async (event, context) => {
         },
         body: JSON.stringify({
             data: {
-                "list": res_list,
-                "summary": [361, 16, 0, 39, 12, 32, 19],
-                "test": res_list
+                "list": res_list
             },
         })
     };

@@ -31,9 +31,7 @@ export const clientLoader = async ({
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
   const navigate = useNavigate();
-  console.log(data.idToken)
   if (!data.idToken){
-    console.log("navi")
     redirect("/");
   }
   const editClick = (dt:string) => {
