@@ -45,7 +45,15 @@
       "Disability": {"N": "1"},
       "MedicalCare": {"N": "0"},
       "OpenInstructor": {"M": {"Qualification":{"N": "2"}, "NonQualification": {"N": "0"}}},
-      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}}
+      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}},
+      "Details": {"M": {
+        "InstructorWorkHours": {"L": [
+          {"M": {"InstructorId": {"S": "0001"}, "StartTime": {"S": "11:30"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "8:00"}}},
+          {"M": {"InstructorId": {"S": "0002"}, "StartTime": {"S": "13:15"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "6:15"}}},
+          {"M": {"InstructorId": {"S": "0003"}, "StartTime": {"S": "13:15"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "6:15"}}}
+        ]},
+        "Summary": {"M": {"WorkHours": {"S": "20:30"}}}
+      }}
     }}},
     {"PutRequest": {"Item": {
       "PK": {"S" : "AFTER_SCHOOL#0001"},
@@ -55,7 +63,14 @@
       "Disability": {"N": "0"},
       "MedicalCare": {"N": "0"},
       "OpenInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}},
-      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}}
+      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}},
+      "Details": {"M": {
+        "InstructorWorkHours": {"L": [
+          {"M": {"InstructorId": {"S": "0001"}, "StartTime": {"S": "11:30"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "8:00"}}},
+          {"M": {"InstructorId": {"S": "0003"}, "StartTime": {"S": "13:15"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "6:15"}}}
+        ]},
+        "Summary": {"M": {"WorkHours": {"S": "14:15"}}}
+      }}
     }}}
   ]
 }

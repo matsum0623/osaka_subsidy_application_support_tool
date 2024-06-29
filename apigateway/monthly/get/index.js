@@ -1,18 +1,13 @@
 const AWS = require('aws-sdk')
 const dynamo = new AWS.DynamoDB.DocumentClient({ region: 'localhost', endpoint: 'http://host.docker.internal:8000' });
 
-const { DynamoDBClient, ListTablesCommand } = require('@aws-sdk/client-dynamodb');
-const client = new DynamoDBClient({ region: 'localhost', endpoint: 'http://host.docker.internal:8000' });
-
 exports.handler = async (event, context) => {
     const today = new Date()
     const qsp = event.queryStringParameters
     const ym = !qsp.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : qsp.ym
 
-    console.log("test")
     const daily_dict = {}
     try {
-        // DynamoDBにscanでアクセス
         const result = await dynamo.query({
             TableName: 'test-table',
             KeyConditionExpression: 'PK = :p_key AND begins_with(SK, :s_key)',
@@ -27,9 +22,7 @@ exports.handler = async (event, context) => {
         });
     } catch (error) {
         console.log(error.message)
-        // エラーが発生したらエラー情報を返す
     }
-    console.log("test")
 
     const start_date = new Date(ym + '-01')
     let dt = start_date

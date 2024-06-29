@@ -88,8 +88,8 @@ export default function Edit() {
         <tbody>
           <tr>
             <td><input className="form-control text-right" name="children" type="number" defaultValue={data.children.sum}/></td>
-            <td><input className="form-control text-right" name="disability" type="number" defaultValue={1}/></td>
-            <td><input className="form-control text-right" name="medical_care" type="number" defaultValue={0}/></td>
+            <td><input className="form-control text-right" name="disability" type="number" defaultValue={data.children.disability}/></td>
+            <td><input className="form-control text-right" name="medical_care" type="number" defaultValue={data.children.medical_care}/></td>
           </tr>
         </tbody>
 
