@@ -1,5 +1,5 @@
 /node_modules
-/apigateway/layers/nodejs/node_modules
+apigateway/layers/npm/nodejs/node_modules/
 
 /.cache
 /build

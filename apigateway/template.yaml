@@ -5,7 +5,8 @@ Globals:
   Function:
     Timeout: 30
     Layers:
-      - !Ref CommonLayer
+      - !Ref MyModuleLayer
+      - !Ref NodeModuleLayer
   Api:
     Cors:
       AllowOrigin: "'*'"
@@ -14,13 +15,20 @@ Globals:
       AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
 
 Resources:
-  CommonLayer:
+  NodeModuleLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
       CompatibleRuntimes:
         - nodejs18.x
-      LayerName: "CommonLayer"
-      ContentUri: layers
+      LayerName: "NodeModuleLayer"
+      ContentUri: layers/npm
+  MyModuleLayer:
+    Type: AWS::Serverless::LayerVersion
+    Properties:
+      CompatibleRuntimes:
+        - nodejs18.x
+      LayerName: "MyModuleLayer"
+      ContentUri: layers/common_layer
 
   MonthlyGetLambda: # Lambda
     Type: AWS::Serverless::Function
