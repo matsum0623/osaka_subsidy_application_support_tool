@@ -1,11 +1,7 @@
-const AWS = require('aws-sdk')
-const dynamo = new AWS.DynamoDB.DocumentClient({ region: 'localhost', endpoint: 'http://host.docker.internal:8000' });
-
 const {response_ok, response_400} = require('lambda_response')
 const {daily, instructor} = require('connect_dynamodb')
 
 exports.handler = async (event, context) => {
-  const today = new Date()
   const qsp = event.queryStringParameters
   if (!qsp.date){
     return response_400

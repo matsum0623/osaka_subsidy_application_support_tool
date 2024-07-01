@@ -109,8 +109,8 @@ export default function Edit() {
             data.instructors.map((inst: any, idx:number) => (
               <tr key={inst.id}>
                 <td>{inst.name}</td>
-                <td><input name={inst.id + ".start"} defaultValue={inst.start} type="time" step={300} onChange={setHour}/></td>
-                <td><input name={inst.id + ".end"} defaultValue={inst.end} type="time" onChange={setHour}/></td>
+                <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" step={300} onChange={setHour}/></td>
+                <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" onChange={setHour}/></td>
                 <td>{instData[idx].hours}</td>
               </tr>
             ))

@@ -10,7 +10,7 @@ import { getIdToken } from "~/api/auth";
 export const signUp = () => {}
 
 export const clientLoader = async ({
-  params,
+  request,
 }: ClientLoaderFunctionArgs) => {
   // データを取ってくる
   const idToken = await getIdToken();
@@ -18,7 +18,8 @@ export const clientLoader = async ({
     return redirect(`/`)
   }else{
     const today = new Date()
-    const ym = !params.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : params.ym
+    const url = new URL(request.url);
+    const ym = !url.searchParams.get("ym") ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : url.searchParams.get("ym")
     const list = await getData("/monthly?ym=" + ym)
     return {
       idToken: idToken,
