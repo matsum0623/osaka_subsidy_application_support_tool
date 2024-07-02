@@ -1,5 +1,5 @@
 const {response_ok} = require('lambda_response')
-const {daily} = require('connect_dynamodb')
+const {after_school, daily} = require('connect_dynamodb')
 
 exports.handler = async (event, context) => {
     const today = new Date()
@@ -10,7 +10,7 @@ exports.handler = async (event, context) => {
     try {
         const result = await daily.get_list('0001', ym)
         // 結果を日付をキーにしたオブジェクトに変換
-        result.Items.forEach(item => {
+        result.forEach(item => {
             daily_dict[item.SK.slice(-10)] = item
         });
     } catch (error) {
@@ -26,6 +26,7 @@ exports.handler = async (event, context) => {
             dt_str,
             dt.getDate().toString() + '日',
             dt.getDay(),
+            dt_str in daily_dict ? daily_dict[dt_str]['OpenType'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['Children'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['Disability'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['MedicalCare'] : "",
@@ -37,7 +38,11 @@ exports.handler = async (event, context) => {
         dt = new Date(dt.setDate(dt.getDate() + 1));
     }
 
+    const after_school_info = await after_school.get_item('0001')
     return response_ok({
-        "list": res_list
+        "list": res_list,
+        "config": {
+            "open_types": after_school_info['Config']['OpenTypes']
+        }
     });
 };

@@ -5,14 +5,52 @@
       "SK": {"S" : "AFTER_SCHOOL#0001"},
       "Name": {"S": "Šw“¶‚P"},
       "InstructorIds": {"L": []},
-      "Children": {"L": []}
+      "Children": {"L": []},
+      "Config": {"M": {
+        "OpenTypes": {"M": {
+          "0": {"M": {
+            "TypeName": {"S": "•½“ú"},
+            "OpenTime": {"S": "13:15"},
+            "CloseTime": {"S": "19:30"}
+          }},
+          "1": {"M": {
+            "TypeName": {"S": "“y—j“ú"},
+            "OpenTime": {"S": "8:00"},
+            "CloseTime": {"S": "19:30"}
+          }},
+          "2": {"M": {
+            "TypeName": {"S": "’·Šú‹x‰É"},
+            "OpenTime": {"S": "8:00"},
+            "CloseTime": {"S": "19:30"}
+          }}
+        }}
+      }}
     }}},
     {"PutRequest": {"Item": {
       "PK": {"S" : "#METADATA#AFTER_SCHOOL"},
       "SK": {"S" : "AFTER_SCHOOL#0002"},
       "Name": {"S": "Šw“¶‚Q"},
       "InstructorIds": {"L": []},
-      "Children": {"L": []}
+      "Children": {"L": []},
+      "Config": {"M": {
+        "OpenTypes": {"M": {
+          "0": {"M": {
+            "TypeName": {"S": "•½“ú"},
+            "OpenTime": {"S": "13:15"},
+            "CloseTime": {"S": "19:30"}
+          }},
+          "1": {"M": {
+            "TypeName": {"S": "“y—j“ú"},
+            "OpenTime": {"S": "8:00"},
+            "CloseTime": {"S": "19:30"}
+          }},
+          "2": {"M": {
+            "TypeName": {"S": "’·Šú‹x‰É"},
+            "OpenTime": {"S": "8:00"},
+            "CloseTime": {"S": "19:30"}
+          }}
+        }}
+      }}
     }}},
 
     {"PutRequest": {"Item": {
@@ -58,7 +96,24 @@
     {"PutRequest": {"Item": {
       "PK": {"S" : "AFTER_SCHOOL#0001"},
       "SK": {"S" : "DAILY#2024-06-02"},
-      "OpenType": {"N": "0"},
+      "OpenType": {"N": "1"},
+      "Children": {"N": "19"},
+      "Disability": {"N": "0"},
+      "MedicalCare": {"N": "0"},
+      "OpenInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}},
+      "CloseInstructor": {"M": {"Qualification":{"N": "1"}, "NonQualification": {"N": "1"}}},
+      "Details": {"M": {
+        "InstructorWorkHours": {"L": [
+          {"M": {"InstructorId": {"S": "0001"}, "StartTime": {"S": "11:30"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "8:00"}}},
+          {"M": {"InstructorId": {"S": "0003"}, "StartTime": {"S": "13:15"}, "EndTime": {"S": "19:30"}, "WorkHours": {"S": "6:15"}}}
+        ]},
+        "Summary": {"M": {"WorkHours": {"S": "14:15"}}}
+      }}
+    }}},
+    {"PutRequest": {"Item": {
+      "PK": {"S" : "AFTER_SCHOOL#0001"},
+      "SK": {"S" : "DAILY#2024-06-03"},
+      "OpenType": {"N": "2"},
       "Children": {"N": "19"},
       "Disability": {"N": "0"},
       "MedicalCare": {"N": "0"},
