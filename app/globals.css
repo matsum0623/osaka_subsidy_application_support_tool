@@ -104,3 +104,11 @@ body {
   border-top-left-radius: 0;
   border-top-right-radius: 0;
 }
+
+.loading {
+  position: absolute;
+  width: -webkit-fill-available;
+  top: 0;
+  left: 0;
+
+}

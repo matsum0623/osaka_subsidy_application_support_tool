@@ -6,9 +6,11 @@ import {
   ClientActionFunctionArgs,
   redirect,
   useParams,
+  useNavigation,
 } from "@remix-run/react"
 import { useState } from "react";
 import { getData, postData } from "~/api/fetchApi";
+import { Loading } from "~/components/util"
 
 export const clientLoader = async ({
   params,
@@ -22,8 +24,8 @@ export const clientAction = async({
   request,
   params,
 }: ClientActionFunctionArgs) => {
-  const response = await postData("/monthly/daily", Object.fromEntries(await request.formData()))
-  return redirect(`/edit/${params.dt}`);
+  await postData("/monthly/daily", Object.fromEntries(await request.formData()))
+  return redirect(`/daily/edit/${params.dt}`);
 }
 
 export default function Edit() {
@@ -80,6 +82,7 @@ export default function Edit() {
   const instructors = Object.values(data.instructors)
   return (
     <Form method="post">
+      {Loading(useNavigation())}
       <p className="fs-2">
         {params.dt}
       </p>
@@ -126,8 +129,8 @@ export default function Edit() {
             instructors.map((inst: any) => (
               <tr key={inst.id}>
                 <td>{inst.name}</td>
-                <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" step={300} onChange={(e) => setHour(e.target)}/></td>
-                <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" onChange={(e) => setHour(e.target)}/></td>
+                <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)}/></td>
+                <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)}/></td>
                 <td><input name={"times." + inst.id + ".hour"} defaultValue={instData[inst.id].hours} type="hidden" />{instData[inst.id].hours}</td>
               </tr>
             ))
@@ -141,8 +144,8 @@ export default function Edit() {
         </tbody>
       </table>
       <p>
-        <button type="submit" className="btn btn-primary">Save</button>
-        <button onClick={() => CancelClick()} type="button" className="btn btn-danger">Cancel</button>
+        <button type="submit" className="btn btn-primary">登録</button>
+        <button onClick={() => CancelClick()} type="button" className="btn btn-danger">キャンセル</button>
       </p>
       <input type='hidden' name="date" value={params.dt} />
     </Form>

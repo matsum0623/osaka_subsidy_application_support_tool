@@ -3,11 +3,11 @@ import {
   ClientLoaderFunctionArgs,
   useLoaderData,
   redirect,
+  useNavigation,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
-
-export const signUp = () => {}
+import { Loading, weekday } from "~/components/util"
 
 export const clientLoader = async ({
   request,
@@ -36,13 +36,12 @@ export default function Index() {
     redirect("/");
   }
   const editClick = (dt:string) => {
-    navigate("/edit/" + dt);
+    navigate("/daily/edit/" + dt);
   };
-
-  const weekday = ['日', '月', '火', '水', '木', '金', '土', ]
 
   return (
     <div>
+      {Loading(useNavigation())}
       <table className="table table-bordered table-hover text-center">
         <thead>
           <tr>
