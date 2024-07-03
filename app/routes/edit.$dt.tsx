@@ -73,6 +73,10 @@ export default function Edit() {
   const changeOpenType = (value:string) => {
     console.log(value)
   }
+  const CancelClick = () => {
+    navigate("/monthly?ym=" + params.dt?.substring(0, 7))
+  }
+
   const instructors = Object.values(data.instructors)
   return (
     <Form method="post">
@@ -132,13 +136,13 @@ export default function Edit() {
             <td>合計</td>
             <td></td>
             <td></td>
-            <td>{sumHours}</td>
+            <td><input name={"hour_summary"} defaultValue={sumHours} type="hidden" />{sumHours}</td>
           </tr>
         </tbody>
       </table>
       <p>
         <button type="submit" className="btn btn-primary">Save</button>
-        <button onClick={() => navigate("/monthly")} type="button" className="btn btn-danger">Cancel</button>
+        <button onClick={() => CancelClick()} type="button" className="btn btn-danger">Cancel</button>
       </p>
       <input type='hidden' name="date" value={params.dt} />
     </Form>
