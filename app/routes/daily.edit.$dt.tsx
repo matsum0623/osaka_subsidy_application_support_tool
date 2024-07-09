@@ -6,11 +6,9 @@ import {
   ClientActionFunctionArgs,
   redirect,
   useParams,
-  useNavigation,
 } from "@remix-run/react"
 import { useState } from "react";
 import { getData, postData } from "~/api/fetchApi";
-import { Loading } from "~/components/util"
 
 export const clientLoader = async ({
   params,
@@ -82,7 +80,6 @@ export default function Edit() {
   const instructors = Object.values(data.instructors)
   return (
     <Form method="post">
-      {Loading(useNavigation())}
       <p className="fs-2">
         {params.dt}
       </p>

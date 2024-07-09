@@ -3,31 +3,53 @@ import {
   ClientLoaderFunctionArgs,
   useLoaderData,
   redirect,
-  useNavigation,
+  Form,
+  ClientActionFunctionArgs,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
-import { Loading, weekday } from "~/components/util"
+import { weekday } from "~/components/util"
+import { Header } from "~/components/header";
+import { useRef } from "react";
 
 export const clientLoader = async ({
   request,
 }: ClientLoaderFunctionArgs) => {
-  // データを取ってくる
   const idToken = await getIdToken();
   if (!idToken){
     return redirect(`/`)
-  }else{
-    const today = new Date()
-    const url = new URL(request.url);
-    const ym = !url.searchParams.get("ym") ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : url.searchParams.get("ym")
-    const data = await getData("/monthly?ym=" + ym)
-    return {
-      idToken: idToken,
-      list: data.list,
-      config: data.config,
-    };
   }
+
+  const today = new Date()
+  const url = new URL(request.url);
+  const ym = !url.searchParams.get("ym") ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : url.searchParams.get("ym")
+  const data = await getData("/monthly?ym=" + ym)
+  return {
+    idToken: idToken,
+    list: data.list,
+    config: data.config,
+    user_data: {
+      'user_name': 'test_user',
+      'admin': true,
+    },
+    ym: ym,
+    ym_list: [
+      {value: '2024-04', confirm: true},
+      {value: '2024-05', confirm: true},
+      {value: '2024-06', confirm: false},
+      {value: '2024-07', confirm: false},
+    ]
+  };
 };
+
+export const clientAction = async ({
+  request
+}: ClientActionFunctionArgs) => {
+  const form_data = Object.fromEntries(await request.formData())
+  console.log('clientAction')
+  console.log(form_data)
+  return redirect("/monthly?ym=" + form_data.ym)
+}
 
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
@@ -38,10 +60,63 @@ export default function Index() {
   const editClick = (dt:string) => {
     navigate("/daily/edit/" + dt);
   };
+  const changeMonth = (ym:string) => {
+    navigate("/monthly?ym=" + ym);
+  }
+  const confirmCheck = (e) => {
+    console.log('check')
+    console.log(e.target)
+    console.log(e)
+    return false
+  }
+
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  const openDialog = () => {
+    if (dialogRef.current) {
+      dialogRef.current.showModal();
+    }
+  };
+
+  const closeDialog = () => {
+    if (dialogRef.current) {
+      dialogRef.current.close();
+    }
+  };
 
   return (
     <div>
-      {Loading(useNavigation())}
+      {Header(data.user_data)}
+      <Form method="post">
+        <div className="monthly-header">
+          <div>
+            月度:<select name="ym" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value))}>
+              {data.ym_list.map((item) => (
+                  <option key={item.value} value={item.value} >{item.value.split('-').join('月') + '日' + (item.confirm ? ' 確定済み' : '')}</option>
+              ))}
+            </select>
+          </div>
+          <div>
+            <button type="button" value={"確定"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirm_modal" onClick={() => openDialog()}>確定処理</button>
+          </div>
+        </div>
+        <div className="modal" id="confirm_modal" tabIndex={-1}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">確定処理</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <p>確定しますか？</p>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={closeDialog}>キャンセル</button>
+                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal" onClick={closeDialog}>確定</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Form>
       <table className="table table-bordered table-hover text-center">
         <thead>
           <tr>

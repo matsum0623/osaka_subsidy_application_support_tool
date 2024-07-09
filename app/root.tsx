@@ -5,6 +5,7 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigation,
 } from "@remix-run/react";
 import { LinksFunction } from "@remix-run/node";
 import stylesheet from "./globals.css?url"
@@ -12,7 +13,7 @@ import { Amplify } from "aws-amplify"
 import awsExports from '~/aws-exports';
 Amplify.configure(awsExports);
 
-import { getIdToken } from "./api/auth";
+import { Loading } from "~/components/util"
 
 export const meta: MetaFunction = () => {
   return [
@@ -27,9 +28,8 @@ export const links: LinksFunction = () => [
 ]
 
 export function Layout({ children }: { children: React.ReactNode }) {
-  const idToken = getIdToken()
   return (
-    <html lang="en">
+    <html lang="ja">
       <head>
         <meta charSet="utf-8" />
         <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -37,20 +37,7 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-      <div id="sidebar">
-          <nav className="navbar navbar-expand-lg bg-body-tertiary">
-            <div className="nav-wrapper">
-              <a href="#" className="brand-logo">月次報告作成サイト</a>
-              <ul id="nav-mobile" className="right hide-on-med-and-down">
-                {/*
-                <li><a href="sass.html">Sass</a></li>
-                <li><a href="badges.html">Components</a></li>
-                <li><a href="collapsible.html">JavaScript</a></li>
-                -*/}
-              </ul>
-            </div>
-          </nav>
-        </div>
+        {Loading(useNavigation())}
         <main className="container">
           <Outlet />
         </main>
