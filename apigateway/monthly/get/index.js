@@ -1,7 +1,13 @@
-const {response_ok} = require('lambda_response')
-const {after_school, daily} = require('connect_dynamodb')
+const { response_ok, response_403 } = require('lambda_response')
+const { after_school, daily, user } = require('connect_dynamodb')
+const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
+    const decode_token = Auth.check_id_token(event)
+    if(!decode_token){
+        return response_403
+    }
+
     const today = new Date()
     const qsp = event.queryStringParameters
     const ym = !qsp.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : qsp.ym
@@ -39,10 +45,15 @@ exports.handler = async (event, context) => {
     }
 
     const after_school_info = await after_school.get_item('0001')
+    const user_data = await user.get_item(decode_token.email)
     return response_ok({
-        "list": res_list,
-        "config": {
-            "open_types": after_school_info['Config']['OpenTypes']
+        list: res_list,
+        config: {
+            open_types: after_school_info['Config']['OpenTypes']
+        },
+        user_data: {
+            user_name: user_data.UserName,
+            admin: user_data.Admin,
         }
     });
 };

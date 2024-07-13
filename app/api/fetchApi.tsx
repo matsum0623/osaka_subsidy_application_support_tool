@@ -9,15 +9,17 @@ export async function fetchApi(path:string, opt:object) {
     )
 }
 
-export async function getData(path:string) {
+export async function getData(path:string, idToken:string) {
     return await fetchApi(path, {
         method: "GET",
+        headers: new Headers({'Authorization': idToken}),
     })
 }
 
-export async function postData(path:string, postData:object) {
+export async function postData(path:string, postData:object, idToken:string) {
     return await fetchApi(path, {
         method: "POST",
+        headers: new Headers({'Authorization': idToken}),
         body: JSON.stringify(postData),
     })
 }

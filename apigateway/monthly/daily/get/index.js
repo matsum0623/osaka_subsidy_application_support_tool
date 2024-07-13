@@ -1,10 +1,15 @@
-const {response_ok, response_400} = require('lambda_response')
-const {daily, instructor, after_school} = require('connect_dynamodb')
+const {response_ok, response_400, response_403} = require('lambda_response')
+const {daily, instructor, after_school, user} = require('connect_dynamodb')
+const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
   const qsp = event.queryStringParameters
   if (!qsp.date){
     return response_400
+  }
+  const decode_token = Auth.check_id_token(event)
+  if(!decode_token){
+      return response_403
   }
 
   // その日の情報を取得
@@ -59,8 +64,13 @@ exports.handler = async (event, context) => {
   }
 
   const after_school_info = await after_school.get_item('0001')
+  const user_data = await user.get_item(decode_token.email)
   res_data["config"]= {
     "open_types": after_school_info['Config']['OpenTypes']
+  }
+  res_data["user_data"]= {
+    user_name: user_data.UserName,
+    admin: user_data.Admin,
   }
   return response_ok(res_data)
 };

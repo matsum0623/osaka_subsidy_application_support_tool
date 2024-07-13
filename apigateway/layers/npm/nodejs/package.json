@@ -11,5 +11,8 @@
   "description": "",
   "devDependencies": {
     "aws-sdk": "^2.1646.0"
+  },
+  "dependencies": {
+    "jwt-decode": "^4.0.0"
   }
 }

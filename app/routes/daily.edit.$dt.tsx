@@ -8,13 +8,19 @@ import {
   useParams,
 } from "@remix-run/react"
 import { useState } from "react";
+import { getIdToken } from "~/api/auth";
 import { getData, postData } from "~/api/fetchApi";
+import { Header } from "~/components/header";
 
 export const clientLoader = async ({
   params,
 }: ClientLoaderFunctionArgs) => {
   // データを取ってくる
-  const data = await getData("/monthly/daily?date=" + params.dt)
+  const idToken = await getIdToken();
+  if (!idToken){
+    return redirect(`/`)
+  }
+  const data = await getData("/monthly/daily?date=" + params.dt, idToken)
   return data;
 };
 
@@ -22,7 +28,11 @@ export const clientAction = async({
   request,
   params,
 }: ClientActionFunctionArgs) => {
-  await postData("/monthly/daily", Object.fromEntries(await request.formData()))
+  const idToken = await getIdToken();
+  if (!idToken){
+    return redirect(`/`)
+  }
+  await postData("/monthly/daily", Object.fromEntries(await request.formData()), idToken)
   return redirect(`/daily/edit/${params.dt}`);
 }
 
@@ -80,6 +90,7 @@ export default function Edit() {
   const instructors = Object.values(data.instructors)
   return (
     <Form method="post">
+      {Header(data.user_data)}
       <p className="fs-2">
         {params.dt}
       </p>

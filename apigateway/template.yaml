@@ -85,7 +85,9 @@ Resources:
     Type: AWS::Serverless::Api
     Properties:
       Name: arinko_api
-      Cors: "'*'"
+      Cors:
+        AllowOrigin: "'*'"
+        AllowHeaders: "'Origin, X-Requested-With, Content-Type, Authorization, Accept'"
       DefinitionBody:
         Fn::Transform:
           Name: AWS::Include

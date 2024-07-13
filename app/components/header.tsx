@@ -10,7 +10,7 @@ export function Header(user_data:any) {
         <ul className="nav nav-pills">
           <li className="nav-item"><a href="/monthly" className="nav-link">月次報告</a></li>
           {
-            !user_data.admin &&
+            user_data.admin &&
             <li className="nav-item"><a href="/admin" className="nav-link">管理画面</a></li>
           }
           <li className="nav-item"><a href="/logout" className="nav-link">ログアウト</a></li>

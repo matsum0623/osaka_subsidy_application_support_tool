@@ -23,15 +23,12 @@ export const clientLoader = async ({
   const today = new Date()
   const url = new URL(request.url);
   const ym = !url.searchParams.get("ym") ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : url.searchParams.get("ym")
-  const data = await getData("/monthly?ym=" + ym)
+  const data = await getData("/monthly?ym=" + ym, idToken)
   return {
     idToken: idToken,
     list: data.list,
     config: data.config,
-    user_data: {
-      'user_name': 'test_user',
-      'admin': true,
-    },
+    user_data: data.user_data,
     ym: ym,
     ym_list: [
       {value: '2024-04', confirm: true},

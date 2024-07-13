@@ -54,6 +54,13 @@
     }}},
 
     {"PutRequest": {"Item": {
+      "PK": {"S" : "#METADATA#USER"},
+      "SK": {"S" : "USER#sample_admin@gmail.com"},
+      "Admin": {"BOOL": true},
+      "UserName": {"S": "ä«óùé“ÉÜÅ[ÉU"}
+    }}},
+
+    {"PutRequest": {"Item": {
       "PK": {"S" : "AFTER_SCHOOL#0001"},
       "SK": {"S" : "INSTRUCTOR#0001"},
       "Name": {"S": "éwì±àıÇP"},
