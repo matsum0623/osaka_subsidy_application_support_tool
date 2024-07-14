@@ -10,7 +10,6 @@ import {
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, postData } from "~/api/fetchApi";
-import { Header } from "~/components/header";
 
 export const clientLoader = async ({
   params,
@@ -33,7 +32,7 @@ export const clientAction = async({
     return redirect(`/`)
   }
   await postData("/monthly/daily", Object.fromEntries(await request.formData()), idToken)
-  return redirect(`/daily/edit/${params.dt}`);
+  return redirect(`/monthly/edit/${params.dt}`);
 }
 
 export default function Edit() {
@@ -84,13 +83,12 @@ export default function Edit() {
     console.log(value)
   }
   const CancelClick = () => {
-    navigate("/monthly?ym=" + params.dt?.substring(0, 7))
+    navigate("/monthly/" + params.dt?.substring(0, 7))
   }
 
   const instructors = Object.values(data.instructors)
   return (
     <Form method="post">
-      {Header(data.user_data)}
       <p className="fs-2">
         {params.dt}
       </p>
