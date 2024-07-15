@@ -30,10 +30,61 @@ Resources:
       LayerName: "MyModuleLayer"
       ContentUri: layers/common_layer
 
+  UserGetLambda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/user/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
+  AfterSchoolGetLambda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
+  AfterSchoolSchoolIdGetLambda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/school_id/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school/{school_id}
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
   MonthlyGetLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./monthly/get
+      CodeUri: ./handler/monthly/get
       Handler: index.handler
       Runtime: nodejs18.x
       Timeout: 30
@@ -45,12 +96,12 @@ Resources:
             Path: /monthly
             Method: GET
             RestApiId:
-              Ref: ArinkoAPI
+              Ref: CommonAPI
 
   MonthlyDailyGetLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./monthly/daily/get
+      CodeUri: ./handler/monthly/daily/get
       Handler: index.handler
       Runtime: nodejs18.x
       Timeout: 30
@@ -62,12 +113,12 @@ Resources:
             Path: /monthly/daily
             Method: GET
             RestApiId:
-              Ref: ArinkoAPI
+              Ref: CommonAPI
 
   MonthlyDailyPostLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:
-      CodeUri: ./monthly/daily/post
+      CodeUri: ./handler/monthly/daily/post
       Handler: index.handler
       Runtime: nodejs18.x
       Timeout: 30
@@ -79,9 +130,9 @@ Resources:
             Path: /monthly/daily
             Method: POST
             RestApiId:
-              Ref: ArinkoAPI
+              Ref: CommonAPI
 
-  ArinkoAPI: # API Gateway
+  CommonAPI: # API Gateway
     Type: AWS::Serverless::Api
     Properties:
       Name: arinko_api

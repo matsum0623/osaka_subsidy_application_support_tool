@@ -2,40 +2,60 @@ import {
   useLoaderData,
   redirect,
   Outlet,
+  useNavigate,
 } from "@remix-run/react";
+import { useState } from "react";
 import { getIdToken } from "~/api/auth";
+import { getData } from "~/api/fetchApi";
+import { Header } from "~/components/header";
+
+const pages = [
+  {link: './after_school', name: '学童情報'},
+  {link: './instructor', name: '指導員情報'},
+  {link: './users', name: 'ユーザ設定'},
+]
 
 export const clientLoader = async () => {
-  // データを取ってくる
   const idToken = await getIdToken();
   if (!idToken){
     return redirect(`/`)
   }else{
-    return {
-      idToken: idToken,
-    };
+    const data = await getData("/user", idToken)
+    data.idToken = idToken
+    return data
   }
 };
 
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
+  const navigate = useNavigate()
   if (!data.idToken){
     redirect("/");
   }
+
+  const ChangePage = (page:string) => {
+    navigate(page)
+    setNow(page)
+  }
+
+  const [now, setNow] = useState('./')
+  const child_data = {
+    after_schools: data.user_data.after_schools
+  }
+
   return (
     <div>
-      <ul className="nav">
-        <li className="nav-item">
-          <a className="nav-link" href="after_school" onClick={(e) => (console.log(e))}>学童情報</a>
-        </li>
-        <li className="nav-item">
-          <a className="nav-link" href="instructor">指導員情報</a>
-        </li>
-        <li className="nav-item">
-          <a className="nav-link" href="users">ユーザ設定</a>
-        </li>
+      {Header(data.user_data)}
+      {/*
+      <ul className="nav nav-pills nav-fill border-bottom pb-2">
+        {pages.map((i) => (
+          <li className="nav-item" key={i.link}>
+            <button className={"nav-link " + ((now == i.link ? 'active': ''))} onClick={() => (ChangePage(i.link))}>{i.name}</button>
+          </li>
+        ))}
       </ul>
-      <Outlet />
+      */}
+      <Outlet context={child_data}/>
     </div>
   );
 }

@@ -57,7 +57,11 @@
       "PK": {"S" : "#METADATA#USER"},
       "SK": {"S" : "USER#sample_admin@gmail.com"},
       "Admin": {"BOOL": true},
-      "UserName": {"S": "管理者ユーザ"}
+      "UserName": {"S": "管理者ユーザ"},
+      "AfterSchools": {"L": [
+        {"S": "0001"},
+        {"S": "0002"}
+      ]}
     }}},
 
     {"PutRequest": {"Item": {
