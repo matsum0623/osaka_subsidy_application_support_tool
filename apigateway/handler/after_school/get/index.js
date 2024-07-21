@@ -21,6 +21,8 @@ exports.handler = async (event, context) => {
                 school_id: school_id,
                 school_name: school_info.Name,
                 open_types: school_info.Config.OpenTypes,
+                child_count: 20,
+                instructor_count: 9,
             })
         }
     }

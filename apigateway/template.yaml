@@ -81,6 +81,23 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
+  AfterSchoolInstructorGetLambda: # Lambda
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/school_id/instructors/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school/{school_id}/instructors
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
   MonthlyGetLambda: # Lambda
     Type: AWS::Serverless::Function
     Properties:

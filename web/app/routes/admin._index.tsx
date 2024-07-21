@@ -51,6 +51,8 @@ export default function Index() {
           <tr>
             <td>学童ID</td>
             <td>学童名</td>
+            <td>児童数</td>
+            <td>指導員数</td>
             <td></td>
           </tr>
         </thead>
@@ -59,10 +61,11 @@ export default function Index() {
             <tr key={afs.school_id}>
               <td className="align-middle">{afs.school_id}</td>
               <td className="align-middle">{afs.school_name}</td>
+              <td className="align-middle">{afs.child_count}</td>
+              <td className="align-middle">{afs.instructor_count}</td>
               <td><button className="btn btn-primary" onClick={() => EditAfterSchool(afs.school_id)}>編集</button></td>
             </tr>
           ))}
-
         </tbody>
       </table>
 
