@@ -23,3 +23,19 @@ export async function postData(path:string, postData:object, idToken:string) {
         body: JSON.stringify(postData),
     })
 }
+
+export async function putData(path:string, postData:object, idToken:string) {
+    return await fetchApi(path, {
+        method: "PUT",
+        headers: new Headers({'Authorization': idToken}),
+        body: JSON.stringify(postData),
+    })
+}
+
+export async function deleteData(path:string, postData:object, idToken:string) {
+    return await fetchApi(path, {
+        method: "DELETE",
+        headers: new Headers({'Authorization': idToken}),
+        body: JSON.stringify(postData),
+    })
+}

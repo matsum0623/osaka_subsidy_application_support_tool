@@ -49,7 +49,7 @@ exports.handler = async (event, context) => {
     const result = await instructor.get_all('0001')
 
     // 結果を日付をキーにしたオブジェクトに変換
-    result.Items.forEach(item => {
+    result.forEach(item => {
       const instructor_id = item.SK.substring(11)
       res_data['instructors'][instructor_id] = {
         "id": instructor_id,

@@ -7,7 +7,7 @@ import {
 } from "@remix-run/react";
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
-import { getData } from "~/api/fetchApi";
+import { getData, putData, postData, deleteData } from "~/api/fetchApi";
 
 export const clientLoader = async ({
   params,
@@ -19,6 +19,7 @@ export const clientLoader = async ({
   }else{
     const data = await getData("/after_school/" + params.school_id + '/instructors', idToken)
     data.idToken = idToken
+    data.school_id = params.school_id
     return data
   }
 };
@@ -36,7 +37,7 @@ export default function Index() {
 
   const navigate = useNavigate()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e:any) => {
     const post_data = {
       instructor_id: instructorId,
       instructor_Name: instructorName,
@@ -45,9 +46,22 @@ export default function Index() {
       medical_care: medicalCare,
       modal_type: modalType,
     }
-    console.log('handleSubmit')
     e.preventDefault();
-    console.log(post_data)
+    if(modalType == "add"){
+      await postData("/after_school/" + data.school_id + '/instructors', post_data, data.idToken)
+    }else if(modalType == "edit"){
+      await putData("/after_school/" + data.school_id + '/instructors', post_data, data.idToken)
+    }
+    navigate('./')
+  }
+
+  const handleDeleteSubmit = async (e:any) => {
+    e.preventDefault();
+    const post_data = {
+      instructor_id: instructorId,
+      instructor_Name: instructorName,
+    }
+    await deleteData("/after_school/" + data.school_id + '/instructors', post_data, data.idToken)
     navigate('./')
   }
 
@@ -58,13 +72,18 @@ export default function Index() {
   const [medicalCare, setMedicalCare] = useState<boolean>(false)
   const [modalType, setModalType] = useState<string>("add")
 
-  const openModal = (id:string, name:string, qualify:boolean, add:boolean, medi:boolean, type:string) => {
+  const openModal = (id:string, name:string, qualify:boolean, add:boolean, medical:boolean, type:string) => {
     setInstructorId(id)
     setInstructorName(name)
     setQualification(qualify)
     setAdditional(add)
-    setMedicalCare(medi)
+    setMedicalCare(medical)
     setModalType(type)
+  }
+
+  const openDeleteConfirmModal = (id:string, name:string) => {
+    setInstructorId(id)
+    setInstructorName(name)
   }
 
   return (
@@ -80,11 +99,11 @@ export default function Index() {
               <div className="modal-body">
               <div className="mb-3">
                 <label htmlFor="InstructorIdInput" className="form-label">指導員ID</label>
-                <input type="text" name="instructor_id" className="form-control" id="InstructorIdInput" placeholder="指導員ID" value={instructorId} onChange={(e) => setInstructorId(e.target.value)}/>
+                <input type="text" name="instructor_id" className="form-control" id="InstructorIdInput" placeholder="指導員ID" value={instructorId} required onChange={(e) => setInstructorId(e.target.value)}/>
               </div>
               <div className="mb-3">
                 <label htmlFor="InstructorNameInput" className="form-label">指導員氏名</label>
-                <input type="text" name="instructor_name" className="form-control" id="InstructorNameInput" placeholder="指導員氏名" value={instructorName} onChange={(e) => setInstructorName(e.target.value)}/>
+                <input type="text" name="instructor_name" className="form-control" id="InstructorNameInput" placeholder="指導員氏名" value={instructorName} required onChange={(e) => setInstructorName(e.target.value)}/>
               </div>
               <div className="form-check">
                 <input className="form-check-input" type="checkbox" name="qualification" id="CheckQualification" checked={qualification} onChange={() => setQualification(!qualification)}/>
@@ -107,6 +126,26 @@ export default function Index() {
           </div>
         </div>
       </Form>
+
+      <Form onSubmit={(e) => handleDeleteSubmit(e)}>
+        <div className="modal" id="delete_modal" tabIndex={-1}>
+          <div className="modal-dialog">
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title">指導員削除</h5>
+                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div className="modal-body">
+                <div className="mb-3">[{instructorId}:{instructorName}]を削除します。よろしいですか？</div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
+                <button type="submit" className="btn btn-danger" data-bs-dismiss="modal">削除</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </Form>
       <div className="row justify-content-start">
         <div className="col-3">
           <p className="h3">指導員情報修正</p>
@@ -118,6 +157,7 @@ export default function Index() {
       <table className="table table-bordered text-center mt-3">
         <thead>
           <tr>
+            <td>指導員ID</td>
             <td>氏名</td>
             <td>指導員資格</td>
             <td>障害加算</td>
@@ -128,11 +168,13 @@ export default function Index() {
         <tbody>
           {data.instructors.map((ins:any) => (
             <tr key={ins.id}>
+              <td className="align-middle">{ins.id}</td>
               <td className="align-middle">{ins.name}</td>
               <td className="align-middle">{ins.qualification && '○'}</td>
               <td className="align-middle">{ins.additional && '○'}</td>
               <td className="align-middle">{ins.medical_care && '○'}</td>
               <td><button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal"  onClick={() => (openModal(ins.id, ins.name, ins.qualification, ins.additional, ins.medical_care, "edit"))}>編集</button></td>
+              <td><button className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal"  onClick={() => (openDeleteConfirmModal(ins.id, ins.name))}>削除</button></td>
             </tr>
           ))}
         </tbody>

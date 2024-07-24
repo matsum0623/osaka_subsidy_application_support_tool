@@ -11,7 +11,7 @@ Globals:
     Cors:
       AllowOrigin: "'*'"
       AllowCredentials: true
-      AllowMethods: "'POST'"
+      AllowMethods: "'POST,PUT,DELETE'"
       AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
 
 Resources:
@@ -30,7 +30,7 @@ Resources:
       LayerName: "MyModuleLayer"
       ContentUri: layers/common_layer
 
-  UserGetLambda: # Lambda
+  UserGetLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/user/get
@@ -47,7 +47,7 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
-  AfterSchoolGetLambda: # Lambda
+  AfterSchoolGetLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/get
@@ -64,7 +64,7 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
-  AfterSchoolSchoolIdGetLambda: # Lambda
+  AfterSchoolSchoolIdGetLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/get
@@ -81,7 +81,7 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
-  AfterSchoolInstructorGetLambda: # Lambda
+  AfterSchoolInstructorGetLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/instructors/get
@@ -98,7 +98,58 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
-  MonthlyGetLambda: # Lambda
+  AfterSchoolInstructorPostLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/school_id/instructors/post
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school/{school_id}/instructors
+            Method: POST
+            RestApiId:
+              Ref: CommonAPI
+
+  AfterSchoolInstructorPutLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/school_id/instructors/put
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school/{school_id}/instructors
+            Method: PUT
+            RestApiId:
+              Ref: CommonAPI
+
+  AfterSchoolInstructorDeleteLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/school_id/instructors/delete
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school/{school_id}/instructors
+            Method: DELETE
+            RestApiId:
+              Ref: CommonAPI
+
+  MonthlyGetLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/monthly/get
@@ -115,7 +166,7 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
-  MonthlyDailyGetLambda: # Lambda
+  MonthlyDailyGetLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/monthly/daily/get
@@ -132,7 +183,7 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
-  MonthlyDailyPostLambda: # Lambda
+  MonthlyDailyPostLambda:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/monthly/daily/post

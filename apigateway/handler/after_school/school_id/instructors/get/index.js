@@ -14,8 +14,6 @@ exports.handler = async (event, context) => {
 
     const instructors = await instructor.get_all(pp.school_id)
 
-    console.log(instructors)
-
     if(!instructors){
         return response_400
     }

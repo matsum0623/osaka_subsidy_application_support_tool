@@ -43,7 +43,7 @@ export default function Edit() {
   const [sumHours, setSumHours] = useState(data.summary.hours)
   const [ct, setCt] = useState(0) // 再描画用のState
 
-  const setHour = (target:string) => {
+  const setHour = (target:any) => {
     const [id, k] = target.name.split('.').slice(-2)
     const start_time = (k == 'start') ? target.value : instData[id].start
     const end_time = (k == 'end') ? target.value : instData[id].end
@@ -67,7 +67,7 @@ export default function Edit() {
 
     let sum_hour = 0
     let sum_min = 0
-    Object.values(instData).map((inst:object) => {
+    Object.values(instData).map((inst:any) => {
       if (inst.hours){
         const [hour, min] = inst.hours.split(':')
         sum_hour += parseInt(hour)
