@@ -4,6 +4,7 @@ import {
   useLoaderData,
 } from "@remix-run/react";
 import { getIdToken } from "~/api/auth";
+import { getData } from "~/api/fetchApi";
 import { Header } from '~/components/header'
 
 export const clientLoader = async () => {
@@ -12,20 +13,21 @@ export const clientLoader = async () => {
     return redirect(`/login`)
   }
   // トークンが取得できればユーザデータを取得する
-  return {
-    'user_name': 'test_user',
-    'admin': true,
-  }
+  const data = await getData("/user", idToken)
+  data.idToken = idToken
+  return data
 };
 
 export const clientAction = async() => {}
 
 export default function Index() {
-  const user_data = useLoaderData<typeof clientLoader>()
-  console.log(user_data)
+  const data = useLoaderData<typeof clientLoader>()
+  if (!data.idToken){
+    redirect("/");
+  }
   return (
     <div>
-      {Header(user_data)}
+      {Header(data.user_data)}
       <Outlet />
     </div>
   );

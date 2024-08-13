@@ -3,27 +3,33 @@ import {
   useLoaderData,
   redirect,
   Outlet,
+  ClientLoaderFunctionArgs,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
 import { Header } from "~/components/header";
 import { useRef } from "react";
 
-export const clientLoader = async () => {
+export const clientLoader = async ({
+  params,
+}: ClientLoaderFunctionArgs) => {
   const idToken = await getIdToken();
   if (!idToken){
     return redirect(`/`)
   }
 
   const today = new Date()
+  const today_year = today.getFullYear()
+  const today_month = today.getMonth() + 1
   const data = await getData("/user", idToken)
-  data.ym = today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2)
-  data.ym_list = [
-    {value: '2024-04', confirm: true},
-    {value: '2024-05', confirm: true},
-    {value: '2024-06', confirm: false},
-    {value: '2024-07', confirm: false},
-  ]
+  data.ym = params.ym
+  data.ym_list = []
+  for(let i=0; i < 13; i++){
+    data.ym_list.push({
+      value: ((i<=today_month) ? today_year : today_year-1) + '-' + ('0' + ( (i < today_month) ? today_month - i : today_month - i + 12)).slice(-2),
+      confirm: false
+    })
+  }
   return data
 };
 
@@ -33,8 +39,9 @@ export default function Index() {
   if (!data.idToken){
     redirect("/");
   }
+
   const changeMonth = (ym:string) => {
-    navigate("/monthly/" + ym);
+    return navigate("/monthly/" + ym);
   }
 
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -50,14 +57,16 @@ export default function Index() {
       <div className="monthly-header">
         <div>
           月度:<select name="ym" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value))}>
-            {data.ym_list.map((item) => (
-                <option key={item.value} value={item.value} >{item.value.split('-').join('月') + '日' + (item.confirm ? ' 確定済み' : '')}</option>
+            {data.ym_list.map((item:any) => (
+                <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
             ))}
           </select>
         </div>
+        {/* TODO: 確定処理は未実装
         <div>
           <button type="button" value={"確定"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirm_modal" onClick={() => openDialog()}>確定処理</button>
         </div>
+        */}
       </div>
       <Outlet />
     </div>

@@ -1,4 +1,8 @@
 export function Header(user_data:any) {
+  // 月次報告は20日締めなので、20日までは前月
+  const today = new Date()
+  const ym = ((today.getDate() <= 20 && today.getMonth() == 0) ? today.getFullYear()-1 : today.getFullYear()) + '-' + ('0' + ((today.getDate() <= 20) ? ((today.getMonth() == 0) ? 12 : today.getMonth()) : (today.getMonth() + 1))).slice(-2)
+
   return (
     <div className="container fixed-top">
       <header className="d-flex flex-wrap justify-content-center py-3 mb-4 border-bottom">
@@ -8,7 +12,7 @@ export function Header(user_data:any) {
         </a>
 
         <ul className="nav nav-pills nav-fill">
-          <li className="nav-item"><a href="/monthly" className="nav-link">月次報告</a></li>
+          <li className="nav-item"><a href={"/monthly/" + ym} className="nav-link">月次報告</a></li>
           {
             user_data.admin &&
             <li className="nav-item"><a href="/admin" className="nav-link">管理画面</a></li>

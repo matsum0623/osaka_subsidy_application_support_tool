@@ -149,9 +149,9 @@ export default function Edit() {
           </tr>
         </tbody>
       </table>
-      <p>
-        <button type="submit" className="btn btn-primary">登録</button>
-        <button onClick={() => CancelClick()} type="button" className="btn btn-danger">キャンセル</button>
+      <p className="text-end">
+        <button type="submit" className="btn btn-primary mr-3">登録</button>
+        <button onClick={() => CancelClick()} type="button" className="btn btn-danger mr-10">キャンセル</button>
       </p>
       <input type='hidden' name="date" value={params.dt} />
     </Form>
