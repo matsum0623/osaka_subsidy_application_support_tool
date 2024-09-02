@@ -14,7 +14,7 @@ exports.handler = async (event, context) => {
 
     const daily_dict = {}
     try {
-        const result = await daily.get_list('0001', ym)
+        const result = await daily.get_list('0001', ym) // TODO: 学童の選択を可能にする
         // 結果を日付をキーにしたオブジェクトに変換
         result.forEach(item => {
             daily_dict[item.SK.slice(-10)] = item
@@ -44,7 +44,7 @@ exports.handler = async (event, context) => {
         dt = new Date(dt.setDate(dt.getDate() + 1));
     }
 
-    const after_school_info = await after_school.get_item('0001')
+    const after_school_info = await after_school.get_item('0001') // TODO: 学童の選択を可能にする
     const user_data = await user.get_item(decode_token.email)
     return response_ok({
         list: res_list,

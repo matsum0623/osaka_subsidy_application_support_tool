@@ -27,7 +27,7 @@ exports.handler = async (event, context) => {
   }
   const instructor_data = {}
   try {
-    const result = await daily.get_item('0001', qsp.date)
+    const result = await daily.get_item('0001', qsp.date)// TODO: 学童の選択を可能にする
 
     result.Items.forEach(item => {
       res_data['open_type'] = item.OpenType,
@@ -46,7 +46,7 @@ exports.handler = async (event, context) => {
   }
   // 指導員情報を取得
   try {
-    const result = await instructor.get_all('0001')
+    const result = await instructor.get_all('0001')// TODO: 学童の選択を可能にする
 
     // 結果を日付をキーにしたオブジェクトに変換
     result.forEach(item => {
@@ -54,6 +54,9 @@ exports.handler = async (event, context) => {
       res_data['instructors'][instructor_id] = {
         "id": instructor_id,
         "name": item.Name,
+        "qualification": item.Qualification,
+        "additional": item.Additional,
+        "medical_care": item.MedicalCare,
         "start": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].StartTime : '',
         "end": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].EndTime : '',
         "hours": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].WorkHours : '',
@@ -63,7 +66,7 @@ exports.handler = async (event, context) => {
       console.log(error.message)
   }
 
-  const after_school_info = await after_school.get_item('0001')
+  const after_school_info = await after_school.get_item('0001') // TODO: 学童の選択を可能にする
   const user_data = await user.get_item(decode_token.email)
   res_data["config"]= {
     "open_types": after_school_info['Config']['OpenTypes']
