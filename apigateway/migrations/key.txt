@@ -15,9 +15,10 @@ SK:AFTER_SCHOOL#<SCHOOL_ID>
 # 指導員情報
 PK:AFTER_SCHOOL#<SCHOOL_ID>
 SK:INSTRUCTOR#<指導員ID>
-    名称
-    指導員資格
-    加配フラグ
+    Name: 氏名
+    Qualification: 指導員資格
+    Additional: 加配フラグ
+    MedicalCare: 医ケアフラグ
 
 # 児童情報
 PK:AFTER_SCHOOL#<SCHOOL_ID>

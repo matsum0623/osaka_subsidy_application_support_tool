@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, postData } from "~/api/fetchApi";
+import { checkInstructor } from "~/lib/common_check";
 
 export const clientLoader = async ({
   params,
@@ -42,6 +43,7 @@ export default function Edit() {
   const [instData, setInstData] = useState(data.instructors)
   const [sumHours, setSumHours] = useState(data.summary.hours)
   const [ct, setCt] = useState(0) // 再描画用のState
+  const [instChk, setInstChk] = useState(checkInstructor(instData, data.config.open_types[data.open_type])) // 指導員の配置チェック
 
   const setHour = (target:any) => {
     const [id, k] = target.name.split('.').slice(-2)
@@ -51,8 +53,8 @@ export default function Edit() {
       instData[id].start = start_time
       instData[id].end = end_time
     }else if (start_time >= end_time){
-      console.log("エラー")
-      console.log(start_time, end_time)
+      // TODO: 不正な登録の場合は画面に表示する
+      console.log("不正な時刻登録です", start_time, end_time)
       instData[id].hours = ''
     }else{
       const [start_hour, start_min] = start_time.split(':').map((i:any) => (parseInt(i)))
@@ -90,7 +92,7 @@ export default function Edit() {
   return (
     <Form method="post">
       <p className="fs-2">
-        {params.dt}
+        {params.dt}  <span className={instChk ? "instChkOK" : "instChkNG"}>{instChk ? "OK" : "NG"}</span>
       </p>
       <h1 className="fs2">開所情報</h1>
       <table className="table table-bordered text-center">
@@ -135,8 +137,8 @@ export default function Edit() {
             instructors.map((inst: any) => (
               <tr key={inst.id}>
                 <td>{inst.name}</td>
-                <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)}/></td>
-                <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)}/></td>
+                <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)} onBlur={() => setInstChk(checkInstructor(instData, data.config.open_types[data.open_type]))}/></td>
+                <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)} onBlur={() => setInstChk(checkInstructor(instData, data.config.open_types[data.open_type]))}/></td>
                 <td><input name={"times." + inst.id + ".hour"} defaultValue={instData[inst.id].hours} type="hidden" />{instData[inst.id].hours}</td>
               </tr>
             ))
