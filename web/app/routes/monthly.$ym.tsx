@@ -25,14 +25,11 @@ export const clientLoader = async ({
   return {
     idToken: idToken,
     list: data.list,
+    /*
+      TODO: 想定されるリスト内容をコメントに残す
+    */
     config: data.config,
     ym: ym,
-    ym_list: [
-      {value: '2024-04', confirm: true},
-      {value: '2024-05', confirm: true},
-      {value: '2024-06', confirm: false},
-      {value: '2024-07', confirm: false},
-    ]
   };
 };
 
@@ -93,10 +90,11 @@ export default function Index() {
               <th colSpan={3}>児童数</th>
               <th colSpan={2}>開所時職員数</th>
               <th colSpan={2}>閉所時職員数</th>
+              <th rowSpan={2}>Chk</th>
               <th rowSpan={2}></th>
           </tr>
           <tr>
-              <th></th>
+              <th>合計</th>
               <th>内、障がい児</th>
               <th>内、医ケア児</th>
               <th>支援員数</th>
@@ -119,6 +117,7 @@ export default function Index() {
               <td>{i[8]}</td>
               <td>{i[9]}</td>
               <td>{i[10]}</td>
+              <td><span className={i[3] != '' ? (i[11] ? 'instChkOK' : 'instChkNG') : ''}>{i[3] != '' ? (i[11] ? 'OK' : 'NG') : ''}</span></td>
               <td>
                 <button type="button" className="btn btn-primary" onClick={() => editClick(i[0])}>
                   入力

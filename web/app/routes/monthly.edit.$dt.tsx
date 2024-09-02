@@ -127,6 +127,9 @@ export default function Edit() {
         <thead>
           <tr>
             <td>氏名</td>
+            <td>指</td>
+            <td>加</td>
+            <td>医</td>
             <td>開始</td>
             <td>終了</td>
             <td>時間</td>
@@ -137,6 +140,9 @@ export default function Edit() {
             instructors.map((inst: any) => (
               <tr key={inst.id}>
                 <td>{inst.name}</td>
+                <td>{(inst.qualification) ? '〇' : ''}</td>
+                <td>{(inst.additional) ? '〇' : ''}</td>
+                <td>{(inst.medical_care) ? '〇' : ''}</td>
                 <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)} onBlur={() => setInstChk(checkInstructor(instData, data.config.open_types[data.open_type]))}/></td>
                 <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)} onBlur={() => setInstChk(checkInstructor(instData, data.config.open_types[data.open_type]))}/></td>
                 <td><input name={"times." + inst.id + ".hour"} defaultValue={instData[inst.id].hours} type="hidden" />{instData[inst.id].hours}</td>
@@ -145,8 +151,7 @@ export default function Edit() {
           }
           <tr>
             <td>合計</td>
-            <td></td>
-            <td></td>
+            <td colSpan={5}></td>
             <td><input name={"hour_summary"} defaultValue={sumHours} type="hidden" />{sumHours}</td>
           </tr>
         </tbody>

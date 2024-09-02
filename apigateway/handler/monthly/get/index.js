@@ -40,6 +40,7 @@ exports.handler = async (event, context) => {
             dt_str in daily_dict ? daily_dict[dt_str]['OpenInstructor']['NonQualification'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['CloseInstructor']['Qualification'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['CloseInstructor']['NonQualification'] : "",
+            dt_str in daily_dict ? daily_dict[dt_str]['InstructorCheck'] : "",
         ])
         dt = new Date(dt.setDate(dt.getDate() + 1));
     }
