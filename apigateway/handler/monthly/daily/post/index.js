@@ -24,7 +24,7 @@ exports.handler = async (event, context) => {
       instructor_work_hours_tmp[ins_id][type] = post_data[key]
     }
   }
-  const after_school_info = await after_school.get_item('0001')
+  const after_school_info = await after_school.get_item('0001') // TODO: 学童の選択を可能にする
   const instructor_work_hours =[]
   const open_instructor = {
     "Qualification": 0,
@@ -35,13 +35,16 @@ exports.handler = async (event, context) => {
     "NonQualification": 0
   }
   for (const ins_id in instructor_work_hours_tmp){
+    if(instructor_work_hours_tmp[ins_id]['start'] == '' || instructor_work_hours_tmp[ins_id]['end'] == ''){
+      continue
+    }
     instructor_work_hours.push({
       "InstructorId": ins_id,
       "StartTime": instructor_work_hours_tmp[ins_id]['start'],
       "EndTime": instructor_work_hours_tmp[ins_id]['end'],
       "WorkHours": instructor_work_hours_tmp[ins_id]['hour'],
     })
-    const instructor_info = await instructor.get_item('0001', ins_id)
+    const instructor_info = await instructor.get_item('0001', ins_id) // TODO: 学童の選択を可能にする
     if (instructor_work_hours_tmp[ins_id]['start'] <= after_school_info['Config']['OpenTypes'][post_data.open_type]['OpenTime']){
       if (instructor_info.Qualification){
         open_instructor['Qualification'] += 1
