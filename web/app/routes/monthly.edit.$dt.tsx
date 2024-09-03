@@ -37,7 +37,7 @@ export const clientAction = async({
 }
 
 export default function Edit() {
-  const params = useParams()
+  const params:any = useParams()
   const navigate = useNavigate()
   const data = useLoaderData<typeof clientLoader>()
   const [instData, setInstData] = useState(data.instructors)
@@ -88,14 +88,21 @@ export default function Edit() {
     navigate("/monthly/" + params.dt?.substring(0, 7))
   }
 
+  const prev_dt: Date = new Date(params.dt);
+  const next_dt: Date = new Date(params.dt);
+  prev_dt.setDate(prev_dt.getDate() - 1);
+  next_dt.setDate(next_dt.getDate() + 1);
   const instructors = Object.values(data.instructors)
   return (
     <Form method="post">
       <p className="fs-2">
         {params.dt}  <span className={instChk ? "instChkOK" : "instChkNG"}>{instChk ? "OK" : "NG"}</span>
+        <a href={`/monthly/edit/${prev_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-10">前日</button></a>
+        <a href={`/monthly/edit/${next_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-5">翌日</button></a>
       </p>
-      <h1 className="fs2">開所情報</h1>
-      <table className="table table-bordered text-center">
+      <p className="fs-4">
+      </p>
+      <table className="table table-bordered text-center mt-3">
         <thead>
           <tr>
             <th>開所パターン</th>
@@ -122,8 +129,7 @@ export default function Edit() {
         </tbody>
       </table>
 
-      <h1 className="fs2">指導員情報</h1>
-      <table className="table table-bordered text-center">
+      <table className="table table-bordered text-center mt-3">
         <thead>
           <tr>
             <td>氏名</td>

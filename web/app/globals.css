@@ -122,3 +122,11 @@ body {
 body {
   padding-top: 80px;
 }
+
+.instChkOK {
+  color: green;
+}
+
+.instChkNG {
+  color: red;
+}

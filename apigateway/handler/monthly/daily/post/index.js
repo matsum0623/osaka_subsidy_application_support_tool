@@ -47,21 +47,20 @@ exports.handler = async (event, context) => {
     })
     const instructor_info = await instructor.get_item('0001', ins_id) // TODO: 学童の選択を可能にする
     instructor_info_tmp[ins_id] = instructor_info
-    if (instructor_work_hours_tmp[ins_id]['start'] <= after_school_info['Config']['OpenTypes'][post_data.open_type]['OpenTime']){
+    if (instructor_work_hours_tmp[ins_id]['start'] <= after_school_info['Config']['OpenTypes'][post_data.open_type]['OpenTime'].padStart(5, '0')){
       if (instructor_info.Qualification){
         open_instructor['Qualification'] += 1
       }else{
         open_instructor['NonQualification'] += 1
       }
     }
-    if (instructor_work_hours_tmp[ins_id]['end'] >= after_school_info['Config']['OpenTypes'][post_data.open_type]['CloseTime']){
+    if (instructor_work_hours_tmp[ins_id]['end'] >= after_school_info['Config']['OpenTypes'][post_data.open_type]['CloseTime'].padStart(5, '0')){
       if (instructor_info.Qualification){
         close_instructor['Qualification'] += 1
       }else{
         close_instructor['NonQualification'] += 1
       }
     }
-
   }
 
   // 指導員配置チェック
@@ -132,7 +131,6 @@ function checkInstructor(instData, config, instructor_info_tmp) {
           })
       }
   })
-  console.log(work_member)
 
   /*
       配置をチェックする
@@ -143,7 +141,6 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   let check_response = true
   Object.keys(work_member).map((key) => {
       if(work_member[key].num < 2 || work_member[key].qua < 1){
-        console.log(key)
         check_response = false
       }
   })

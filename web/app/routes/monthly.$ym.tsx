@@ -127,7 +127,6 @@ export default function Index() {
           ))}
         </tbody>
       </table>
-      <Outlet />
     </div>
   );
 }
