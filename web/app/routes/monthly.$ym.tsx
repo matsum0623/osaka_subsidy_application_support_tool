@@ -90,7 +90,8 @@ export default function Index() {
               <th colSpan={3}>児童数</th>
               <th colSpan={2}>開所時職員数</th>
               <th colSpan={2}>閉所時職員数</th>
-              <th rowSpan={2}>Chk</th>
+              <th rowSpan={2}>開所<br/>閉所</th>
+              <th rowSpan={2}>配置</th>
               <th rowSpan={2}></th>
           </tr>
           <tr>
@@ -109,15 +110,20 @@ export default function Index() {
             <tr key={i[0]} className={i[2]==6 ? "table-info" : (i[2]==0 ? "table-danger" : "")}>
               <td>{i[1]}</td>
               <td>{weekday[i[2]]}</td>
-              <td>{data.config.open_types[i[3]]?.TypeName}</td>
-              <td>{i[4]}</td>
-              <td>{i[5]}</td>
-              <td>{i[6]}</td>
-              <td>{i[7]}</td>
-              <td>{i[8]}</td>
-              <td>{i[9]}</td>
-              <td>{i[10]}</td>
-              <td><span className={i[3] != '' ? (i[11] ? 'instChkOK' : 'instChkNG') : ''}>{i[3] != '' ? (i[11] ? 'OK' : 'NG') : ''}</span></td>
+              <td>{(i[4] != '' && i[4] > 0) ? data.config.open_types[i[3]]?.TypeName : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[4]  : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[5]  : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[6]  : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[7]  : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[8]  : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[9]  : ''}</td>
+              <td>{(i[4] != '' && i[4] > 0) ? i[10] : ''}</td>
+              <td>
+                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) ? 'instChkOK' : 'instChkNG'}>
+                  {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
+                </span>
+              </td>
+              <td><span className={i[3] != '' ? (i[11] ? 'instChkOK' : 'instChkNG') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span></td>
               <td>
                 <button type="button" className="btn btn-primary" onClick={() => editClick(i[0])}>
                   入力
