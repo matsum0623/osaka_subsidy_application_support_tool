@@ -21,6 +21,8 @@ exports.handler = async (event, context) => {
         post_data.qualification,
         post_data.additional,
         post_data.medical_care,
+        post_data.seiki,
+        post_data.koyou,
     )
 
     return response_ok({});

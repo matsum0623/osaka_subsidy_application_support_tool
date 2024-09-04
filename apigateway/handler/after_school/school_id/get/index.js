@@ -1,5 +1,5 @@
 const { response_ok, response_400, response_403 } = require('lambda_response')
-const { after_school } = require('connect_dynamodb')
+const { after_school, instructor } = require('connect_dynamodb')
 const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
@@ -16,6 +16,8 @@ exports.handler = async (event, context) => {
 
     const school_info = await after_school.get_item(pp.school_id)
     console.log(school_info)
+    const instructors = await instructor.get_all(pp.school_id)
+    console.log(instructors.length)
 
     if(!school_info){
         return response_400
@@ -25,7 +27,8 @@ exports.handler = async (event, context) => {
         school_id: pp.school_id,
         school_name: school_info.Name,
         open_types: [
-        ]
+        ],
+        instructor_num: instructors.length
     }
     for(const id in school_info.Config.OpenTypes){
         response.open_types.push({

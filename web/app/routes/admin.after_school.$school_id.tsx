@@ -63,12 +63,12 @@ export default function Index() {
           <div className="mb-3">
             <label htmlFor="InstructorCount" className="form-label mb-3">指導員数</label>
             <button type="button" className="btn btn-primary ml-3" onClick={() => EditInstructors("0001")}>指導員編集</button>
-            <input type="text" className="form-control mb-3" id="InstructorCount" defaultValue={5} disabled/>
+            <input type="text" className="form-control mb-3" id="InstructorCount" defaultValue={data.instructor_num} disabled/>
           </div>
           <div className="mb-3">
             <label htmlFor="InstructorCount" className="form-label mb-3">開所タイプ数</label>
             <button type="button" className="btn btn-primary ml-3">開所タイプ編集</button>
-            <input type="text" className="form-control mb-3" id="InstructorCount" defaultValue={3} disabled/>
+            <input type="text" className="form-control mb-3" id="InstructorCount" defaultValue={data.open_types.length} disabled/>
           </div>
           <div className="col">
             <button type="submit" className="btn btn-primary ml-2 mr-2 mt-3">保存</button>

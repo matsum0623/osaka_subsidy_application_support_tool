@@ -26,6 +26,8 @@ exports.handler = async (event, context) => {
             qualification: item.Qualification,
             additional: item.Additional,
             medical_care: item.MedicalCare,
+            seiki: item.Seiki,
+            koyou: item.Koyou,
         })
     });
 
