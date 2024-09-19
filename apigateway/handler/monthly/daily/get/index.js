@@ -1,5 +1,5 @@
 const {response_ok, response_400, response_403} = require('lambda_response')
-const {daily, instructor, after_school, user} = require('connect_dynamodb')
+const {daily, instructor, after_school, user, app_const} = require('connect_dynamodb')
 const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
@@ -67,10 +67,20 @@ exports.handler = async (event, context) => {
   }
 
   const after_school_info = await after_school.get_item('0001') // TODO: 学童の選択を可能にする
+  const open_types = await app_const.get_open_types()
   const user_data = await user.get_item(decode_token.email)
-  res_data["config"]= {
-    "open_types": after_school_info['Config']['OpenTypes']
+
+  res_data["config"] = {
+    "open_types": {}
   }
+  Object.keys(after_school_info['Config']['OpenTypes']).forEach((key) => {
+    res_data["config"]["open_types"][key] = {
+      OpenTime: after_school_info['Config']['OpenTypes'][key].OpenTime,
+      CloseTime: after_school_info['Config']['OpenTypes'][key].CloseTime,
+      TypeName: key in Object.keys(open_types) ? open_types[key].TypeName : '',
+    }
+  })
+
   res_data["user_data"]= {
     user_name: user_data.UserName,
     admin: user_data.Admin,

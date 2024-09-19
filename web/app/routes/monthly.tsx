@@ -4,14 +4,14 @@ import {
   redirect,
   Outlet,
   ClientLoaderFunctionArgs,
-  ClientActionFunctionArgs,
   Form,
+  useMatches,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
 import { Header } from "~/components/header";
 import { useRef, useState } from "react";
-import { list } from "postcss";
+import Encoding from 'encoding-japanese';
 
 export const clientLoader = async ({
   params,
@@ -39,8 +39,18 @@ export const clientLoader = async ({
 
 export const downloadCsv = async (ym:string, idToken:string, anchorRef:any) => {
   const data = await getData("/monthly?ym=" + ym, idToken)
-
-  const blob = new Blob([data.list.map((row:any) => ([...row.slice(0,1), ...row.slice(4,11)]).join(',')).join('\n')], {type: 'text/csv;charset=cp932;'})
+  const blob = new Blob([
+    new Uint8Array(
+      Encoding.convert(Encoding.stringToCode(data.list.map((row:any) => ([
+        ...row.slice(0,1),
+        ...row.slice(4,11),
+        ...row.slice(12),
+      ]).join(',')).join('\n')), {
+        from: 'UNICODE',
+        to: 'SJIS',
+      })
+    )
+  ], {type: 'text/csv;charset=cp932;'})
   const link = anchorRef.current
   link.setAttribute('href', URL.createObjectURL(blob))
   link.setAttribute('download', 'test.csv')
@@ -68,6 +78,7 @@ export default function Index() {
   };
 
   const anchorRef  = useRef<HTMLAnchorElement>(null)
+  const params = useMatches()
 
   return (
     <div>
@@ -82,7 +93,7 @@ export default function Index() {
                 ))}
               </select>
             </div>
-            <div className="ms-auto p-2">
+            <div className="ms-auto p-2" hidden={params[2].pathname.indexOf('/edit/') > 0}>
               <button type="button" onClick={() => downloadCsv(ym, data.idToken, anchorRef)} className="btn btn-primary ml-10">CSVダウンロード</button>
               <a ref={anchorRef} className='hidden'></a>
             </div>

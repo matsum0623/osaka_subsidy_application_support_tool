@@ -60,6 +60,25 @@ export default function Index() {
     }
   };
 
+  const child_summary = {
+    'children': 0,
+    'disability': 0,
+    'medical_care': 0,
+    'open_qualification': 0,
+    'open_non_qualification': 0,
+    'close_qualification': 0,
+    'close_non_qualification': 0,
+  }
+  data.list?.forEach((i:any) => {
+    child_summary['children']                += parseInt(i[4]) > 0 ? parseInt(i[4])  : 0
+    child_summary['disability']              += parseInt(i[5]) > 0 ? parseInt(i[5])  : 0
+    child_summary['medical_care']            += parseInt(i[6]) > 0 ? parseInt(i[6])  : 0
+    child_summary['open_qualification']      += parseInt(i[7]) > 0 ? parseInt(i[7])  : 0
+    child_summary['open_non_qualification']  += parseInt(i[8]) > 0 ? parseInt(i[8])  : 0
+    child_summary['close_qualification']     += parseInt(i[9]) > 0 ? parseInt(i[9])  : 0
+    child_summary['close_non_qualification'] += parseInt(i[10]) > 0 ? parseInt(i[10])  : 0
+  })
+
   return (
     <div>
       <Form method="post">
@@ -106,6 +125,17 @@ export default function Index() {
         </thead>
 
         <tbody>
+          <tr key={'summary'}>
+            <td colSpan={3}>合計</td>
+            <td>{child_summary['children']}</td>
+            <td>{child_summary['disability']}</td>
+            <td>{child_summary['medical_care']}</td>
+            <td>{child_summary['open_qualification']}</td>
+            <td>{child_summary['open_non_qualification']}</td>
+            <td>{child_summary['close_qualification']}</td>
+            <td>{child_summary['close_non_qualification']}</td>
+            <td colSpan={3}></td>
+          </tr>
           {data.list?.map((i:any) => (
             <tr key={i[0]} className={i[2]==6 ? "table-info" : (i[2]==0 ? "table-danger" : "")}>
               <td>{i[1]}</td>

@@ -1,5 +1,5 @@
 const { response_ok, response_403 } = require('lambda_response')
-const { after_school, daily, user } = require('connect_dynamodb')
+const { after_school, daily, user, app_const, instructor } = require('connect_dynamodb')
 const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
@@ -11,10 +11,12 @@ exports.handler = async (event, context) => {
     const today = new Date()
     const qsp = event.queryStringParameters
     const ym = !qsp.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : qsp.ym
+    const for_csv_flag = !qsp.for_csv ? true : false
+    const after_school_id = '0001' // TODO: 学童の選択を可能にする
 
     const daily_dict = {}
     try {
-        const result = await daily.get_list('0001', ym) // TODO: 学童の選択を可能にする
+        const result = await daily.get_list(after_school_id, ym)
         // 結果を日付をキーにしたオブジェクトに変換
         result.forEach(item => {
             daily_dict[item.SK.slice(-10)] = item
@@ -26,9 +28,15 @@ exports.handler = async (event, context) => {
     const start_date = new Date(ym + '-01')
     let dt = start_date
     const res_list = []
+    const instructors = {}
+    const all_instructors = await instructor.get_all(after_school_id)
+    all_instructors.forEach((value) => {
+        instructors[value['SK'].split('#')[1]] = value['Name']
+    })
+
     while (dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) == ym) {
         const dt_str = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2)
-        res_list.push([
+        daily_list = [
             dt_str,
             dt.getDate().toString() + '日',
             dt.getDay(),
@@ -41,16 +49,35 @@ exports.handler = async (event, context) => {
             dt_str in daily_dict ? daily_dict[dt_str]['CloseInstructor']['Qualification'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['CloseInstructor']['NonQualification'] : "",
             dt_str in daily_dict ? daily_dict[dt_str]['InstructorCheck'] : "",
-        ])
+        ]
+        if(for_csv_flag){
+            if(dt_str in daily_dict){
+                ob = daily_dict[dt_str]['Details']['InstructorWorkHours']
+                ob.sort((a, b) => {a.InstructorId > b.InstructorId}).forEach((inst_work_info) => {
+                    daily_list.push(instructors[inst_work_info.InstructorId])
+                })
+            }
+        }
+        res_list.push(daily_list)
         dt = new Date(dt.setDate(dt.getDate() + 1));
     }
 
-    const after_school_info = await after_school.get_item('0001') // TODO: 学童の選択を可能にする
+    const after_school_info = await after_school.get_item(after_school_id)
+    const open_types = await app_const.get_open_types()
+    open_types_res = {}
+    Object.keys(after_school_info['Config']['OpenTypes']).forEach((key) => {
+    open_types_res[key] = {
+        OpenTime: after_school_info['Config']['OpenTypes'][key].OpenTime,
+        CloseTime: after_school_info['Config']['OpenTypes'][key].CloseTime,
+        TypeName: key in Object.keys(open_types) ? open_types[key].TypeName : '',
+    }
+    })
+
     const user_data = await user.get_item(decode_token.email)
     return response_ok({
         list: res_list,
         config: {
-            open_types: after_school_info['Config']['OpenTypes']
+            open_types: open_types_res
         },
         user_data: {
             user_name: user_data.UserName,
