@@ -9,8 +9,22 @@ SK:USER#<USER_ID>
 # 学童情報
 PK:#METADATA#AFTER_SCHOOL
 SK:AFTER_SCHOOL#<SCHOOL_ID>
-    ・指導員ID一覧
-    ・児童ID一覧
+    Name: 学童名称
+    Children: 利用日数ごとの人数辞書
+        {
+            c6 : <6/6>,
+            c5 : <5/6>,
+            c4 : <4/6>,
+            c3 : <3/6>,
+            c2 : <2/6>,
+            c1 : <1/6>
+        }
+    Config: 設定
+        OpenTypes: 開所情報
+            <id>:
+                TypeName: 開所タイプ名
+                OpenTime: 開所時刻
+                CloseTime: 閉所時刻
 
 # 指導員情報
 PK:AFTER_SCHOOL#<SCHOOL_ID>
@@ -35,16 +49,14 @@ SK:DAILY#<YYYY-MM-DD>
         {name:text, start:text, end: text, hours:text, 資格保有フラグ:boolean, 障がい加算フラグ:boolean}
 
 # 開所タイプ設定
-PK:AFTER_SCHOOL#<SCHOOL_ID>
-SK:CONFIG#OPEN_TYPE
-    types:{
+PK:#METADATA#CONST
+SK:#OPEN_TYPES
+    OpenTypes:{
         "0": {
-            "open": <time>,
-            "close": <time>,
+            "TypeName": <名称>,
         },
         "1": {
-            "open": <time>,
-            "close": <time>,
+            "TypeName": <名称>,
         },
         ・
         ・

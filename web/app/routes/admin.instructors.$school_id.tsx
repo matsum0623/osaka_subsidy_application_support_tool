@@ -193,13 +193,13 @@ export default function Index() {
           </div>
         </div>
       </Form>
-      <div className="row justify-content-start">
-        <div className="col-3">
+      <div className="row justify-content-between mt-2">
+        <div className="col">
           <p className="h3">指導員情報</p>
         </div>
-        <div className="col">
-          <button type="button" value={"追加"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal("","",false,false,false,"add", '2', '3')}>追加</button>
-          </div>
+        <div className="col text-right mr-5">
+          <button type="button" value={"戻る"} className="btn btn-secondary col-2" onClick={() => navigate('/admin/after_school/' + data.school_id)}>戻る</button>
+        </div>
       </div>
       <table className="table table-bordered text-center mt-3">
         <thead>
@@ -222,11 +222,21 @@ export default function Index() {
               <td className="align-middle">{ins.qualification && '○'}</td>
               <td className="align-middle">{ins.additional && '○'}</td>
               <td className="align-middle">{ins.medical_care && '○'}</td>
-              <td>{ins.seiki == '1' ? '正規' : (ins.seiki == '2' ? '非正規' : '')} / {ins.koyou == '1' ? '常勤' : (ins.koyou == '2' ? '非常勤（みなし常勤）' : (ins.koyou == '3' ? '非常勤' : ''))}</td>
+              <td>{ins.seiki == '1' ? '正規' : (ins.seiki == '2' ? '非正規' : '')}・{ins.koyou == '1' ? '常勤' : (ins.koyou == '2' ? '非常勤（みなし常勤）' : (ins.koyou == '3' ? '非常勤' : ''))}</td>
               <td><button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal"  onClick={() => (openModal(ins.id, ins.name, ins.qualification, ins.additional, ins.medical_care, "edit", ins.seiki, ins.koyou))}>編集</button></td>
               <td><button className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal"  onClick={() => (openDeleteConfirmModal(ins.id, ins.name))}>削除</button></td>
             </tr>
           ))}
+            <tr key={'new'}>
+              <td className="align-middle"></td>
+              <td className="align-middle"></td>
+              <td className="align-middle"></td>
+              <td className="align-middle"></td>
+              <td className="align-middle"></td>
+              <td></td>
+              <td><button type="button" value={"追加"} className="btn btn-success" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal("","",false,false,false,"add", '2', '3')}>＋追加</button></td>
+              <td></td>
+            </tr>
         </tbody>
       </table>
     </div>

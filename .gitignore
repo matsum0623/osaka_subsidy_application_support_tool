@@ -7,4 +7,4 @@ apigateway/layers/npm/nodejs/node_modules/
 .env
 apigateway/.aws-sam/
 dynamodb/docker/dynamodb/shared-local-instance.db
-
+/sample/*

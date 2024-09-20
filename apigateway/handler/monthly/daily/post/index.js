@@ -9,6 +9,7 @@ exports.handler = async (event, context) => {
   }
 
   const post_data = JSON.parse(event.body)
+  const after_school_id = '0001' // TODO: 学童の選択を可能にする
 
   const children = post_data['children']
   const disability = post_data['disability']
@@ -24,7 +25,7 @@ exports.handler = async (event, context) => {
       instructor_work_hours_tmp[ins_id][type] = post_data[key]
     }
   }
-  const after_school_info = await after_school.get_item('0001') // TODO: 学童の選択を可能にする
+  const after_school_info = await after_school.get_item(after_school_id)
   const instructor_work_hours =[]
   const open_instructor = {
     "Qualification": 0,
@@ -45,7 +46,7 @@ exports.handler = async (event, context) => {
       "EndTime": instructor_work_hours_tmp[ins_id]['end'],
       "WorkHours": instructor_work_hours_tmp[ins_id]['hour'],
     })
-    const instructor_info = await instructor.get_item('0001', ins_id) // TODO: 学童の選択を可能にする
+    const instructor_info = await instructor.get_item(after_school_id, ins_id)
     instructor_info_tmp[ins_id] = instructor_info
     if (instructor_work_hours_tmp[ins_id]['start'] <= after_school_info['Config']['OpenTypes'][post_data.open_type]['OpenTime'].padStart(5, '0')){
       if (instructor_info.Qualification){
@@ -68,7 +69,7 @@ exports.handler = async (event, context) => {
 
   // 再登録する
   const response = await daily.put(
-    '0001',
+    after_school_id,
     post_data.date,
     post_data.open_type,
     children,

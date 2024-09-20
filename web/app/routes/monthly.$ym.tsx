@@ -122,9 +122,6 @@ export default function Index() {
               <th>支援員数</th>
               <th>支援員以外</th>
           </tr>
-        </thead>
-
-        <tbody>
           <tr key={'summary'}>
             <td colSpan={3}>合計</td>
             <td>{child_summary['children']}</td>
@@ -136,6 +133,9 @@ export default function Index() {
             <td>{child_summary['close_non_qualification']}</td>
             <td colSpan={3}></td>
           </tr>
+        </thead>
+
+        <tbody>
           {data.list?.map((i:any) => (
             <tr key={i[0]} className={i[2]==6 ? "table-info" : (i[2]==0 ? "table-danger" : "")}>
               <td>{i[1]}</td>

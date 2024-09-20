@@ -1,4 +1,5 @@
 WEBサイト立ち上げ
+cd web
 npm run dev
 
 APIGateway立ち上げ
