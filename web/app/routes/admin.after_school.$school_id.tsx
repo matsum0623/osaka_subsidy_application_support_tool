@@ -18,7 +18,7 @@ export const clientLoader = async ({
   if (!idToken){
     return redirect(`/`)
   }else{
-    const data = await getData("/after_school/" + params.school_id, idToken)
+    const data = await getData(`/after_school/${params.school_id}`, idToken)
     data.idToken = idToken
     return data
   }
@@ -32,8 +32,8 @@ export const clientAction = async({
   if (!idToken){
     return redirect(`/`)
   }
-  const res = await putData("/after_school/" + params.school_id, Object.fromEntries(await request.formData()), idToken)
-  return redirect("/admin/after_school/" + params.school_id)
+  const res = await putData(`/after_school/${params.school_id}`, Object.fromEntries(await request.formData()), idToken)
+  return redirect(`/admin/after_school/${params.school_id}`)
 }
 
 export default function Index() {
@@ -44,10 +44,11 @@ export default function Index() {
   const navigate = useNavigate()
 
   const Cancel = () => {
-    return redirect('/admin')
+    console.log('cancel')
+    return navigate('/admin')
   }
   const EditInstructors = (school_id:string) => {
-    return navigate("../instructors/" + school_id)
+    return navigate(`../instructors/${school_id}`)
   }
 
   const [c6, setC6] = useState(data.children.c6)

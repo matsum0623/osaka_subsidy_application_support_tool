@@ -31,8 +31,7 @@ export default function Index() {
   }
 
   const EditAfterSchool = (school_id:string) => {
-    console.log("学童編集/" + school_id)
-    navigate('./after_school/' + school_id)
+    navigate(`./after_school/${school_id}`)
   }
 
   return (
