@@ -93,7 +93,31 @@ export default function Index() {
     <div>
       {Header(data.user_data)}
       <div className="monthly-header">
-        {MonthlyHeader(data, anchorRef, school_id, ym, changeSchoolId, changeMonth, downloadCsv, params)}
+        {
+          (params.length < 3 || (params.length == 3 && !params[2].pathname.includes('/edit/'))) &&
+          <Form>
+          <div className="d-flex">
+            <div className="p-2">
+              <select name="school_id" className="form-select" defaultValue={data.school_id} onChange={(e) => changeSchoolId(e.target.value)}>
+                {data.user_data.after_schools.map((item:any) => (
+                  <option key={item.school_id} value={item.school_id}>{item.school_id + ':' + item.school_name}</option>
+                ))}
+              </select>
+            </div>
+            <div className="p-2">
+              <select name="ym" className="form-select" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value), e)}>
+                {data.ym_list.map((item:any) => (
+                  <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
+                ))}
+              </select>
+            </div>
+            <div className="ms-auto p-2" hidden={false}>
+              <button type="button" onClick={() => downloadCsv(school_id, ym, data.idToken, anchorRef)} className="btn btn-primary ml-10">CSVダウンロード</button>
+              <a ref={anchorRef} className='hidden'></a>
+            </div>
+          </div>
+        </Form>
+        }
         {/* TODO: 確定処理は未実装
         <div>
           <button type="button" value={"確定"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirm_modal" onClick={() => openDialog()}>確定処理</button>

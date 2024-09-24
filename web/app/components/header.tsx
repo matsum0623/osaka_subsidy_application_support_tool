@@ -26,32 +26,3 @@ export function Header(user_data:any) {
     </div>
   );
 }
-
-export function MonthlyHeader(data:any, anchorRef:any, school_id:string, ym:string, changeSchoolId:any, changeMonth:any, downloadCsv:any, params:any) {
-  if (params.length < 3 || (params.length == 3 && !params[2].pathname.includes('/edit/'))){
-    return (
-      <Form>
-      <div className="d-flex">
-        <div className="p-2">
-          <select name="school_id" className="form-select" defaultValue={data.school_id} onChange={(e) => changeSchoolId(e.target.value)}>
-            {data.user_data.after_schools.map((item:any) => (
-              <option key={item.school_id} value={item.school_id}>{item.school_id + ':' + item.school_name}</option>
-            ))}
-          </select>
-        </div>
-        <div className="p-2">
-          <select name="ym" className="form-select" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value), e)}>
-            {data.ym_list.map((item:any) => (
-              <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
-            ))}
-          </select>
-        </div>
-        <div className="ms-auto p-2" hidden={false}>
-          <button type="button" onClick={() => downloadCsv(school_id, ym, data.idToken, anchorRef)} className="btn btn-primary ml-10">CSVダウンロード</button>
-          <a ref={anchorRef} className='hidden'></a>
-        </div>
-      </div>
-    </Form>
-    )
-  }
-}
