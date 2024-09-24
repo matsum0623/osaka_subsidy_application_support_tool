@@ -9,12 +9,14 @@ import {
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
-import { Header } from "~/components/header";
+import { Header, MonthlyHeader } from "~/components/header";
 import { useRef, useState } from "react";
+import { getSession, commitSession } from "~/lib/session";
 import Encoding from 'encoding-japanese';
 
 export const clientLoader = async ({
   params,
+  request
 }: ClientLoaderFunctionArgs) => {
   const idToken = await getIdToken();
   if (!idToken){
@@ -27,6 +29,7 @@ export const clientLoader = async ({
   const data = await getData("/user", idToken)
   data.idToken = idToken
   data.ym = params.ym
+  data.school_id = params.school_id
   data.ym_list = []
   for(let i=0; i < 13; i++){
     data.ym_list.push({
@@ -37,8 +40,8 @@ export const clientLoader = async ({
   return data
 };
 
-export const downloadCsv = async (ym:string, idToken:string, anchorRef:any) => {
-  const data = await getData("/monthly?ym=" + ym, idToken)
+export const downloadCsv = async (school_id:string, ym:string, idToken:string, anchorRef:any) => {
+  const data = await getData("/monthly?ym=" + ym + '&school_id=' + school_id, idToken)
   const blob = new Blob([
     new Uint8Array(
       Encoding.convert(Encoding.stringToCode(data.list.map((row:any) => ([
@@ -64,10 +67,16 @@ export default function Index() {
     redirect("/");
   }
   const [ym, setDate] = useState(data.ym)
+  const [school_id, setSchoolId] = useState(data.school_id)
 
   const changeMonth = (ym:string) => {
     setDate(ym)
-    return navigate("/monthly/" + ym);
+    return navigate("/monthly/" + school_id + "/" + ym);
+  }
+
+  const changeSchoolId = (school_id:string) => {
+    setSchoolId(school_id)
+    return navigate("/monthly/" + school_id + "/" + ym);
   }
 
   const dialogRef = useRef<HTMLDialogElement>(null);
@@ -84,28 +93,14 @@ export default function Index() {
     <div>
       {Header(data.user_data)}
       <div className="monthly-header">
-        <Form>
-          <div className="d-flex">
-            <div className="p-2">
-              <select name="ym" className="form-select" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value))}>
-                {data.ym_list.map((item:any) => (
-                  <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
-                ))}
-              </select>
-            </div>
-            <div className="ms-auto p-2" hidden={params[2].pathname.indexOf('/edit/') > 0}>
-              <button type="button" onClick={() => downloadCsv(ym, data.idToken, anchorRef)} className="btn btn-primary ml-10">CSVダウンロード</button>
-              <a ref={anchorRef} className='hidden'></a>
-            </div>
-          </div>
-        </Form>
+        {MonthlyHeader(data, anchorRef, school_id, ym, changeSchoolId, changeMonth, downloadCsv, params)}
         {/* TODO: 確定処理は未実装
         <div>
           <button type="button" value={"確定"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirm_modal" onClick={() => openDialog()}>確定処理</button>
         </div>
         */}
       </div>
-      <Outlet />
+      <Outlet context={[school_id, ym]}/>
     </div>
   );
 }

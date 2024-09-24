@@ -3,16 +3,17 @@ const {daily, instructor, after_school, user, app_const} = require('connect_dyna
 const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
-  const qsp = event.queryStringParameters
-  if (!qsp.date){
-    return response_400
-  }
   const decode_token = Auth.check_id_token(event)
   if(!decode_token){
       return response_403
   }
 
-  const after_school_id = '0001' // TODO: 学童の選択を可能にする
+  const qsp = event.queryStringParameters
+  if(qsp == undefined || !qsp.date || !qsp.school_id){
+      return response_400
+  }
+
+  const after_school_id = qsp.school_id
 
   // その日の情報を取得
   const res_data = {

@@ -10,9 +10,12 @@ exports.handler = async (event, context) => {
 
     const today = new Date()
     const qsp = event.queryStringParameters
+    if(qsp == undefined || !qsp.ym || !qsp.school_id){
+        return response_403
+    }
     const ym = !qsp.ym ? today.getFullYear() + '-' + ('0' + (today.getMonth() + 1)).slice(-2) : qsp.ym
     const for_csv_flag = !qsp.for_csv ? true : false
-    const after_school_id = '0001' // TODO: 学童の選択を可能にする
+    const after_school_id = qsp.school_id
 
     const daily_dict = {}
     try {

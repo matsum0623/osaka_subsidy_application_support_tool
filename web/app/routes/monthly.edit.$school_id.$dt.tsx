@@ -6,8 +6,9 @@ import {
   ClientActionFunctionArgs,
   redirect,
   useParams,
+  useOutletContext,
 } from "@remix-run/react"
-import { useState } from "react";
+import { useRef, useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, postData } from "~/api/fetchApi";
 import { checkInstructor } from "~/lib/common_check";
@@ -20,7 +21,7 @@ export const clientLoader = async ({
   if (!idToken){
     return redirect(`/`)
   }
-  const data = await getData("/monthly/daily?date=" + params.dt, idToken)
+  const data = await getData(`/monthly/daily?date=${params.dt}&school_id=${params.school_id}`, idToken)
   return data;
 };
 
@@ -33,7 +34,7 @@ export const clientAction = async({
     return redirect(`/`)
   }
   await postData("/monthly/daily", Object.fromEntries(await request.formData()), idToken)
-  return redirect(`/monthly/edit/${params.dt}`);
+  return redirect(`/monthly/edit/${params.school_id}/${params.dt}`);
 }
 
 export default function Edit() {
@@ -44,6 +45,8 @@ export default function Edit() {
   const [sumHours, setSumHours] = useState(data.summary.hours)
   const [ct, setCt] = useState(0) // 再描画用のState
   const [instChk, setInstChk] = useState(checkInstructor(instData, data.config.open_types[data.open_type])) // 指導員の配置チェック
+
+  const context:string[] = useOutletContext()
 
   const setHour = (target:any) => {
     const [id, k] = target.name.split('.').slice(-2)
@@ -85,7 +88,7 @@ export default function Edit() {
     console.log(value)
   }
   const CancelClick = () => {
-    navigate("/monthly/" + params.dt?.substring(0, 7))
+    navigate(`/monthly/${context[0]}/${context[1]}`)
   }
 
   const prev_dt: Date = new Date(params.dt);
@@ -166,6 +169,7 @@ export default function Edit() {
         <button type="submit" className="btn btn-primary mr-3">登録</button>
         <button onClick={() => CancelClick()} type="button" className="btn btn-danger mr-10">キャンセル</button>
       </p>
+      <input type='hidden' name="school_id" value={params.school_id} />
       <input type='hidden' name="date" value={params.dt} />
     </Form>
   )

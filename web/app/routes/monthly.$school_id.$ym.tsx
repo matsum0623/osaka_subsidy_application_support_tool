@@ -6,6 +6,7 @@ import {
   Form,
   ClientActionFunctionArgs,
   Outlet,
+  useOutletContext,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
@@ -14,6 +15,7 @@ import { useRef } from "react";
 
 export const clientLoader = async ({
   params,
+  request
 }: ClientLoaderFunctionArgs) => {
   const idToken = await getIdToken();
   if (!idToken){
@@ -21,7 +23,8 @@ export const clientLoader = async ({
   }
 
   const ym = params.ym
-  const data = await getData("/monthly?ym=" + ym, idToken)
+  const school_id = params.school_id
+  const data = await getData("/monthly?ym=" + ym + '&school_id=' + school_id, idToken)
   return {
     idToken: idToken,
     list: data.list,
@@ -29,6 +32,7 @@ export const clientLoader = async ({
       TODO: 想定されるリスト内容をコメントに残す
     */
     config: data.config,
+    school_id: school_id,
     ym: ym,
   };
 };
@@ -49,7 +53,7 @@ export default function Index() {
     redirect("/");
   }
   const editClick = (dt:string) => {
-    navigate("/monthly/edit/" + dt);
+    navigate("/monthly/edit/" + data.school_id + '/' + dt);
   };
 
   const dialogRef = useRef<HTMLDialogElement>(null);

@@ -9,8 +9,8 @@ exports.handler = async (event, context) => {
   }
 
   const post_data = JSON.parse(event.body)
-  const after_school_id = '0001' // TODO: 学童の選択を可能にする
 
+  const after_school_id = post_data['school_id']
   const children = post_data['children']
   const disability = post_data['disability']
   const medical_care = post_data['medical_care']
