@@ -30,6 +30,23 @@ Resources:
       LayerName: "MyModuleLayer"
       ContentUri: layers/common_layer
 
+  UsersGetLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/users/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /users
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
   UserGetLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -44,6 +61,57 @@ Resources:
           Properties:
             Path: /user
             Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
+  UserPostLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/user/post
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /user
+            Method: POST
+            RestApiId:
+              Ref: CommonAPI
+
+  UserUserIdGetLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/user/user_id/get
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /user/{user_id}
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
+  UserUserIdPutLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/user/user_id/put
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /user/{user_id}
+            Method: PUT
             RestApiId:
               Ref: CommonAPI
 

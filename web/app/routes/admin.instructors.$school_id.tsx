@@ -48,7 +48,6 @@ export default function Index() {
       seiki: seiki,
       koyou: koyou,
     }
-    console.log(post_data)
     e.preventDefault();
     if(modalType == "add"){
       await postData("/after_school/" + data.school_id + '/instructors', post_data, data.idToken)

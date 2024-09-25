@@ -9,14 +9,12 @@ import {
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
-import { Header, MonthlyHeader } from "~/components/header";
+import { Header } from "~/components/header";
 import { useRef, useState } from "react";
-import { getSession, commitSession } from "~/lib/session";
 import Encoding from 'encoding-japanese';
 
 export const clientLoader = async ({
   params,
-  request
 }: ClientLoaderFunctionArgs) => {
   const idToken = await getIdToken();
   if (!idToken){
@@ -41,6 +39,7 @@ export const clientLoader = async ({
 };
 
 export const downloadCsv = async (school_id:string, ym:string, idToken:string, anchorRef:any) => {
+  // TODO: 将来的にはサーバサイドでエクセルを作成したい
   const data = await getData("/monthly?ym=" + ym + '&school_id=' + school_id, idToken)
   const blob = new Blob([
     new Uint8Array(
