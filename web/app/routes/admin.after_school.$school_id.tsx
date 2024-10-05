@@ -8,7 +8,7 @@ import {
 } from "@remix-run/react";
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
-import { getData, putData } from "~/api/fetchApi";
+import { getData, postData, putData } from "~/api/fetchApi";
 
 export const clientLoader = async ({
   params,
@@ -18,9 +18,13 @@ export const clientLoader = async ({
   if (!idToken){
     return redirect(`/`)
   }else{
-    const data = await getData(`/after_school/${params.school_id}`, idToken)
-    data.idToken = idToken
-    return data
+    try {
+      const data = await getData(`/after_school/${params.school_id}`, idToken)
+      data.idToken = idToken
+      return data
+    } catch (error) {
+      return redirect(`/`)
+    }
   }
 };
 
@@ -32,7 +36,11 @@ export const clientAction = async({
   if (!idToken){
     return redirect(`/`)
   }
-  const res = await putData(`/after_school/${params.school_id}`, Object.fromEntries(await request.formData()), idToken)
+  if(params.school_id == 'new'){
+    const res = await postData(`/after_school`, Object.fromEntries(await request.formData()), idToken)
+  }else{
+    const res = await putData(`/after_school/${params.school_id}`, Object.fromEntries(await request.formData()), idToken)
+  }
   return redirect(`/admin/after_school/${params.school_id}`)
 }
 
@@ -119,7 +127,7 @@ export default function Index() {
         <div className="mt-3 pl-10 pr-10">
           <div className="mb-3">
             <label htmlFor="AfterSchoolId" className="form-label mb-3">学童ID</label>
-            <input type="text" className="form-control mb-3" name="after_school_id" id="AfterSchoolId" defaultValue={data.school_id} readOnly/>
+            <input type="text" className="form-control mb-3" name="after_school_id" id="AfterSchoolId" defaultValue={data.school_id} readOnly={data.school_id != ''}/>
           </div>
           <div className="mb-3">
             <label htmlFor="AfterSchoolName" className="form-label mb-3">学童名称</label>

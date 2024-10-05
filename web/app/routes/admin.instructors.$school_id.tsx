@@ -77,7 +77,16 @@ export default function Index() {
   const [modalType, setModalType] = useState<string>("add")
   const [modalTypeStr, setModalTypeStr] = useState<string>("追加")
 
-  const openModal = (id:string, name:string, qualify:boolean, add:boolean, medical:boolean, type:string, seiki:string, koyou:string) => {
+  const openModal = (
+    type:string = "add",
+    id:string = '',
+    name:string = '',
+    qualify:boolean = false,
+    add:boolean = false,
+    medical:boolean = false,
+    seiki:string = '2',
+    koyou:string = '3',
+  ) => {
     setInstructorId(id)
     setInstructorName(name)
     setQualification(qualify)
@@ -222,7 +231,7 @@ export default function Index() {
               <td className="align-middle">{ins.additional && '○'}</td>
               <td className="align-middle">{ins.medical_care && '○'}</td>
               <td>{ins.seiki == '1' ? '正規' : (ins.seiki == '2' ? '非正規' : '')}・{ins.koyou == '1' ? '常勤' : (ins.koyou == '2' ? '非常勤（みなし常勤）' : (ins.koyou == '3' ? '非常勤' : ''))}</td>
-              <td><button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal"  onClick={() => (openModal(ins.id, ins.name, ins.qualification, ins.additional, ins.medical_care, "edit", ins.seiki, ins.koyou))}>編集</button></td>
+              <td><button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal"  onClick={() => (openModal("edit", ins.id, ins.name, ins.qualification, ins.additional, ins.medical_care, ins.seiki, ins.koyou))}>編集</button></td>
               <td><button className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal"  onClick={() => (openDeleteConfirmModal(ins.id, ins.name))}>削除</button></td>
             </tr>
           ))}
@@ -233,7 +242,7 @@ export default function Index() {
               <td className="align-middle"></td>
               <td className="align-middle"></td>
               <td></td>
-              <td><button type="button" value={"追加"} className="btn btn-success" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal("","",false,false,false,"add", '2', '3')}>＋追加</button></td>
+              <td><button type="button" value={"追加"} className="btn btn-success" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal()}>＋追加</button></td>
               <td></td>
             </tr>
         </tbody>

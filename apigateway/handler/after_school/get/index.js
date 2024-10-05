@@ -18,7 +18,7 @@ exports.handler = async (event, context) => {
         const school_id = school_info.SK.split('#')[1]
         const child_count = Object.values(school_info.Children).reduce((sum, value) => sum + parseInt(value), 0)
         const instructors = await instructor.get_all(school_id)
-        if (user_data.AfterSchools.includes(school_id)){
+        if (user_data.AfterSchools.includes(school_id) || user_data.Admin){
             response.list.push({
                 school_id: school_id,
                 school_name: school_info.Name,

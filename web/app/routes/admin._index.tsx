@@ -4,8 +4,9 @@ import {
   useNavigate,
   Form,
 } from "@remix-run/react";
+import { useState } from "react";
 import { getIdToken } from "~/api/auth";
-import { getData, postData } from "~/api/fetchApi";
+import { getData, postData, putData } from "~/api/fetchApi";
 
 export const clientLoader = async () => {
   const idToken = await getIdToken();
@@ -29,39 +30,57 @@ export default function Index() {
   const navigate = useNavigate()
 
   const AddAfterSchool = () => {
-    console.log("学童追加")
+    navigate(`./after_school/new`)
   }
 
   const EditAfterSchool = (school_id:string) => {
     navigate(`./after_school/${school_id}`)
   }
 
-  const modal_type:string = 'add'
-  const user_id:string = ''
-  const user_name:string = ''
+  const [modal_type, setModalType] = useState('add')
+  const [user_id, setUserId] = useState('')
+  const [user_name, setUserName] = useState('')
+  const [after_schools, setAfterSchools] = useState([''])
+
+  const openModal = (
+    modal_type:string = 'add',
+    user_id:string = '',
+    user_name:string = '',
+    after_schools:string[] = [],
+  ) => {
+    setModalType(modal_type)
+    setUserId(user_id)
+    setUserName(user_name)
+    setAfterSchools(after_schools)
+  }
+
+  const changeAfterSchools = (e:any) => {
+    if(e.target.checked){
+      setAfterSchools([...after_schools, e.target.value])
+    }else{
+      setAfterSchools(after_schools.filter((school_id, index) => (school_id !== e.target.value)))
+    }
+  }
 
   const handleSubmit = async (e:any) => {
     e.preventDefault()
-    const form_data = new FormData(e.target)
     const after_schools:string[] = []
     const post_data = {
-      user_id: form_data.get('user_id')?.toString(),
-      user_name: form_data.get('user_name')?.toString(),
+      user_id: user_id,
+      user_name: user_name,
       after_schools: after_schools,
       admin_flag: false,
     }
-    form_data.forEach((value, key) => {
-      if(key.startsWith('after_school_check_')){
-        post_data.after_schools.push(value.toString())
-      }
-    })
     // TODO:モーダルを無理やり閉じてる
     document.getElementById('add_modal_cancel')?.click()
-    const response = await postData(`/user`, post_data, data.idToken)
+    if(modal_type == 'add'){
+      const response = await postData(`/user`, post_data, data.idToken)
+    }else{
+      const response = await putData(`/user/${user_id}`, post_data, data.idToken)
+    }
     navigate('./')
   }
 
-  const EditUser = async (user_id:string) => {}
   const DeleteUser = async (user_id:string) => {}
 
   return (
@@ -102,7 +121,7 @@ export default function Index() {
           <p className="h3">ユーザ一覧</p>
         </div>
         <div className="col-sm-2">
-          <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal">ユーザ追加</button>
+          <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal()}>ユーザ追加</button>
         </div>
       </div>
       <table className="table table-bordered text-center mt-3">
@@ -111,49 +130,49 @@ export default function Index() {
             <td>ユーザID(メールアドレス)</td>
             <td>ユーザ名</td>
             <td>管理学童数</td>
-            <td></td>
-            <td></td>
-            <td></td>
+            <td colSpan={3}></td>
           </tr>
         </thead>
         <tbody>
           {data.users.list.map((user:any) => (
             <tr key={user.user_id}>
-              <td className="align-middle">{user.user_id}</td>
-              <td className="align-middle">{user.user_name}</td>
-              <td className="align-middle">{user.after_schools.length}</td>
-              <td className="align-middle">{(user.status == 'active') ? '有効' : '無効'}</td>
-              <td><button className="btn btn-primary" onClick={() => EditUser(user.user_id)}>編集</button></td>
-              <td><button className="btn btn-danger" onClick={() => DeleteUser(user.user_id)}>削除</button></td>
+              <td className="col-sm-4 align-middle">{user.user_id}</td>
+              <td className="col-sm-4 align-middle">{user.user_name}</td>
+              <td className="col-sm-1 align-middle">{user.after_schools.length}</td>
+              <td className="col-sm-1 align-middle">{(user.status == 'active') ? '有効' : '無効'}</td>
+              <td className="col-sm-1">
+                <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal('edit', user.user_id, user.user_name, user.after_schools)}>編集</button>
+              </td>
+              <td className="col-sm-1"><button className="btn btn-danger" onClick={() => DeleteUser(user.user_id)}>削除</button></td>
             </tr>
           ))}
         </tbody>
       </table>
 
-      {/** ユーザ追加ダイアログ */}
+      {/** ユーザ追加・編集ダイアログ */}
       <Form onSubmit={(e) => handleSubmit(e)}>
         <div className="modal" id="add_modal" tabIndex={-1}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
-                <h5 className="modal-title">ユーザ追加</h5>
+                <h5 className="modal-title">ユーザ{modal_type == 'add' ? '追加' : '編集'}</h5>
                 <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
                   <label htmlFor="UserIdInput" className="form-label">ユーザID(メールアドレス)</label>
-                  <input type="email" name="user_id" className="form-control" id="UserIdInput" placeholder="ユーザID" required/>
+                  <input type="email" name="user_id" className="form-control" id="UserIdInput" placeholder="ユーザID" required value={user_id} onChange={(e) => setUserId(e.target.value)} disabled={modal_type == 'edit'}/>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="UserNameInput" className="form-label">ユーザ名</label>
-                  <input type="text" name="user_name" className="form-control" id="UserNameInput" placeholder="ユーザ名" required/>
+                  <input type="text" name="user_name" className="form-control" id="UserNameInput" placeholder="ユーザ名" required value={user_name} onChange={(e) => setUserName(e.target.value)}/>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="AfterSchoolSelect" className="form-label">管理学童</label>
                   <div id="AfterSchoolSelect">
                     {data.after_schools.list.map((afs:any) => (
                       <div className="form-check ml-1" key={afs.school_id}>
-                        <input className="form-check-input" type="checkbox" name={`after_school_check_${afs.school_id}`} value={afs.school_id} id={`check_${afs.school_id}`}/>
+                        <input className="form-check-input" type="checkbox" name={`after_school_check_${afs.school_id}`} value={afs.school_id} id={`check_${afs.school_id}`} checked={after_schools.includes(afs.school_id)} onChange={(e) => changeAfterSchools(e)}/>
                         <label className="form-check-label" htmlFor={`check_${afs.school_id}`}>{`${afs.school_id}:${afs.school_name}`}</label>
                       </div>
                     ))}

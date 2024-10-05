@@ -132,6 +132,23 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
+  AfterSchoolPostLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/after_school/post
+      Handler: index.handler
+      Runtime: nodejs18.x
+      Timeout: 30
+      MemorySize: 256
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /after_school
+            Method: POST
+            RestApiId:
+              Ref: CommonAPI
+
   AfterSchoolSchoolIdPutLambda:
     Type: AWS::Serverless::Function
     Properties:

@@ -12,6 +12,28 @@ exports.handler = async (event, context) => {
         return response_400
     }
 
+    if(pp.school_id == 'new'){
+        // 新規作成時は開所時刻設定だけ返す。
+        // TODO:開所タイプ返すだけだし、別で返してもいいような気がする
+        const open_types = await app_const.get_open_types()
+        const response = {
+            school_id: '',
+            school_name: '',
+            open_types: [],
+            instructor_num: 0,
+            children: {c6:0, c5:0, c4:0, c3:0, c2:0, c1:0},
+        }
+        Object.keys(open_types).forEach((id) => {
+            response.open_types.push({
+                type_id: id,
+                type_name: open_types[id].TypeName,
+                open_time: open_types[id].DefaultOpenTime,
+                close_time: open_types[id].DefaultCloseTime,
+            })
+        })
+        return response_ok(response)
+    }
+
     const school_info = await after_school.get_item(pp.school_id)
     if(!school_info){
         return response_400
