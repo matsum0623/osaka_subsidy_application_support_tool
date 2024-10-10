@@ -28,6 +28,7 @@ exports.handler = async (event, context) => {
             medical_care: item.MedicalCare,
             seiki: item.Seiki,
             koyou: item.Koyou,
+            order: item.Order ? item.Order : 99,
         })
     });
 

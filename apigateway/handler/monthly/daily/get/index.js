@@ -63,6 +63,7 @@ exports.handler = async (event, context) => {
         "start": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].StartTime : '',
         "end": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].EndTime : '',
         "hours": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].WorkHours : '',
+        "order": item.Order ? item.Order : 99,
       }
     });
   } catch (error) {

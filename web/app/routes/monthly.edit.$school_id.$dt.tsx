@@ -6,9 +6,8 @@ import {
   ClientActionFunctionArgs,
   redirect,
   useParams,
-  useOutletContext,
 } from "@remix-run/react"
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, postData } from "~/api/fetchApi";
 import { checkInstructor } from "~/lib/common_check";
@@ -45,8 +44,6 @@ export default function Edit() {
   const [sumHours, setSumHours] = useState(data.summary.hours)
   const [ct, setCt] = useState(0) // 再描画用のState
   const [instChk, setInstChk] = useState(checkInstructor(instData, data.config.open_types[data.open_type])) // 指導員の配置チェック
-
-  const context:string[] = useOutletContext()
 
   const setHour = (target:any) => {
     const [id, k] = target.name.split('.').slice(-2)
@@ -88,20 +85,20 @@ export default function Edit() {
     console.log(value)
   }
   const CancelClick = () => {
-    navigate(`/monthly/${context[0]}/${context[1]}`)
+    navigate(`/monthly/${params.school_id}/${params.dt.slice(0, 7)}`)
   }
 
   const prev_dt: Date = new Date(params.dt);
   const next_dt: Date = new Date(params.dt);
   prev_dt.setDate(prev_dt.getDate() - 1);
   next_dt.setDate(next_dt.getDate() + 1);
-  const instructors = Object.values(data.instructors)
+  const instructors = Object.values(data.instructors).sort((a:any, b:any) => (a.order - b.order))
   return (
     <Form method="post">
       <p className="fs-2">
         {params.dt}  <span className={instChk ? "instChkOK" : "instChkNG"}>{instChk ? "OK" : "NG"}</span>
-        <a href={`/monthly/edit/${prev_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-10">前日</button></a>
-        <a href={`/monthly/edit/${next_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-5">翌日</button></a>
+        <a href={`/monthly/edit/${params.school_id}/${prev_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-10">前日</button></a>
+        <a href={`/monthly/edit/${params.school_id}/${next_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-5">翌日</button></a>
       </p>
       <p className="fs-4">
       </p>

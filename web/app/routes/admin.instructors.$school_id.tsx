@@ -47,6 +47,7 @@ export default function Index() {
       modal_type: modalType,
       seiki: seiki,
       koyou: koyou,
+      order: order,
     }
     e.preventDefault();
     if(modalType == "add"){
@@ -74,28 +75,24 @@ export default function Index() {
   const [medicalCare, setMedicalCare] = useState<boolean>(false)
   const [seiki, setSeiki] = useState<string>('')
   const [koyou, setKoyou] = useState<string>('')
+  const [order, setOrder] = useState<number>(9999)
   const [modalType, setModalType] = useState<string>("add")
   const [modalTypeStr, setModalTypeStr] = useState<string>("追加")
 
   const openModal = (
     type:string = "add",
-    id:string = '',
-    name:string = '',
-    qualify:boolean = false,
-    add:boolean = false,
-    medical:boolean = false,
-    seiki:string = '2',
-    koyou:string = '3',
+    instructor_info:any = {}
   ) => {
-    setInstructorId(id)
-    setInstructorName(name)
-    setQualification(qualify)
-    setAdditional(add)
-    setMedicalCare(medical)
+    setInstructorId(instructor_info.id ? instructor_info.id : "")
+    setInstructorName(instructor_info.name ? instructor_info.name : "")
+    setQualification(instructor_info.qualification ? instructor_info.qualification : false)
+    setAdditional(instructor_info.additional ? instructor_info.additional : false)
+    setMedicalCare(instructor_info.medical_care ? instructor_info.medical_care : false)
     setModalType(type)
     setModalTypeStr(type == 'add' ? '追加' : '編集')
-    setSeiki(seiki)
-    setKoyou(koyou)
+    setSeiki(instructor_info.seiki ? instructor_info.seiki : '2')
+    setKoyou(instructor_info.koyou ? instructor_info.koyou : '3')
+    setOrder(instructor_info.order ? instructor_info.order : 99)
   }
 
   const openDeleteConfirmModal = (id:string, name:string) => {
@@ -103,9 +100,8 @@ export default function Index() {
     setInstructorName(name)
   }
 
-  const check = (e:any) => {
-    console.log(e)
-  }
+  // 表示順に並び替え
+  data.instructors.sort((a:any, b:any) => a.order - b.order)
 
   return (
     <div>
@@ -172,6 +168,10 @@ export default function Index() {
                     </span>
                   </div>
                 </div>
+                <div className="mb-3">
+                  <label htmlFor="OrderInput" className="form-label">表示順</label>
+                  <input type="number" name="order" className="form-control" id="OrderInput" placeholder="表示順" value={order} required onChange={(e) => setOrder(parseInt(e.target.value))}/>
+                </div>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn btn-secondary" data-bs-dismiss="modal">キャンセル</button>
@@ -218,6 +218,7 @@ export default function Index() {
             <td>障害加算</td>
             <td>医ケア</td>
             <td>雇用・勤務形態</td>
+            <td>表示順</td>
             <td></td>
             <td></td>
           </tr>
@@ -231,7 +232,8 @@ export default function Index() {
               <td className="align-middle">{ins.additional && '○'}</td>
               <td className="align-middle">{ins.medical_care && '○'}</td>
               <td>{ins.seiki == '1' ? '正規' : (ins.seiki == '2' ? '非正規' : '')}・{ins.koyou == '1' ? '常勤' : (ins.koyou == '2' ? '非常勤（みなし常勤）' : (ins.koyou == '3' ? '非常勤' : ''))}</td>
-              <td><button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal"  onClick={() => (openModal("edit", ins.id, ins.name, ins.qualification, ins.additional, ins.medical_care, ins.seiki, ins.koyou))}>編集</button></td>
+              <td className="align-middle">{ins.order}</td>
+              <td><button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal"  onClick={() => (openModal("edit", ins))}>編集</button></td>
               <td><button className="btn btn-danger" data-bs-toggle="modal" data-bs-target="#delete_modal"  onClick={() => (openDeleteConfirmModal(ins.id, ins.name))}>削除</button></td>
             </tr>
           ))}

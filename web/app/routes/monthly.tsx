@@ -6,6 +6,7 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useMatches,
+  useParams,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
@@ -55,7 +56,7 @@ export const downloadCsv = async (school_id:string, ym:string, idToken:string, a
   ], {type: 'text/csv;charset=cp932;'})
   const link = anchorRef.current
   link.setAttribute('href', URL.createObjectURL(blob))
-  link.setAttribute('download', 'test.csv')
+  link.setAttribute('download', `${school_id}_${ym}.csv`)
   link.click()
 }
 
@@ -86,14 +87,14 @@ export default function Index() {
   };
 
   const anchorRef  = useRef<HTMLAnchorElement>(null)
-  const params = useMatches()
+  const matches = useMatches()
 
   return (
     <div>
       {Header(data.user_data)}
       <div className="monthly-header">
         {
-          (params.length < 3 || (params.length == 3 && !params[2].pathname.includes('/edit/'))) &&
+          (matches.length < 3 || (matches.length == 3 && !matches[2].pathname.includes('/edit/'))) &&
           <Form>
           <div className="d-flex">
             <div className="p-2">
@@ -123,7 +124,7 @@ export default function Index() {
         </div>
         */}
       </div>
-      <Outlet context={[school_id, ym]}/>
+      <Outlet />
     </div>
   );
 }

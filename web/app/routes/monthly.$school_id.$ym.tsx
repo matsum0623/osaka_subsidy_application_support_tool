@@ -5,8 +5,6 @@ import {
   redirect,
   Form,
   ClientActionFunctionArgs,
-  Outlet,
-  useOutletContext,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
@@ -15,7 +13,6 @@ import { useRef } from "react";
 
 export const clientLoader = async ({
   params,
-  request
 }: ClientLoaderFunctionArgs) => {
   const idToken = await getIdToken();
   if (!idToken){
