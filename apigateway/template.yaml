@@ -3,10 +3,16 @@ Transform: AWS::Serverless-2016-10-31
 
 Globals:
   Function:
+    Handler: index.handler
+    Runtime: nodejs18.x
     Timeout: 30
+    MemorySize: 256
     Layers:
       - !Ref MyModuleLayer
       - !Ref NodeModuleLayer
+    Environment:
+      Variables:
+        DYNAMODB_TABLE_NAME: !Ref DynamoDB
   Api:
     Cors:
       AllowOrigin: "'*'"
@@ -15,6 +21,37 @@ Globals:
       AllowHeaders: "'Content-Type,X-CSRF-TOKEN'"
 
 Resources:
+  DynamoDB:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      BillingMode: PAY_PER_REQUEST
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      StreamSpecification:
+        StreamViewType: NEW_AND_OLD_IMAGES
+
+  LambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+
   NodeModuleLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -34,10 +71,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/users/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -51,10 +85,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/user/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -68,10 +99,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/user/post
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -85,10 +113,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/user/user_id/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -102,10 +127,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/user/user_id/put
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -119,10 +141,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -136,10 +155,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/post
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -153,10 +169,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/put
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -171,9 +184,7 @@ Resources:
     Properties:
       CodeUri: ./handler/after_school/school_id/get
       Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -187,10 +198,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/instructors/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -204,10 +212,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/instructors/post
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -221,10 +226,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/instructors/put
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -238,10 +240,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/after_school/school_id/instructors/delete
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -255,10 +254,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/monthly/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -272,10 +268,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/monthly/daily/get
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -289,10 +282,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/monthly/daily/post
-      Handler: index.handler
-      Runtime: nodejs18.x
-      Timeout: 30
-      MemorySize: 256
+      Role: !GetAtt LambdaRole.Arn
       Events:
         GetApi:
           Type: Api

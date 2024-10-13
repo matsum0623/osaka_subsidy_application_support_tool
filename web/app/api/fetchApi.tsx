@@ -39,7 +39,7 @@ export class NotFoundError extends CustomBaseError{
 }
 
 export async function fetchApi(path:string, opt:object) {
-    return await fetch(config.maiApi + path, opt)
+    return await fetch(config.RESTApi + path, opt)
     .then(response => {
         if(response.status == 200){
             return response.json().then(j => j.data)
