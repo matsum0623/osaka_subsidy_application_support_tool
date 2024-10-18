@@ -81,9 +81,10 @@ export default function Index() {
   })
 
   return (
+    // <!-- TODO: スマホでの表示の場合は、・日付・入力完了しているかどうか・チェック結果を表示する -->
     <div>
       <Form method="post">
-        <div className="modal" id="confirm_modal" tabIndex={-1}>
+        <div className="modal hidden" id="confirm_modal" tabIndex={-1}>
           <div className="modal-dialog">
             <div className="modal-content">
               <div className="modal-header">
@@ -101,8 +102,8 @@ export default function Index() {
           </div>
         </div>
       </Form>
-      <table className="table table-bordered table-hover text-center">
-        <thead>
+      <table className="w-full">
+        <thead className="hidden sm:table-header-group">
           <tr>
               <th rowSpan={2}>日付</th>
               <th rowSpan={2}>曜日</th>
@@ -135,28 +136,41 @@ export default function Index() {
             <td colSpan={3}></td>
           </tr>
         </thead>
+        <thead className="table-header-group sm:hidden">
+          <tr>
+              <th>日付</th>
+              <th>曜日</th>
+              <th>入力</th>
+              <th></th>
+          </tr>
+        </thead>
 
         <tbody>
           {data.list?.map((i:any) => (
-            <tr key={i[0]} className={i[2]==6 ? "table-info" : (i[2]==0 ? "table-danger" : "")}>
+            <tr key={i[0]} className={i[2]==6 ? "bg-cyan-100" : (i[2]==0 ? "bg-red-100" : "")}>
               <td>{i[1]}</td>
               <td>{weekday[i[2]]}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? data.config.open_types[i[3]]?.TypeName : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[4]  : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[5]  : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[6]  : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[7]  : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[8]  : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[9]  : ''}</td>
-              <td>{(i[4] != '' && i[4] > 0) ? i[10] : ''}</td>
-              <td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? data.config.open_types[i[3]]?.TypeName : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[4]  : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[5]  : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[6]  : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[7]  : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[8]  : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[9]  : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[10] : ''}</td>
+              <td className="hidden sm:table-cell">
                 <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) ? 'instChkOK' : 'instChkNG'}>
                   {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
                 </span>
               </td>
-              <td><span className={i[3] != '' ? (i[11] ? 'instChkOK' : 'instChkNG') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span></td>
+              <td className="hidden sm:table-cell"><span className={i[3] != '' ? (i[11] ? 'instChkOK' : 'instChkNG') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span></td>
+              <td className="table-cell sm:hidden">
+                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) && (i[4] != '' && i[4] > 0) ? 'instChkOK' : 'instChkNG'}>
+                  {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
+                </span>
+              </td>
               <td>
-                <button type="button" className="btn btn-primary" onClick={() => editClick(i[0])}>
+                <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={() => editClick(i[0])}>
                   入力
                 </button>
               </td>

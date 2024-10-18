@@ -92,38 +92,38 @@ export default function Index() {
   return (
     <div>
       {Header(data.user_data)}
-      <div className="monthly-header">
-        {
-          (matches.length < 3 || (matches.length == 3 && !matches[2].pathname.includes('/edit/'))) &&
+      {
+        (matches.length < 3 || (matches.length == 3 && !matches[2].pathname.includes('/edit/'))) &&
+        <div className="monthly-header border-t-2 sticky top-12 sm:top-20">
           <Form>
-          <div className="d-flex">
-            <div className="p-2">
-              <select name="school_id" className="form-select" defaultValue={data.school_id} onChange={(e) => changeSchoolId(e.target.value)}>
-                {data.user_data.after_schools.map((item:any) => (
-                  <option key={item.school_id} value={item.school_id}>{item.school_id + ':' + item.school_name}</option>
-                ))}
-              </select>
+            <div className="flex">
+              <div className="p-2">
+                <select name="school_id" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" defaultValue={data.school_id} onChange={(e) => changeSchoolId(e.target.value)}>
+                  {data.user_data.after_schools.map((item:any) => (
+                    <option key={item.school_id} value={item.school_id}>{item.school_id + ':' + item.school_name}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="p-2">
+                <select name="ym" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value), e)}>
+                  {data.ym_list.map((item:any) => (
+                    <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="ms-auto p-2 hidden sm:block">
+                <button type="button" onClick={() => downloadCsv(school_id, ym, data.idToken, anchorRef)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">CSVダウンロード</button>
+                <a ref={anchorRef} className='hidden'></a>
+              </div>
             </div>
-            <div className="p-2">
-              <select name="ym" className="form-select" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value), e)}>
-                {data.ym_list.map((item:any) => (
-                  <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
-                ))}
-              </select>
-            </div>
-            <div className="ms-auto p-2" hidden={false}>
-              <button type="button" onClick={() => downloadCsv(school_id, ym, data.idToken, anchorRef)} className="btn btn-primary ml-10">CSVダウンロード</button>
-              <a ref={anchorRef} className='hidden'></a>
-            </div>
-          </div>
-        </Form>
-        }
+          </Form>
+        </div>
+      }
         {/* TODO: 確定処理は未実装
         <div>
           <button type="button" value={"確定"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirm_modal" onClick={() => openDialog()}>確定処理</button>
         </div>
         */}
-      </div>
       <Outlet />
     </div>
   );

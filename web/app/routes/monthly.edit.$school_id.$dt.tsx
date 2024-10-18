@@ -10,6 +10,7 @@ import {
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, postData } from "~/api/fetchApi";
+import { weekday } from "~/components/util";
 import { checkInstructor } from "~/lib/common_check";
 
 export const clientLoader = async ({
@@ -88,21 +89,28 @@ export default function Edit() {
     navigate(`/monthly/${params.school_id}/${params.dt.slice(0, 7)}`)
   }
 
+  const now_dt: Date = new Date(params.dt);
   const prev_dt: Date = new Date(params.dt);
   const next_dt: Date = new Date(params.dt);
   prev_dt.setDate(prev_dt.getDate() - 1);
   next_dt.setDate(next_dt.getDate() + 1);
   const instructors = Object.values(data.instructors).sort((a:any, b:any) => (a.order - b.order))
+
   return (
     <Form method="post">
-      <p className="fs-2">
-        {params.dt}  <span className={instChk ? "instChkOK" : "instChkNG"}>{instChk ? "OK" : "NG"}</span>
-        <a href={`/monthly/edit/${params.school_id}/${prev_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-10">前日</button></a>
-        <a href={`/monthly/edit/${params.school_id}/${next_dt.toISOString().slice(0, 10)}`}><button type="button" className="btn btn-primary ml-5">翌日</button></a>
-      </p>
-      <p className="fs-4">
-      </p>
-      <table className="table table-bordered text-center mt-3">
+      <div className="bg-white text-base border-t-2 sm:text-2xl flex gap-3 justify-center sm:justify-start sticky top-12 sm:top-20">
+        <div>{params.dt}({weekday[now_dt.getDay()]})</div>
+        <span className={(instChk ? "instChkOK" : "instChkNG")}>{instChk ? "OK" : "NG"}</span>
+        <a href={`/monthly/edit/${params.school_id}/${prev_dt.toISOString().slice(0, 10)}`}>
+          <button type="button" className="btn-primary">前日</button>
+        </a>
+        <a href={`/monthly/edit/${params.school_id}/${next_dt.toISOString().slice(0, 10)}`}>
+          <button type="button" className="btn-primary">翌日</button>
+        </a>
+      </div>
+
+      {/* PC表示用 */}
+      <table className="hidden sm:table table-bordered text-center mt-3 w-full">
         <thead>
           <tr>
             <th>開所パターン</th>
@@ -122,20 +130,48 @@ export default function Edit() {
                 }
               </select>
             </td>
-            <td><input className="form-control text-right" name="children" type="number" defaultValue={data.children.sum}/></td>
-            <td><input className="form-control text-right" name="disability" type="number" defaultValue={data.children.disability}/></td>
-            <td><input className="form-control text-right" name="medical_care" type="number" defaultValue={data.children.medical_care}/></td>
+            <td className="py-0.5"><input className="text-right input-default" name="children" type="number" defaultValue={data.children.sum}/></td>
+            <td className="py-0.5"><input className="text-right input-default" name="disability" type="number" defaultValue={data.children.disability}/></td>
+            <td className="py-0.5"><input className="text-right input-default" name="medical_care" type="number" defaultValue={data.children.medical_care}/></td>
+          </tr>
+        </tbody>
+      </table>
+      {/* スマホ表示用 */}
+      <table className="table sm:hidden table-bordered text-center mt-3 w-full">
+        <tbody>
+          <tr>
+            <td colSpan={2}>
+              <select name="open_type" defaultValue={data.open_type} onChange={(e) => changeOpenType(e.target.value)}>
+                {
+                  Object.keys(data.config.open_types).map((key:string) => (
+                    <option value={key} key={key}>{data.config.open_types[key].TypeName + "(" + data.config.open_types[key].OpenTime + "-" + data.config.open_types[key].CloseTime + ")"}</option>
+                  ))
+                }
+              </select>
+            </td>
+          </tr>
+          <tr>
+            <td>児</td>
+            <td className="p-0"><input className="text-right input-default" name="children" type="number" defaultValue={data.children.sum}/></td>
+          </tr>
+          <tr>
+            <td>障</td>
+            <td className="p-0"><input className="text-right input-default" name="disability" type="number" defaultValue={data.children.disability}/></td>
+          </tr>
+          <tr>
+            <td>医</td>
+            <td className="p-0"><input className="text-right input-default" name="medical_care" type="number" defaultValue={data.children.medical_care}/></td>
           </tr>
         </tbody>
       </table>
 
-      <table className="table table-bordered text-center mt-3">
+      <table className="table table-bordered text-center mt-3 w-full">
         <thead>
           <tr>
             <td>氏名</td>
-            <td>指</td>
-            <td>加</td>
-            <td>医</td>
+            <td className="hidden sm:table-cell">指</td>
+            <td className="hidden sm:table-cell">加</td>
+            <td className="hidden sm:table-cell">医</td>
             <td>開始</td>
             <td>終了</td>
             <td>時間</td>
@@ -145,10 +181,11 @@ export default function Edit() {
           {
             instructors.map((inst: any) => (
               <tr key={inst.id}>
-                <td>{inst.name}</td>
-                <td>{(inst.qualification) ? '〇' : ''}</td>
-                <td>{(inst.additional) ? '〇' : ''}</td>
-                <td>{(inst.medical_care) ? '〇' : ''}</td>
+                <td className="text-base table-cell sm:hidden">{inst.name.slice(0,2)}</td>
+                <td className="text-base hidden sm:table-cell">{inst.name}</td>
+                <td className="hidden sm:table-cell">{(inst.qualification) ? '〇' : ''}</td>
+                <td className="hidden sm:table-cell">{(inst.additional) ? '〇' : ''}</td>
+                <td className="hidden sm:table-cell">{(inst.medical_care) ? '〇' : ''}</td>
                 <td><input name={"times." + inst.id + ".start"} defaultValue={inst.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)} onBlur={() => setInstChk(checkInstructor(instData, data.config.open_types[data.open_type]))}/></td>
                 <td><input name={"times." + inst.id + ".end"} defaultValue={inst.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => setHour(e.target)} onBlur={() => setInstChk(checkInstructor(instData, data.config.open_types[data.open_type]))}/></td>
                 <td><input name={"times." + inst.id + ".hour"} defaultValue={instData[inst.id].hours} type="hidden" />{instData[inst.id].hours}</td>
@@ -157,14 +194,15 @@ export default function Edit() {
           }
           <tr>
             <td>合計</td>
-            <td colSpan={5}></td>
+            <td colSpan={2} className="table-cell sm:hidden"></td>
+            <td colSpan={5} className="hidden sm:table-cell"></td>
             <td><input name={"hour_summary"} defaultValue={sumHours} type="hidden" />{sumHours}</td>
           </tr>
         </tbody>
       </table>
-      <p className="text-end">
-        <button type="submit" className="btn btn-primary mr-3">登録</button>
-        <button onClick={() => CancelClick()} type="button" className="btn btn-danger mr-10">キャンセル</button>
+      <p className="text-end mt-2">
+        <button type="submit" className="btn-primary mr-3">登録</button>
+        <button onClick={() => CancelClick()} type="button" className="btn btn-danger sm:mr-10">戻る</button>
       </p>
       <input type='hidden' name="school_id" value={params.school_id} />
       <input type='hidden' name="date" value={params.dt} />
