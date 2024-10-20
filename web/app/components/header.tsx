@@ -5,7 +5,7 @@ export function Header(user_data:any) {
   const ym = ((today.getDate() <= 20 && today.getMonth() == 0) ? today.getFullYear()-1 : today.getFullYear()) + '-' + ('0' + ((today.getDate() <= 20) ? ((today.getMonth() == 0) ? 12 : today.getMonth()) : (today.getMonth() + 1))).slice(-2)
 
   return (
-    <div className="container sticky top-0 app-header">
+    <div className="container sticky top-0 bg-white">
       <header className="bg-white">
         <nav className="mx-auto flex max-w-7xl items-center justify-between p-2 sm:p-6 sm:px-8" aria-label="Global">
           <div className="flex sm:flex-1">

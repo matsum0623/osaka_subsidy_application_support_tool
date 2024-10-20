@@ -40,17 +40,22 @@ export default function Index() {
   const [modal_type, setModalType] = useState('add')
   const [user_id, setUserId] = useState('')
   const [user_name, setUserName] = useState('')
+  const [email, setEmail] = useState('')
   const [after_schools, setAfterSchools] = useState([''])
+  const [modal_open, setModalOpen] = useState(false)
 
   const openModal = (
     modal_type:string = 'add',
     user_id:string = '',
     user_name:string = '',
+    email:string = '',
     after_schools:string[] = [],
   ) => {
+    setModalOpen(true)
     setModalType(modal_type)
     setUserId(user_id)
     setUserName(user_name)
+    setEmail(email)
     setAfterSchools(after_schools)
   }
 
@@ -68,6 +73,7 @@ export default function Index() {
     const post_data = {
       user_id: user_id,
       user_name: user_name,
+      email: email,
       after_schools: after_schools,
       admin_flag: false,
     }
@@ -84,16 +90,16 @@ export default function Index() {
   const DeleteUser = async (user_id:string) => {}
 
   return (
-    <div>
-      <div className="row">
-        <div className="col-sm-2">
-          <p className="h3">学童一覧</p>
+    <div className="border-t-2 ">
+      <div className="flex gap-24 mt-2">
+        <div className="">
+          <p className="text-2xl font-bold">学童一覧</p>
         </div>
-        <div className="col-sm-2">
+        <div className="">
           <button className="btn btn-primary" onClick={AddAfterSchool}>学童追加</button>
         </div>
       </div>
-      <table className="table table-bordered text-center mt-3">
+      <table className="table table-bordered text-center mt-3 w-full">
         <thead>
           <tr>
             <td>学童ID</td>
@@ -116,15 +122,15 @@ export default function Index() {
         </tbody>
       </table>
 
-      <div className="row">
-        <div className="col-sm-2">
-          <p className="h3">ユーザ一覧</p>
+      <div className="flex gap-24 mt-2">
+        <div className="">
+          <p className="text-2xl font-bold">ユーザ一覧</p>
         </div>
-        <div className="col-sm-2">
-          <button type="button" className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal()}>ユーザ追加</button>
+        <div className="">
+          <button type="button" className="btn btn-primary" onClick={() => openModal()}>ユーザ追加</button>
         </div>
       </div>
-      <table className="table table-bordered text-center mt-3">
+      <table className="table table-bordered text-center mt-3 w-full">
         <thead>
           <tr>
             <td>ユーザID(メールアドレス)</td>
@@ -141,7 +147,7 @@ export default function Index() {
               <td className="col-sm-1 align-middle">{user.after_schools.length}</td>
               <td className="col-sm-1 align-middle">{(user.status == 'active') ? '有効' : '無効'}</td>
               <td className="col-sm-1">
-                <button className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#add_modal" onClick={() => openModal('edit', user.user_id, user.user_name, user.after_schools)}>編集</button>
+                <button className="btn btn-primary" onClick={() => openModal('edit', user.user_id, user.user_name, user.email, user.after_schools)}>編集</button>
               </td>
               <td className="col-sm-1"><button className="btn btn-danger" onClick={() => DeleteUser(user.user_id)}>削除</button></td>
             </tr>
@@ -150,44 +156,60 @@ export default function Index() {
       </table>
 
       {/** ユーザ追加・編集ダイアログ */}
-      <Form onSubmit={(e) => handleSubmit(e)}>
-        <div className="modal" id="add_modal" tabIndex={-1}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">ユーザ{modal_type == 'add' ? '追加' : '編集'}</h5>
-                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      <div id="edit-modal" tabIndex={-1} aria-hidden="true"
+        className={(modal_open ? "block" : "hidden") + " modal-back-ground"}
+        onClick={(e) => {
+          if((e.target as HTMLElement).id == 'edit-modal'){
+            setModalOpen(false)
+          }
+        }}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <Form onSubmit={(e) => handleSubmit(e)}>
+              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  ユーザ{modal_type == 'add' ? '追加' : '編集'}
+                </h3>
+                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setModalOpen(false)}>
+                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
               </div>
               <div className="modal-body">
                 <div className="mb-3">
-                  <label htmlFor="UserIdInput" className="form-label">ユーザID(メールアドレス)</label>
-                  <input type="email" name="user_id" className="form-control" id="UserIdInput" placeholder="ユーザID" required value={user_id} onChange={(e) => setUserId(e.target.value)} disabled={modal_type == 'edit'}/>
+                  <label htmlFor="UserIdInput" className="form-label">ユーザID</label>
+                  <input type="text" name="user_id" className="input-default" id="UserIdInput" placeholder="ユーザID" required value={user_id} onChange={(e) => setUserId(e.target.value)} disabled={modal_type == 'edit'}/>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="UserNameInput" className="form-label">ユーザ名</label>
-                  <input type="text" name="user_name" className="form-control" id="UserNameInput" placeholder="ユーザ名" required value={user_name} onChange={(e) => setUserName(e.target.value)}/>
+                  <input type="text" name="user_name" className="input-default" id="UserNameInput" placeholder="ユーザ名" required value={user_name} onChange={(e) => setUserName(e.target.value)}/>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="EmailInput" className="form-label">メールアドレス</label>
+                  <input type="email" name="email" className="input-default" id="EmailInput" placeholder="メールアドレス" required value={email} onChange={(e) => setEmail(e.target.value)}/>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="AfterSchoolSelect" className="form-label">管理学童</label>
                   <div id="AfterSchoolSelect">
                     {data.after_schools.list.map((afs:any) => (
-                      <div className="form-check ml-1" key={afs.school_id}>
-                        <input className="form-check-input" type="checkbox" name={`after_school_check_${afs.school_id}`} value={afs.school_id} id={`check_${afs.school_id}`} checked={after_schools.includes(afs.school_id)} onChange={(e) => changeAfterSchools(e)}/>
-                        <label className="form-check-label" htmlFor={`check_${afs.school_id}`}>{`${afs.school_id}:${afs.school_name}`}</label>
+                      <div className="flex items-center mb-4 ml-2" key={afs.school_id}>
+                        <input className="check-box-default" type="checkbox" name={`after_school_check_${afs.school_id}`} value={afs.school_id} id={`check_${afs.school_id}`} checked={after_schools.includes(afs.school_id)} onChange={(e) => changeAfterSchools(e)}/>
+                        <label className="check-box-label-default" htmlFor={`check_${afs.school_id}`}>{`${afs.school_id}:${afs.school_name}`}</label>
                       </div>
                     ))}
                   </div>
                 </div>
               </div>
               <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" id="add_modal_cancel">キャンセル</button>
-                <button type="submit" className="btn btn-primary" data-dismiss="modal" onClick={(e) => console.log(e)}>登録</button>
+                <button type="button" className="btn-danger w-28" onClick={() => setModalOpen(false)}>キャンセル</button>
+                <button type="button" className="ms-3 btn-primary w-28" onClick={() => setModalOpen(false)}>登録</button>
               </div>
-            </div>
+            </Form>
           </div>
         </div>
-      </Form>
-
+      </div>
     </div>
   );
 }

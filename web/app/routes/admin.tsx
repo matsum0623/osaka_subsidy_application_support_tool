@@ -1,3 +1,4 @@
+import { LinksFunction } from "@remix-run/node";
 import {
   useLoaderData,
   redirect,
@@ -46,15 +47,6 @@ export default function Index() {
   return (
     <div>
       {Header(data.user_data)}
-      {/*
-      <ul className="nav nav-pills nav-fill border-bottom pb-2">
-        {pages.map((i) => (
-          <li className="nav-item" key={i.link}>
-            <button className={"nav-link " + ((now == i.link ? 'active': ''))} onClick={() => (ChangePage(i.link))}>{i.name}</button>
-          </li>
-        ))}
-      </ul>
-      */}
       <Outlet context={child_data}/>
     </div>
   );

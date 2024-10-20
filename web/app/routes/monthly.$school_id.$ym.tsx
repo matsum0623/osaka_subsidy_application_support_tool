@@ -159,13 +159,13 @@ export default function Index() {
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[9]  : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[10] : ''}</td>
               <td className="hidden sm:table-cell">
-                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) ? 'instChkOK' : 'instChkNG'}>
+                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) ? 'text-green-500' : 'text-red-500 font-bold'}>
                   {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
                 </span>
               </td>
-              <td className="hidden sm:table-cell"><span className={i[3] != '' ? (i[11] ? 'instChkOK' : 'instChkNG') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span></td>
+              <td className="hidden sm:table-cell"><span className={i[3] != '' ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span></td>
               <td className="table-cell sm:hidden">
-                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) && (i[4] != '' && i[4] > 0) ? 'instChkOK' : 'instChkNG'}>
+                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) && (i[4] != '' && i[4] > 0) ? 'text-green-500' : 'text-red-500 font-bold'}>
                   {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
                 </span>
               </td>

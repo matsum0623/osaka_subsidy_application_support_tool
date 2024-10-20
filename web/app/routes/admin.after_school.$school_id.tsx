@@ -1,3 +1,4 @@
+import { LinksFunction } from "@remix-run/node";
 import {
   useLoaderData,
   redirect,
@@ -116,65 +117,64 @@ export default function Index() {
   }
 
   return (
-    <div>
+    <div className="border-t-2 ">
       <Form method="post">
-        <div className="row mt-2">
-          <div className="col">
-            <p className="h3">学童情報修正</p>
+        <div className="flex my-2">
+          <div>
+            <p className="text-2xl font-bold">学童情報修正</p>
           </div>
-          <div className="col"></div>
         </div>
-        <div className="mt-3 pl-10 pr-10">
-          <div className="mb-3">
-            <label htmlFor="AfterSchoolId" className="form-label mb-3">学童ID</label>
-            <input type="text" className="form-control mb-3" name="after_school_id" id="AfterSchoolId" defaultValue={data.school_id} readOnly={data.school_id != ''}/>
+        <div className="mt-2 px-5">
+          <div>
+            <label htmlFor="AfterSchoolId" className="text-xl">学童ID</label>
+            <input type="text" className="input-default" name="after_school_id" id="AfterSchoolId" defaultValue={data.school_id} readOnly={data.school_id != ''}/>
           </div>
-          <div className="mb-3">
-            <label htmlFor="AfterSchoolName" className="form-label mb-3">学童名称</label>
-            <input type="text" className="form-control mb-3" name="after_school_name" id="AfterSchoolName" defaultValue={data.school_name} />
+          <div className="mt-2">
+            <label htmlFor="AfterSchoolName" className="text-xl">学童名称</label>
+            <input type="text" className="input-default" name="after_school_name" id="AfterSchoolName" defaultValue={data.school_name} />
           </div>
-          <div className="mb-3">
-            <label htmlFor="ChildrenCount" className="form-label mb-3">児童数</label>
-            <table className="table table-bordered text-center">
+          <div className="mt-2">
+            <label htmlFor="ChildrenCount" className="text-xl">児童数</label>
+            <table className="w-full">
               <thead>
                 <tr>
-                  <th>日数</th>
+                  <th className="w-28">日数</th>
                   <th>6/6</th>
                   <th>5/6</th>
                   <th>4/6</th>
                   <th>3/6</th>
                   <th>2/6</th>
                   <th>1/6</th>
-                  <th>合計</th>
+                  <th className="w-20">合計</th>
                 </tr>
               </thead>
               <tbody>
                 <tr>
-                  <td className="col-2 align-middle">登録自動数</td>
-                  <td className="col-1">
-                    <input type="number" className="form-control text-center" name="children_6" defaultValue={data.children.c6} onChange={(e) => setAvg(6, e.target)}/>
+                  <td className="">登録<br/>児童数</td>
+                  <td className="">
+                    <input type="number" className="input-default text-center" name="children_6" defaultValue={data.children.c6} onChange={(e) => setAvg(6, e.target)}/>
                   </td>
-                  <td className="col-1">
-                    <input type="number" className="form-control text-center" name="children_5" defaultValue={data.children.c5} onChange={(e) => setAvg(5, e.target)}/>
+                  <td className="">
+                    <input type="number" className="input-default text-center" name="children_5" defaultValue={data.children.c5} onChange={(e) => setAvg(5, e.target)}/>
                   </td>
-                  <td className="col-1">
-                    <input type="number" className="form-control text-center" name="children_4" defaultValue={data.children.c4} onChange={(e) => setAvg(4, e.target)}/>
+                  <td className="">
+                    <input type="number" className="input-default text-center" name="children_4" defaultValue={data.children.c4} onChange={(e) => setAvg(4, e.target)}/>
                   </td>
-                  <td className="col-1">
-                    <input type="number" className="form-control text-center" name="children_3" defaultValue={data.children.c3} onChange={(e) => setAvg(3, e.target)}/>
+                  <td className="">
+                    <input type="number" className="input-default text-center" name="children_3" defaultValue={data.children.c3} onChange={(e) => setAvg(3, e.target)}/>
                   </td>
-                  <td className="col-1">
-                    <input type="number" className="form-control text-center" name="children_2" defaultValue={data.children.c2} onChange={(e) => setAvg(2, e.target)}/>
+                  <td className="">
+                    <input type="number" className="input-default text-center" name="children_2" defaultValue={data.children.c2} onChange={(e) => setAvg(2, e.target)}/>
                   </td>
-                  <td className="col-1">
-                    <input type="number" className="form-control text-center" name="children_1" defaultValue={data.children.c1} onChange={(e) => setAvg(1, e.target)}/>
+                  <td className="">
+                    <input type="number" className="input-default text-center" name="children_1" defaultValue={data.children.c1} onChange={(e) => setAvg(1, e.target)}/>
                   </td>
-                  <td className="col-2 align-middle">
+                  <td className="">
                     {c_sum}
                   </td>
                 </tr>
                 <tr>
-                  <td>平均登録自動数</td>
+                  <td>平均登録<br/>児童数</td>
                   <td>{c6_avg}</td>
                   <td>{c5_avg}</td>
                   <td>{c4_avg}</td>
@@ -186,14 +186,14 @@ export default function Index() {
               </tbody>
             </table>
           </div>
-          <div className="mb-3">
-            <label htmlFor="InstructorCount" className="form-label mb-3">指導員数</label>
+          <div className="mt-4">
+            <label htmlFor="InstructorCount" className="text-xl">指導員数</label>
             <button type="button" className="btn btn-primary ml-3" onClick={() => EditInstructors(data.school_id)}>指導員編集</button>
-            <input type="text" className="form-control mb-3" id="InstructorCount" defaultValue={data.instructor_num} disabled/>
+            <input type="text" className="input-default mt-1" id="InstructorCount" defaultValue={data.instructor_num} disabled/>
           </div>
-          <div className="mb-3">
-            <label htmlFor="ChildrenCount" className="form-label mb-3">開所タイプ</label>
-            <table className="table table-bordered text-center">
+          <div className="mt-4">
+            <label htmlFor="ChildrenCount" className="text-xl">開所タイプ</label>
+            <table className="">
               <thead>
                 <tr>
                   <th>開所タイプ名称</th>
@@ -205,12 +205,12 @@ export default function Index() {
                 {
                   Object.keys(data.open_types).map((key) => (
                     <tr key={key}>
-                      <td>{data.open_types[key].type_name}</td>
-                      <td>
-                        <input type="time" defaultValue={data.open_types[key].open_time} name={"open_time_" + key + "_open"} className="border px-2 rounded"/>
+                      <td className="w-80">{data.open_types[key].type_name}</td>
+                      <td className="w-40">
+                        <input type="time" defaultValue={data.open_types[key].open_time} name={"open_time_" + key + "_open"} className="input-default text-center"/>
                       </td>
-                      <td>
-                        <input type="time" defaultValue={data.open_types[key].close_time} name={"open_time_" + key + "_close"} className="border px-2 rounded"/>
+                      <td className="w-40">
+                        <input type="time" defaultValue={data.open_types[key].close_time} name={"open_time_" + key + "_close"} className="input-default text-center"/>
                       </td>
                     </tr>
                   ))
@@ -220,7 +220,7 @@ export default function Index() {
           </div>
           <div className="col">
             <button type="submit" className="btn btn-primary ml-2 mr-2 mt-3">保存</button>
-            <button type="button" className="btn btn-secondary mt-3" onClick={Cancel}>キャンセル</button>
+            <button type="button" className="btn btn-danger mt-3" onClick={Cancel}>キャンセル</button>
           </div>
         </div>
       </Form>

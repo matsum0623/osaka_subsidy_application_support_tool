@@ -94,7 +94,7 @@ export default function Index() {
       {Header(data.user_data)}
       {
         (matches.length < 3 || (matches.length == 3 && !matches[2].pathname.includes('/edit/'))) &&
-        <div className="monthly-header border-t-2 sticky top-12 sm:top-20">
+        <div className="flex justify-between bg-white border-t-2 sticky top-12 sm:top-20">
           <Form>
             <div className="flex">
               <div className="p-2">

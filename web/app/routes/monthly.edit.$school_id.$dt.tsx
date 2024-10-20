@@ -100,7 +100,7 @@ export default function Edit() {
     <Form method="post">
       <div className="bg-white text-base border-t-2 sm:text-2xl flex gap-3 justify-center sm:justify-start sticky top-12 sm:top-20">
         <div>{params.dt}({weekday[now_dt.getDay()]})</div>
-        <span className={(instChk ? "instChkOK" : "instChkNG")}>{instChk ? "OK" : "NG"}</span>
+        <span className={(instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{instChk ? "OK" : "NG"}</span>
         <a href={`/monthly/edit/${params.school_id}/${prev_dt.toISOString().slice(0, 10)}`}>
           <button type="button" className="btn-primary">前日</button>
         </a>
