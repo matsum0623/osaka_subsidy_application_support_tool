@@ -22,7 +22,7 @@ export function Header(user_data:any) {
             }
           </div>
           <div className="flex sm:flex-1 sm:justify-end">
-            <a href="#" className="text-sm font-semibold leading-6 text-gray-900">ログアウト<span aria-hidden="true">&rarr;</span></a>
+            <a href="/logout" className="text-sm font-semibold leading-6 text-gray-900">ログアウト<span aria-hidden="true">&rarr;</span></a>
           </div>
         </nav>
       </header>
