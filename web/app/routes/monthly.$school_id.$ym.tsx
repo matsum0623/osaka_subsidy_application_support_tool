@@ -139,8 +139,8 @@ export default function Index() {
         <thead className="table-header-group sm:hidden">
           <tr>
               <th>日付</th>
-              <th>曜日</th>
-              <th>入力</th>
+              <th>開所<br/>閉所</th>
+              <th>配置</th>
               <th></th>
           </tr>
         </thead>
@@ -148,8 +148,9 @@ export default function Index() {
         <tbody>
           {data.list?.map((i:any) => (
             <tr key={i[0]} className={i[2]==6 ? "bg-cyan-100" : (i[2]==0 ? "bg-red-100" : "")}>
-              <td>{i[1]}</td>
-              <td>{weekday[i[2]]}</td>
+              <td className="hidden sm:table-cell">{i[1]}</td>
+              <td className="hidden sm:table-cell">{weekday[i[2]]}</td>
+              <td className="table-cell sm:hidden">{i[1]}（{weekday[i[2]]}）</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? data.config.open_types[i[3]]?.TypeName : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[4]  : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[5]  : ''}</td>
@@ -158,16 +159,13 @@ export default function Index() {
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[8]  : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[9]  : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[10] : ''}</td>
-              <td className="hidden sm:table-cell">
+              <td>
                 <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) ? 'text-green-500' : 'text-red-500 font-bold'}>
                   {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
                 </span>
               </td>
-              <td className="hidden sm:table-cell"><span className={i[3] != '' ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span></td>
-              <td className="table-cell sm:hidden">
-                <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) && (i[4] != '' && i[4] > 0) ? 'text-green-500' : 'text-red-500 font-bold'}>
-                  {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
-                </span>
+              <td>
+                <span className={i[3] != '' ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span>
               </td>
               <td>
                 <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={() => editClick(i[0])}>

@@ -34,7 +34,7 @@ export const clientAction = async({
     return redirect(`/`)
   }
   await postData("/monthly/daily", Object.fromEntries(await request.formData()), idToken)
-  return redirect(`/monthly/edit/${params.school_id}/${params.dt}`);
+  return {}
 }
 
 export default function Edit() {
@@ -98,7 +98,7 @@ export default function Edit() {
 
   return (
     <Form method="post">
-      <div className="bg-white text-base border-t-2 sm:text-2xl flex gap-3 justify-center sm:justify-start sticky top-12 sm:top-20">
+      <div className="bg-white text-base border-t-2 sm:text-2xl flex gap-3 justify-center sm:justify-start sticky top-12 sm:top-20 pt-2">
         <div>{params.dt}({weekday[now_dt.getDay()]})</div>
         <span className={(instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{instChk ? "OK" : "NG"}</span>
         <a href={`/monthly/edit/${params.school_id}/${prev_dt.toISOString().slice(0, 10)}`}>
