@@ -65,8 +65,7 @@ exports.handler = async (event, context) => {
   }
 
   // 指導員配置チェック
-  const ins_check = checkInstructor(instructor_work_hours, after_school_info['Config']['OpenTypes'][post_data.open_type], instructor_info_tmp)
-
+  const [ins_check, excess_shortage] = checkInstructor(instructor_work_hours, after_school_info['Config']['OpenTypes'][post_data.open_type], instructor_info_tmp)
   // 再登録する
   const response = await daily.put(
     after_school_id,
@@ -83,12 +82,15 @@ exports.handler = async (event, context) => {
         "WorkHours": post_data.hour_summary,
       }
     },
-    instructor_check = ins_check,
+    ins_check,
+    excess_shortage,
   )
 
   return response_ok({});
 };
 
+// TODO: 過剰過少時間をチェックして保存しておく
+// 結果をGETで返して表示する
 function checkInstructor(instData, config, instructor_info_tmp) {
   const open = config.OpenTime
   const close = config.CloseTime
@@ -96,7 +98,7 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   let [open_h, open_m] = open.split(':').map((s) => parseInt(s))
   const work_member = {}
   while(true){
-      const key = String(open_h) + ':' + String(open_m)
+      const key = String(open_h) + ':' + ('00' + String(open_m)).slice(-2)
       if(key >= close){
           break
       }
@@ -105,6 +107,14 @@ function checkInstructor(instData, config, instructor_info_tmp) {
           qua: 0,
           add: 0,
           med: 0,
+          shortage: {
+            num: 0,
+            qua: 0,
+          },
+          excess: {
+            num: 0,
+            qua: 0,
+          }
       }
       open_m += 15
       if(open_m >= 60){
@@ -115,7 +125,6 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   instData.map((value) => {
       if(value.WorkHours != ''){
           ins_info = instructor_info_tmp[value.InstructorId]
-          console.log(ins_info)
           Object.keys(work_member).forEach((key) => {
               if(value.StartTime <= key && key < value.EndTime){
                   work_member[key].num += 1
@@ -141,9 +150,37 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   */
   let check_response = true
   Object.keys(work_member).map((key) => {
-      if(work_member[key].num < 2 || work_member[key].qua < 1){
+      // ２人以上配置されているか
+      if(work_member[key].num < 2){
         check_response = false
+        work_member[key]['shortage']['num'] = 2 - work_member[key].num
+      }else if(work_member[key].num > 2){
+        work_member[key].excess.num = work_member[key].num - 2
+      }
+      // 資格者が1人以上配置されているか
+      if(work_member[key].qua < 1){
+        check_response = false
+        work_member[key]['shortage']['qua'] = 1 - work_member[key].qua
+      }else if(work_member[key].qua > 1){
+        work_member[key].excess.qua = work_member[key].qua - 1
       }
   })
-  return check_response
+  const excess_shortage = {}
+  Object.keys(work_member).map((key) => {
+    if(work_member[key].shortage.num > 0 || work_member[key].shortage.qua > 0 || 
+      work_member[key].excess.num > 0 || work_member[key].excess.qua > 0){
+      excess_shortage[key] = {
+        'shortage': {
+          'num': work_member[key].shortage.num,
+          'qua': work_member[key].shortage.qua,
+        },
+        'excess': {
+          'num': work_member[key].excess.num,
+          'qua': work_member[key].excess.qua,
+        }
+      }
+    }
+  })
+  // 過不足分のみ抜き出す
+  return [check_response, excess_shortage]
 }

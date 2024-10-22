@@ -30,20 +30,19 @@ exports.handler = async (event, context) => {
   }
   const instructor_data = {}
   try {
-    const result = await daily.get_item(after_school_id, qsp.date)
-
-    result.Items.forEach(item => {
-      res_data['open_type'] = item.OpenType,
+    const daily_item = await daily.get_item(after_school_id, qsp.date)
+    if(daily_item){
+      res_data['open_type'] = daily_item.OpenType,
       res_data['children'] = {
-        'sum': item.Children,
-        'disability': item.Disability,
-        'medical_care': item.MedicalCare,
+        'sum': daily_item.Children,
+        'disability': daily_item.Disability,
+        'medical_care': daily_item.MedicalCare,
       }
-      res_data['summary']['hours'] = item.Details.Summary.WorkHours
-      item.Details.InstructorWorkHours.forEach((ins) => {
+      res_data['summary']['hours'] = daily_item.Details.Summary.WorkHours
+      daily_item.Details.InstructorWorkHours.forEach((ins) => {
         instructor_data[ins.InstructorId] = ins
       })
-    });
+    }
   } catch (error) {
       console.log(error.message)
   }
