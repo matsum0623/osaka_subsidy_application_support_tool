@@ -12,7 +12,7 @@ export function checkInstructor(instData: any, config:any) {
         med: number,
     }} = {}
     while(true){
-        const key = String(open_h) + ':' + String(open_m)
+        const key = ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)
         if(key >= close){
             break
         }
@@ -32,11 +32,13 @@ export function checkInstructor(instData: any, config:any) {
         if(value.hours != ''){
             Object.keys(work_member).forEach((key:string) => {
                 if(value.start <= key && key < value.end){
-                    work_member[key].num += 1
-                    if(value.qualification){
+                    if(!value.additional_check){
+                        work_member[key].num += 1
+                    }
+                    if(value.qualification && !value.additional_check){
                         work_member[key].qua += 1
                     }
-                    if(value.additional){
+                    if(value.additional_check){
                         work_member[key].add += 1
                     }
                     if(value.medical_care){
@@ -46,7 +48,6 @@ export function checkInstructor(instData: any, config:any) {
             })
         }
     })
-
     /*
         配置をチェックする
             １．全時間帯で2人以上

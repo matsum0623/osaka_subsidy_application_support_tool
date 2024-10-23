@@ -59,10 +59,11 @@ exports.handler = async (event, context) => {
         "qualification": item.Qualification,
         "additional": item.Additional,
         "medical_care": item.MedicalCare,
-        "start": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].StartTime : '',
-        "end": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].EndTime : '',
-        "hours": (instructor_id in instructor_data) ? instructor_data[item.SK.substring(11)].WorkHours : '',
+        "start": instructor_data[instructor_id]?.StartTime ?? '',
+        "end": instructor_data[instructor_id]?.EndTime ?? '',
+        "hours": instructor_data[instructor_id]?.WorkHours ?? '',
         "order": item.Order ? item.Order : 99,
+        "additional_check": instructor_data[instructor_id]?.AdditionalCheck ?? false,
       }
     });
   } catch (error) {

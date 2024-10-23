@@ -15,6 +15,7 @@ exports.handler = async (event, context) => {
   const disability = post_data['disability']
   const medical_care = post_data['medical_care']
 
+  // POSTデータを整理
   const instructor_work_hours_tmp = {}
   for (const key in post_data){
     if (key.split('.')[0] == 'times'){
@@ -23,9 +24,17 @@ exports.handler = async (event, context) => {
         instructor_work_hours_tmp[ins_id] = {}
       }
       instructor_work_hours_tmp[ins_id][type] = post_data[key]
+    }else if (key.split('.')[0] == 'additional'){
+      const ins_id = key.split('.')[1]
+      if(!(ins_id in instructor_work_hours_tmp)){
+        instructor_work_hours_tmp[ins_id] = {}
+      }
+      // チェックがない場合は項目ごと送信されないので、キーがあればtrue
+      instructor_work_hours_tmp[ins_id]['additional'] = true
     }
   }
   const after_school_info = await after_school.get_item(after_school_id)
+  open_type = after_school_info['Config']['OpenTypes'][post_data.open_type]
   const instructor_work_hours =[]
   const open_instructor = {
     "Qualification": 0,
@@ -35,8 +44,10 @@ exports.handler = async (event, context) => {
     "Qualification": 0,
     "NonQualification": 0
   }
+
   const instructor_info_tmp = {}
   for (const ins_id in instructor_work_hours_tmp){
+    // 時間が入力されていない場合はスキップ
     if(instructor_work_hours_tmp[ins_id]['start'] == '' || instructor_work_hours_tmp[ins_id]['end'] == ''){
       continue
     }
@@ -45,17 +56,19 @@ exports.handler = async (event, context) => {
       "StartTime": instructor_work_hours_tmp[ins_id]['start'],
       "EndTime": instructor_work_hours_tmp[ins_id]['end'],
       "WorkHours": instructor_work_hours_tmp[ins_id]['hour'],
+      "AdditionalCheck": instructor_work_hours_tmp[ins_id]['additional']
     })
     const instructor_info = await instructor.get_item(after_school_id, ins_id)
     instructor_info_tmp[ins_id] = instructor_info
-    if (instructor_work_hours_tmp[ins_id]['start'] <= after_school_info['Config']['OpenTypes'][post_data.open_type]['OpenTime'].padStart(5, '0')){
+    // 開所・閉所時間の指導員数をカウント
+    if (instructor_work_hours_tmp[ins_id]['start'] <= open_type['OpenTime'].padStart(5, '0')){
       if (instructor_info.Qualification){
         open_instructor['Qualification'] += 1
       }else{
         open_instructor['NonQualification'] += 1
       }
     }
-    if (instructor_work_hours_tmp[ins_id]['end'] >= after_school_info['Config']['OpenTypes'][post_data.open_type]['CloseTime'].padStart(5, '0')){
+    if (instructor_work_hours_tmp[ins_id]['end'] >= open_type['CloseTime'].padStart(5, '0')){
       if (instructor_info.Qualification){
         close_instructor['Qualification'] += 1
       }else{
@@ -65,7 +78,7 @@ exports.handler = async (event, context) => {
   }
 
   // 指導員配置チェック
-  const [ins_check, excess_shortage] = checkInstructor(instructor_work_hours, after_school_info['Config']['OpenTypes'][post_data.open_type], instructor_info_tmp)
+  const [ins_check, excess_shortage, work_member] = checkInstructor(instructor_work_hours, open_type, instructor_info_tmp)
   // 再登録する
   const response = await daily.put(
     after_school_id,
@@ -78,12 +91,13 @@ exports.handler = async (event, context) => {
     close_instructor,
     {
       "InstructorWorkHours": instructor_work_hours,
+      "WorkMember": work_member,
       "Summary": {
         "WorkHours": post_data.hour_summary,
+        "ExcessShortage": excess_shortage,
       }
     },
     ins_check,
-    excess_shortage,
   )
 
   return response_ok({});
@@ -98,7 +112,7 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   let [open_h, open_m] = open.split(':').map((s) => parseInt(s))
   const work_member = {}
   while(true){
-      const key = String(open_h) + ':' + ('00' + String(open_m)).slice(-2)
+      const key = ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)
       if(key >= close){
           break
       }
@@ -127,11 +141,13 @@ function checkInstructor(instData, config, instructor_info_tmp) {
           ins_info = instructor_info_tmp[value.InstructorId]
           Object.keys(work_member).forEach((key) => {
               if(value.StartTime <= key && key < value.EndTime){
-                  work_member[key].num += 1
-                  if(ins_info.Qualification){
+                  if(!value.Additional){
+                    work_member[key].num += 1
+                  }
+                  if(ins_info.Qualification && !value.Additional){
                       work_member[key].qua += 1
                   }
-                  if(ins_info.Additional){
+                  if(value.Additional){
                       work_member[key].add += 1
                   }
                   if(ins_info.MedicalCare){
@@ -167,7 +183,7 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   })
   const excess_shortage = {}
   Object.keys(work_member).map((key) => {
-    if(work_member[key].shortage.num > 0 || work_member[key].shortage.qua > 0 || 
+    if(work_member[key].shortage.num > 0 || work_member[key].shortage.qua > 0 ||
       work_member[key].excess.num > 0 || work_member[key].excess.qua > 0){
       excess_shortage[key] = {
         'shortage': {
@@ -181,6 +197,5 @@ function checkInstructor(instData, config, instructor_info_tmp) {
       }
     }
   })
-  // 過不足分のみ抜き出す
-  return [check_response, excess_shortage]
+  return [check_response, excess_shortage, work_member]
 }
