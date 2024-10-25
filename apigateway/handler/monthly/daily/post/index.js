@@ -10,31 +10,16 @@ exports.handler = async (event, context) => {
 
   const post_data = JSON.parse(event.body)
 
-  const after_school_id = post_data['school_id']
-  const children = post_data['children']
-  const disability = post_data['disability']
-  const medical_care = post_data['medical_care']
+  const after_school_id = post_data.school_id
+  const children = post_data.children.sum
+  const disability = post_data.children.disability
+  const medical_care = post_data.children.medical_care
 
   // POSTデータを整理
-  const instructor_work_hours_tmp = {}
-  for (const key in post_data){
-    if (key.split('.')[0] == 'times'){
-      const [ins_id, type] = key.split('.').slice(-2)
-      if(!(ins_id in instructor_work_hours_tmp)){
-        instructor_work_hours_tmp[ins_id] = {}
-      }
-      instructor_work_hours_tmp[ins_id][type] = post_data[key]
-    }else if (key.split('.')[0] == 'additional'){
-      const ins_id = key.split('.')[1]
-      if(!(ins_id in instructor_work_hours_tmp)){
-        instructor_work_hours_tmp[ins_id] = {}
-      }
-      // チェックがない場合は項目ごと送信されないので、キーがあればtrue
-      instructor_work_hours_tmp[ins_id]['additional'] = true
-    }
-  }
+  const instructor_work_hours_tmp = post_data.instructors
+
   const after_school_info = await after_school.get_item(after_school_id)
-  open_type = after_school_info['Config']['OpenTypes'][post_data.open_type]
+  open_type = after_school_info.Config.OpenTypes[post_data.open_type]
   const instructor_work_hours =[]
   const open_instructor = {
     "Qualification": 0,
@@ -48,15 +33,15 @@ exports.handler = async (event, context) => {
   const instructor_info_tmp = {}
   for (const ins_id in instructor_work_hours_tmp){
     // 時間が入力されていない場合はスキップ
-    if(instructor_work_hours_tmp[ins_id]['start'] == '' || instructor_work_hours_tmp[ins_id]['end'] == ''){
+    if(instructor_work_hours_tmp[ins_id].start == '' || instructor_work_hours_tmp[ins_id].end == ''){
       continue
     }
     instructor_work_hours.push({
       "InstructorId": ins_id,
-      "StartTime": instructor_work_hours_tmp[ins_id]['start'],
-      "EndTime": instructor_work_hours_tmp[ins_id]['end'],
-      "WorkHours": instructor_work_hours_tmp[ins_id]['hour'],
-      "AdditionalCheck": instructor_work_hours_tmp[ins_id]['additional']
+      "StartTime": instructor_work_hours_tmp[ins_id].start,
+      "EndTime": instructor_work_hours_tmp[ins_id].end,
+      "WorkHours": instructor_work_hours_tmp[ins_id].hours,
+      "AdditionalCheck": instructor_work_hours_tmp[ins_id].additional_check,
     })
     const instructor_info = await instructor.get_item(after_school_id, ins_id)
     instructor_info_tmp[ins_id] = instructor_info
@@ -93,13 +78,12 @@ exports.handler = async (event, context) => {
       "InstructorWorkHours": instructor_work_hours,
       "WorkMember": work_member,
       "Summary": {
-        "WorkHours": post_data.hour_summary,
+        "WorkHours": post_data.summary.hours,
         "ExcessShortage": excess_shortage,
       }
     },
     ins_check,
   )
-
   return response_ok({});
 };
 
@@ -166,20 +150,20 @@ function checkInstructor(instData, config, instructor_info_tmp) {
   */
   let check_response = true
   Object.keys(work_member).map((key) => {
-      // ２人以上配置されているか
-      if(work_member[key].num < 2){
-        check_response = false
-        work_member[key]['shortage']['num'] = 2 - work_member[key].num
-      }else if(work_member[key].num > 2){
-        work_member[key].excess.num = work_member[key].num - 2
-      }
-      // 資格者が1人以上配置されているか
-      if(work_member[key].qua < 1){
-        check_response = false
-        work_member[key]['shortage']['qua'] = 1 - work_member[key].qua
-      }else if(work_member[key].qua > 1){
-        work_member[key].excess.qua = work_member[key].qua - 1
-      }
+    // ２人以上配置されているか
+    if(work_member[key].num < 2){
+      check_response = false
+      work_member[key]['shortage']['num'] = 2 - work_member[key].num
+    }else if(work_member[key].num > 2){
+      work_member[key].excess.num = work_member[key].num - 2
+    }
+    // 資格者が1人以上配置されているか
+    if(work_member[key].qua < 1){
+      check_response = false
+      work_member[key]['shortage']['qua'] = 1 - work_member[key].qua
+    }else if(work_member[key].qua > 1){
+      work_member[key].excess.qua = work_member[key].qua - 1
+    }
   })
   const excess_shortage = {}
   Object.keys(work_member).map((key) => {
