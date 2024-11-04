@@ -14,4 +14,13 @@ export function Loading(navigation:any) {
   }
 }
 
+/**
+ * 現在日付から初期表示する年月を取得する
+ * @returns yyyy-mm
+ */
+export function viewMonth() {
+  const today = new Date()
+  return ((today.getDate() <= 20 && today.getMonth() == 0) ? today.getFullYear()-1 : today.getFullYear()) + '-' + ('0' + ((today.getDate() <= 20) ? ((today.getMonth() == 0) ? 12 : today.getMonth()) : (today.getMonth() + 1))).slice(-2)
+}
+
 export const weekday = ['日', '月', '火', '水', '木', '金', '土', ]

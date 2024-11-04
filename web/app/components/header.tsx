@@ -1,8 +1,10 @@
+import { viewMonth } from './util'
+
 export function Header(user_data:any) {
   // 月次報告は20日締めなので、20日までは前月
   const today = new Date()
   const school_id = user_data.after_schools[0].school_id
-  const ym = ((today.getDate() <= 20 && today.getMonth() == 0) ? today.getFullYear()-1 : today.getFullYear()) + '-' + ('0' + ((today.getDate() <= 20) ? ((today.getMonth() == 0) ? 12 : today.getMonth()) : (today.getMonth() + 1))).slice(-2)
+  const ym = viewMonth()
 
   return (
     <div className="container sticky top-0 bg-white">
