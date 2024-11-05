@@ -5,15 +5,12 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
-  useNavigation,
 } from "@remix-run/react";
 import { LinksFunction } from "@remix-run/node";
 import stylesheet from "./globals.css?url"
 import { Amplify } from "aws-amplify"
 import awsExports from '~/aws-exports';
 Amplify.configure(awsExports);
-
-import { Loading } from "~/components/util"
 
 export const meta: MetaFunction = () => {
   return [
@@ -36,7 +33,6 @@ export function Layout({ children }: { children: React.ReactNode }) {
         <Links />
       </head>
       <body>
-        {Loading(useNavigation())}
         <main className="container px-5 sm:px-20">
           <Outlet />
         </main>

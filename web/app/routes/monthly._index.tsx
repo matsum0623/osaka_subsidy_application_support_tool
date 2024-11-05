@@ -1,65 +1,23 @@
-import {
-  useNavigate,
-  ClientLoaderFunctionArgs,
-  useLoaderData,
-  redirect,
-  Form,
-  ClientActionFunctionArgs,
-} from "@remix-run/react";
-import { getData } from "~/api/fetchApi";
-import { getIdToken } from "~/api/auth";
+import { useOutletContext } from "@remix-run/react";
 import { weekday } from "~/components/util"
-import { useRef } from "react";
-
-export const clientLoader = async ({
-  params,
-}: ClientLoaderFunctionArgs) => {
-  const idToken = await getIdToken();
-  if (!idToken){
-    return redirect(`/`)
-  }
-
-  const ym = params.ym
-  const school_id = params.school_id
-  const data = await getData("/monthly?ym=" + ym + '&school_id=' + school_id, idToken)
-  return {
-    idToken: idToken,
-    list: data.list,
-    /*
-      TODO: 想定されるリスト内容をコメントに残す
-    */
-    config: data.config,
-    school_id: school_id,
-    ym: ym,
-  };
-};
-
-export const clientAction = async ({
-  request
-}: ClientActionFunctionArgs) => {
-  const form_data = Object.fromEntries(await request.formData())
-  console.log('clientAction')
-  console.log(form_data)
-  return redirect("/monthly/" + form_data.ym)
-}
 
 export default function Index() {
-  const data = useLoaderData<typeof clientLoader>()
-  const navigate = useNavigate();
-  if (!data.idToken){
-    redirect("/");
-  }
-  const editClick = (dt:string) => {
-    navigate("/monthly/edit/" + data.school_id + '/' + dt);
-  };
+  const context: {
+    school_id: string,
+    ym: string,
+    search_results: object[],
+    config: {
+      open_types: any,
+    },
+    setEditParams(school_id: string, date: string): void
+  } = useOutletContext();
 
-  const dialogRef = useRef<HTMLDialogElement>(null);
-
-  const closeDialog = () => {
-    if (dialogRef.current) {
-      dialogRef.current.close();
+  const data_list: object[] = []
+  if(context){
+    for (const element of context.search_results) {
+      data_list.push(element);
     }
-  };
+  }
 
   const child_summary = {
     'children': 0,
@@ -70,7 +28,7 @@ export default function Index() {
     'close_qualification': 0,
     'close_non_qualification': 0,
   }
-  data.list?.forEach((i:any) => {
+  data_list?.forEach((i:any) => {
     child_summary['children']                += parseInt(i[4]) > 0 ? parseInt(i[4])  : 0
     child_summary['disability']              += parseInt(i[5]) > 0 ? parseInt(i[5])  : 0
     child_summary['medical_care']            += parseInt(i[6]) > 0 ? parseInt(i[6])  : 0
@@ -80,29 +38,14 @@ export default function Index() {
     child_summary['close_non_qualification'] += parseInt(i[10]) > 0 ? parseInt(i[10])  : 0
   })
 
+  const editClick = (dt:string) => {
+    context.setEditParams(context.school_id, dt);
+  };
+
+
   return (
-    // <!-- TODO: スマホでの表示の場合は、・日付・入力完了しているかどうか・チェック結果を表示する -->
-    <div>
-      <Form method="post">
-        <div className="modal hidden" id="confirm_modal" tabIndex={-1}>
-          <div className="modal-dialog">
-            <div className="modal-content">
-              <div className="modal-header">
-                <h5 className="modal-title">確定処理</h5>
-                <button type="button" className="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div className="modal-body">
-                <p>確定しますか？</p>
-              </div>
-              <div className="modal-footer">
-                <button type="button" className="btn btn-secondary" data-bs-dismiss="modal" onClick={closeDialog}>キャンセル</button>
-                <button type="submit" className="btn btn-primary" data-bs-dismiss="modal" onClick={closeDialog}>確定</button>
-              </div>
-            </div>
-          </div>
-        </div>
-      </Form>
-      <table className="w-full">
+    <>
+      {<table className="w-full">
         <thead className="hidden sm:table-header-group">
           <tr>
               <th rowSpan={2}>日付</th>
@@ -146,12 +89,12 @@ export default function Index() {
         </thead>
 
         <tbody>
-          {data.list?.map((i:any) => (
+          {data_list?.map((i:any) => (
             <tr key={i[0]} className={i[2]==6 ? "bg-cyan-100" : (i[2]==0 ? "bg-red-100" : "")}>
               <td className="hidden sm:table-cell">{i[1]}</td>
               <td className="hidden sm:table-cell">{weekday[i[2]]}</td>
               <td className="table-cell sm:hidden">{i[1]}（{weekday[i[2]]}）</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? data.config.open_types[i[3]]?.TypeName : ''}</td>
+              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? context.config.open_types[i[3]]?.TypeName : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[4]  : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[5]  : ''}</td>
               <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[6]  : ''}</td>
@@ -175,7 +118,7 @@ export default function Index() {
             </tr>
           ))}
         </tbody>
-      </table>
-    </div>
+      </table>}
+    </>
   );
 }

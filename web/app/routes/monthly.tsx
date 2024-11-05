@@ -6,13 +6,14 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useMatches,
-  useParams,
+  useNavigation,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
 import { Header } from "~/components/header";
 import { useRef, useState } from "react";
 import Encoding from 'encoding-japanese';
+import { Loading, viewMonth, viewMonthList } from "~/components/util";
 
 export const clientLoader = async ({
   params,
@@ -22,20 +23,20 @@ export const clientLoader = async ({
     return redirect(`/`)
   }
 
-  const today = new Date()
-  const today_year = today.getFullYear()
-  const today_month = today.getMonth() + 1
   const data = await getData("/user", idToken)
   data.idToken = idToken
-  data.ym = params.ym
-  data.school_id = params.school_id
-  data.ym_list = []
-  for(let i=0; i < 13; i++){
-    data.ym_list.push({
-      value: ((i<=today_month) ? today_year : today_year-1) + '-' + ('0' + ( (i < today_month) ? today_month - i : today_month - i + 12)).slice(-2),
-      confirm: false
-    })
-  }
+  data.ym = (!params.ym || !params.school_id) ? viewMonth() : params.ym
+  data.school_id = (!params.ym || !params.school_id) ? data.user_data.after_schools[0].school_id : params.school_id
+
+  const res = await getData(`/monthly?ym=${data.ym}&school_id=${data.school_id}`, idToken)
+  data.search_results = res.list
+  data.config = res.config
+
+  data.ym_list = viewMonthList()
+
+  // 月初のデータを取得
+  data.daily_data = await getData(`/monthly/daily?date=${data.ym}-01&school_id=${data.school_id}`, idToken)
+
   return data
 };
 
@@ -62,35 +63,68 @@ export const downloadCsv = async (school_id:string, ym:string, idToken:string, a
 
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
-  const navigate = useNavigate();
-  if (!data.idToken){
-    redirect("/");
-  }
-  const [ym, setDate] = useState(data.ym)
-  const [school_id, setSchoolId] = useState(data.school_id)
 
+  const navigate = useNavigate();
+
+  const [search_ym, setSearchDate] = useState(data.ym)
+  const [search_school_id, setSearchSchoolId] = useState(data.school_id)
+  const [search_results, setSearchResults] = useState(data.search_results)
+
+  const changeParams = async (ym:string, school_id:string) => {
+    setIsLoading("loading")
+    const res = await getData(`/monthly?ym=${ym}&school_id=${school_id}`, data.idToken)
+    setSearchResults(res.list)
+    setIsLoading("idle")
+  }
+
+  const navigation = useNavigation()
   const changeMonth = (ym:string) => {
-    setDate(ym)
-    return navigate("/monthly/" + school_id + "/" + ym);
+    setSearchDate(ym)
+    changeParams(ym, search_school_id)
   }
 
   const changeSchoolId = (school_id:string) => {
-    setSchoolId(school_id)
-    return navigate("/monthly/" + school_id + "/" + ym);
+    setSearchSchoolId(school_id)
+    changeParams(search_ym, school_id)
   }
 
-  const dialogRef = useRef<HTMLDialogElement>(null);
-  const openDialog = () => {
-    if (dialogRef.current) {
-      dialogRef.current.showModal();
-    }
-  };
+  const [edit_school_id, setEditSchoolId] = useState(data.school_id)
+  const [edit_date, setEditDate] = useState(`${data.ym}-01`)
+  const [instructors, setInstructors] = useState(data.daily_data.instructors)
+  const [sum_hours, setSumHours] = useState(data.daily_data.sum_hours)
+  const [open_type, setOpenType] = useState(data.daily_data.open_type)
+  const [children_sum, setChildrenSum] = useState(data.daily_data.instructors)
+  const [children_disability, setChildrenDisability] = useState(data.daily_data.instructors)
+  const [children_medical_care, setChildrenMedicalCare] = useState(data.daily_data.instructors)
+
+  const setEditParams = async (school_id:string, date:string) => {
+    setIsLoading("loading")
+    setEditSchoolId(school_id)
+    setEditDate(date)
+    await changeEditData(school_id, date)
+    navigate('/monthly/edit/')
+    setIsLoading("idle")
+  }
+
+  const changeEditData = async (school_id: string, date:string) => {
+    return await getData(`/monthly/daily?school_id=${school_id}&date=${date}`, data.idToken).then((res) => {
+      setInstructors(res.instructors)
+      setSumHours(res.summary.hours)
+      setOpenType(res.open_type)
+      setChildrenSum(res.children.sum)
+      setChildrenDisability(res.children.disability)
+      setChildrenMedicalCare(res.children.medical_care)
+    })
+  }
 
   const anchorRef  = useRef<HTMLAnchorElement>(null)
   const matches = useMatches()
 
+  const [is_loading, setIsLoading] = useState("idle")
+
   return (
     <div>
+      {Loading({state: is_loading})}
       {Header(data.user_data)}
       {
         (matches.length < 3 || (matches.length == 3 && !matches[2].pathname.includes('/edit/'))) &&
@@ -98,33 +132,51 @@ export default function Index() {
           <Form>
             <div className="flex">
               <div className="p-2">
-                <select name="school_id" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" defaultValue={data.school_id} onChange={(e) => changeSchoolId(e.target.value)}>
+                <select name="school_id" className="select" value={search_school_id} onChange={(e) => changeSchoolId(e.target.value)}>
                   {data.user_data.after_schools.map((item:any) => (
                     <option key={item.school_id} value={item.school_id}>{item.school_id + ':' + item.school_name}</option>
                   ))}
                 </select>
               </div>
               <div className="p-2">
-                <select name="ym" className="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-blue-500 focus:border-blue-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" defaultValue={data.ym} onChange={(e) => (changeMonth(e.target.value), e)}>
+                <select name="ym" className="select" value={search_ym} onChange={(e) => (changeMonth(e.target.value), e)}>
                   {data.ym_list.map((item:any) => (
                     <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
                   ))}
                 </select>
               </div>
               <div className="ms-auto p-2 hidden sm:block">
-                <button type="button" onClick={() => downloadCsv(school_id, ym, data.idToken, anchorRef)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">CSVダウンロード</button>
+                <button type="button" onClick={() => downloadCsv(search_school_id, search_ym, data.idToken, anchorRef)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">CSVダウンロード</button>
                 <a ref={anchorRef} className='hidden'></a>
               </div>
             </div>
           </Form>
         </div>
       }
-        {/* TODO: 確定処理は未実装
-        <div>
-          <button type="button" value={"確定"} className="btn btn-primary" data-bs-toggle="modal" data-bs-target="#confirm_modal" onClick={() => openDialog()}>確定処理</button>
-        </div>
-        */}
-      <Outlet />
+      <Outlet context={{
+        id_token: data.idToken,
+        school_id: search_school_id,
+        month: search_ym,
+        edit_school_id: edit_school_id,
+        edit_date: edit_date,
+        search_results: search_results,
+        config: data.config,
+        setEditParams: setEditParams,
+        change_edit_data: changeEditData,
+        instructors: instructors,
+        sum_hours: sum_hours,
+        open_type: open_type,
+        children_sum: children_sum,
+        children_disability: children_disability,
+        children_medical_care: children_medical_care,
+        setInstructors: setInstructors,
+        setOpenType: setOpenType,
+        setChildrenSum: setChildrenSum,
+        setChildrenDisability: setChildrenDisability,
+        setChildrenMedicalCare: setChildrenMedicalCare,
+        setSumHours: setSumHours,
+        setIsLoading: setIsLoading,
+      }}/>
     </div>
   );
 }
