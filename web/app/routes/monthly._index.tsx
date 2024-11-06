@@ -3,8 +3,7 @@ import { weekday } from "~/components/util"
 
 export default function Index() {
   const context: {
-    school_id: string,
-    ym: string,
+    search_school_id: string,
     search_results: object[],
     config: {
       open_types: any,
@@ -12,14 +11,17 @@ export default function Index() {
     setEditParams(school_id: string, date: string): void
   } = useOutletContext();
 
-  const data_list: object[] = []
-  if(context){
-    for (const element of context.search_results) {
-      data_list.push(element);
-    }
-  }
-
-  const child_summary = {
+  const check_plus = (val:string) => {return parseInt(val) > 0 ? parseInt(val)  : 0}
+  const child_summary = context.search_results.reduce((result:any, i:any) => {
+    result.children                += check_plus(i[4])
+    result.disability              += check_plus(i[5])
+    result.medical_care            += check_plus(i[6])
+    result.open_qualification      += check_plus(i[7])
+    result.open_non_qualification  += check_plus(i[8])
+    result.close_qualification     += check_plus(i[9])
+    result.close_non_qualification += check_plus(i[10])
+    return result;
+  }, {
     'children': 0,
     'disability': 0,
     'medical_care': 0,
@@ -27,21 +29,7 @@ export default function Index() {
     'open_non_qualification': 0,
     'close_qualification': 0,
     'close_non_qualification': 0,
-  }
-  data_list?.forEach((i:any) => {
-    child_summary['children']                += parseInt(i[4]) > 0 ? parseInt(i[4])  : 0
-    child_summary['disability']              += parseInt(i[5]) > 0 ? parseInt(i[5])  : 0
-    child_summary['medical_care']            += parseInt(i[6]) > 0 ? parseInt(i[6])  : 0
-    child_summary['open_qualification']      += parseInt(i[7]) > 0 ? parseInt(i[7])  : 0
-    child_summary['open_non_qualification']  += parseInt(i[8]) > 0 ? parseInt(i[8])  : 0
-    child_summary['close_qualification']     += parseInt(i[9]) > 0 ? parseInt(i[9])  : 0
-    child_summary['close_non_qualification'] += parseInt(i[10]) > 0 ? parseInt(i[10])  : 0
-  })
-
-  const editClick = (dt:string) => {
-    context.setEditParams(context.school_id, dt);
-  };
-
+  });
 
   return (
     <>
@@ -89,7 +77,7 @@ export default function Index() {
         </thead>
 
         <tbody>
-          {data_list?.map((i:any) => (
+          {Object.values(context.search_results)?.map((i:any) => (
             <tr key={i[0]} className={i[2]==6 ? "bg-cyan-100" : (i[2]==0 ? "bg-red-100" : "")}>
               <td className="hidden sm:table-cell">{i[1]}</td>
               <td className="hidden sm:table-cell">{weekday[i[2]]}</td>
@@ -111,7 +99,7 @@ export default function Index() {
                 <span className={i[3] != '' ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span>
               </td>
               <td>
-                <button type="button" className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800" onClick={() => editClick(i[0])}>
+                <button type="button" className="btn-primary" onClick={() => context.setEditParams(context.search_school_id, i[0])}>
                   入力
                 </button>
               </td>

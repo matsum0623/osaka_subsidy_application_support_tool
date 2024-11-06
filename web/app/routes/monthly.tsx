@@ -6,7 +6,6 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useMatches,
-  useNavigation,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
@@ -65,28 +64,12 @@ export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
 
   const navigate = useNavigate();
+  const matches = useMatches()
 
+  // State管理
   const [search_ym, setSearchDate] = useState(data.ym)
   const [search_school_id, setSearchSchoolId] = useState(data.school_id)
   const [search_results, setSearchResults] = useState(data.search_results)
-
-  const changeParams = async (ym:string, school_id:string) => {
-    setIsLoading("loading")
-    const res = await getData(`/monthly?ym=${ym}&school_id=${school_id}`, data.idToken)
-    setSearchResults(res.list)
-    setIsLoading("idle")
-  }
-
-  const navigation = useNavigation()
-  const changeMonth = (ym:string) => {
-    setSearchDate(ym)
-    changeParams(ym, search_school_id)
-  }
-
-  const changeSchoolId = (school_id:string) => {
-    setSearchSchoolId(school_id)
-    changeParams(search_ym, school_id)
-  }
 
   const [edit_school_id, setEditSchoolId] = useState(data.school_id)
   const [edit_date, setEditDate] = useState(`${data.ym}-01`)
@@ -97,17 +80,18 @@ export default function Index() {
   const [children_disability, setChildrenDisability] = useState(data.daily_data.instructors)
   const [children_medical_care, setChildrenMedicalCare] = useState(data.daily_data.instructors)
 
-  const setEditParams = async (school_id:string, date:string) => {
+  const [is_loading, setIsLoading] = useState("idle")
+
+  const changeParams = async (ym:string, school_id:string) => {
     setIsLoading("loading")
-    setEditSchoolId(school_id)
-    setEditDate(date)
-    await changeEditData(school_id, date)
-    navigate('/monthly/edit/')
+    const res = await getData(`/monthly?ym=${ym}&school_id=${school_id}`, data.idToken)
+    setSearchResults(res.list)
     setIsLoading("idle")
   }
 
-  const changeEditData = async (school_id: string, date:string) => {
-    return await getData(`/monthly/daily?school_id=${school_id}&date=${date}`, data.idToken).then((res) => {
+  const setEditParams = async (school_id:string, date:string) => {
+    setIsLoading("loading")
+    await getData(`/monthly/daily?school_id=${school_id}&date=${date}`, data.idToken).then((res) => {
       setInstructors(res.instructors)
       setSumHours(res.summary.hours)
       setOpenType(res.open_type)
@@ -115,12 +99,13 @@ export default function Index() {
       setChildrenDisability(res.children.disability)
       setChildrenMedicalCare(res.children.medical_care)
     })
+    setEditSchoolId(school_id)
+    setEditDate(date)
+    navigate('/monthly/edit/')
+    setIsLoading("idle")
   }
 
-  const anchorRef  = useRef<HTMLAnchorElement>(null)
-  const matches = useMatches()
-
-  const [is_loading, setIsLoading] = useState("idle")
+  const anchorRef = useRef<HTMLAnchorElement>(null)
 
   return (
     <div>
@@ -132,14 +117,14 @@ export default function Index() {
           <Form>
             <div className="flex">
               <div className="p-2">
-                <select name="school_id" className="select" value={search_school_id} onChange={(e) => changeSchoolId(e.target.value)}>
+                <select name="school_id" className="select" value={search_school_id} onChange={(e) => changeParams(search_ym ,e.target.value)}>
                   {data.user_data.after_schools.map((item:any) => (
                     <option key={item.school_id} value={item.school_id}>{item.school_id + ':' + item.school_name}</option>
                   ))}
                 </select>
               </div>
               <div className="p-2">
-                <select name="ym" className="select" value={search_ym} onChange={(e) => (changeMonth(e.target.value), e)}>
+                <select name="ym" className="select" value={search_ym} onChange={(e) => changeParams(e.target.value, search_school_id)}>
                   {data.ym_list.map((item:any) => (
                     <option key={item.value} value={item.value}>{item.value.split('-').join('年') + '月' + (item.confirm ? ' 確定済み' : '')}</option>
                   ))}
@@ -155,20 +140,19 @@ export default function Index() {
       }
       <Outlet context={{
         id_token: data.idToken,
-        school_id: search_school_id,
-        month: search_ym,
+        search_school_id: search_school_id,
+        search_ym: search_ym,
         edit_school_id: edit_school_id,
         edit_date: edit_date,
         search_results: search_results,
         config: data.config,
-        setEditParams: setEditParams,
-        change_edit_data: changeEditData,
         instructors: instructors,
         sum_hours: sum_hours,
         open_type: open_type,
         children_sum: children_sum,
         children_disability: children_disability,
         children_medical_care: children_medical_care,
+        setEditParams: setEditParams,
         setInstructors: setInstructors,
         setOpenType: setOpenType,
         setChildrenSum: setChildrenSum,

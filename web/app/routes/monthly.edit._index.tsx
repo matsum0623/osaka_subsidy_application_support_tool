@@ -11,8 +11,7 @@ import { checkInstructor } from "~/lib/common_check";
 export default function Index() {
   const context: {
     id_token: string,
-    school_id: string,
-    ym: string,
+    search_school_id: string,
     edit_date: string,
     search_results: object[],
     config: {
@@ -34,6 +33,8 @@ export default function Index() {
     setIsLoading(is_loading: string): void,
   } = useOutletContext();
 
+  const navigate = useNavigate()
+
   const [modal_open, setModalOpen] = useState(false)
   const [go_next, setGoNext] = useState(false)
 
@@ -43,16 +44,15 @@ export default function Index() {
 
   const [now_dt, prev_dt, next_dt] = createDates(context.edit_date)
 
-
   const changeDate = (dt:string) => {
-    context.setEditParams(context.school_id, dt);
+    context.setEditParams(context.search_school_id, dt);
   }
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     context.setIsLoading("submitting")
     e.preventDefault();
     const post_data = {
-      school_id: context.school_id,
+      school_id: context.search_school_id,
       date: now_dt.toISOString().slice(0, 10),
       open_type: context.open_type,
       instructors: context.instructors,
@@ -155,6 +155,15 @@ export default function Index() {
         sum_min += parseInt(min)
       }
     })
+    const res = Object.values(context.instructors).filter((inst) => inst.hours).reduce((result:any, inst:any) => {
+      const [hour, min] = inst.hours.split(':').map((i:any) => (parseInt(i)))
+      result.sum_hour += hour
+      result.sum_min += min
+      return result
+    }, {
+      sum_hour: 0,
+      sum_min: 0
+    })
     sum_hour += Math.floor(sum_min / 60)
     sum_min = sum_min % 60
     context.setSumHours(sum_hour + ':' + ( '00' + sum_min ).slice( -2 ))
@@ -170,7 +179,6 @@ export default function Index() {
     setCt(ct + 1)
   }
 
-  const navigate = useNavigate()
   const CancelClick = () => {
     navigate(`/monthly`)
   }
@@ -290,7 +298,7 @@ export default function Index() {
           <button type="submit" className="btn-primary mr-3" onClick={() => setGoNext(false)}>登録</button>
           <button onClick={() => CancelClick()} type="button" className="btn btn-danger sm:mr-10">戻る</button>
         </p>
-        <input type='hidden' name="school_id" value={context.school_id} />
+        <input type='hidden' name="school_id" value={context.search_school_id} />
         <input type='hidden' name="date" value={now_dt.toISOString().slice(0, 10)} />
       </Form>
 

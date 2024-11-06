@@ -1,4 +1,3 @@
-import { LinksFunction } from "@remix-run/node";
 import {
   Form,
   ClientActionFunctionArgs,
@@ -6,7 +5,6 @@ import {
   useSearchParams
 } from "@remix-run/react";
 import { signIn, signOut } from 'aws-amplify/auth'
-import { useState } from "react";
 
 export const clientLoader = async () => {
   // この画面にくる場合はサインアウトさせる
@@ -26,7 +24,6 @@ export const clientAction = async({
   }).catch((e) => {
     return false
   })
-  console.log(isLogin)
   if (isLogin){
     return redirect(`/`);
   }else{
