@@ -187,8 +187,11 @@ export default function Index() {
     <div>
       <div className="bg-white flex justify-between border-t-2 sticky top-12 sm:top-20 pt-2">
         <div className="text-base sm:text-2xl flex gap-3 justify-center sm:justify-start">
-          <div>{now_dt.toISOString().slice(0, 10)}({weekday[now_dt.getDay()]})</div>
-          <span className={(instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{instChk ? "OK" : "NG"}</span>
+          <div className="flex">
+            <input type="date" value={context.edit_date} onChange={(e) => changeDate(e.target.value)} className="input-default sm:text-xl sm:py-1" />
+            <span className="hidden sm:block py-2">({weekday[now_dt.getDay()]})</span>
+          </div>
+          <span className={'py-2 ' + (instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{instChk ? "OK" : "NG"}</span>
             <button type="button" className="btn-primary" onClick={() => changeDate(prev_dt.toISOString().slice(0, 10))}>前日</button>
             <button type="button" className="btn-primary" onClick={() => changeDate(next_dt.toISOString().slice(0, 10))}>翌日</button>
           </div>
