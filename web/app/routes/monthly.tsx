@@ -13,16 +13,13 @@ import { Header } from "~/components/header";
 import { useRef, useState } from "react";
 import Encoding from 'encoding-japanese';
 import { Loading, viewMonth, viewMonthList } from "~/components/util";
+import { getLs } from "~/lib/ls";
 
 export const clientLoader = async ({
   params,
 }: ClientLoaderFunctionArgs) => {
-  const idToken = await getIdToken();
-  if (!idToken){
-    return redirect(`/`)
-  }
-
-  const data = await getData("/user", idToken)
+  const idToken = getLs('idToken') || ''
+  const data = JSON.parse(getLs('user_data') || '{}')
   data.idToken = idToken
   data.ym = (!params.ym || !params.school_id) ? viewMonth() : params.ym
   data.school_id = (!params.ym || !params.school_id) ? data.user_data.after_schools[0].school_id : params.school_id

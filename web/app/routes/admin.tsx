@@ -9,6 +9,7 @@ import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData } from "~/api/fetchApi";
 import { Header } from "~/components/header";
+import { getLs } from "~/lib/ls";
 
 const pages = [
   {link: './after_school', name: '学童情報'},
@@ -17,14 +18,10 @@ const pages = [
 ]
 
 export const clientLoader = async () => {
-  const idToken = await getIdToken();
-  if (!idToken){
-    return redirect(`/`)
-  }else{
-    const data = await getData("/user", idToken)
-    data.idToken = idToken
-    return data
-  }
+  const idToken = getLs('idToken') || ''
+  const data = JSON.parse(getLs('user_data') || '{}')
+  data.idToken = idToken
+  return data
 };
 
 export default function Index() {

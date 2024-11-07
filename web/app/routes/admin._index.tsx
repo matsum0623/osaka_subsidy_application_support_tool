@@ -7,18 +7,15 @@ import {
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, postData, putData } from "~/api/fetchApi";
+import { getLs } from "~/lib/ls";
 
 export const clientLoader = async () => {
-  const idToken = await getIdToken();
-  if (!idToken){
-    return redirect(`/`)
-  }else{
-    const data = await getData("/user", idToken)
-    data.idToken = idToken
-    data.after_schools = await getData("/after_school", idToken)
-    data.users = await getData("/users", idToken)
-    return data
-  }
+  const idToken = getLs('idToken') || ''
+  const data = JSON.parse(getLs('user_data') || '{}')
+  data.idToken = idToken
+  data.after_schools = await getData("/after_school", idToken)
+  data.users = await getData("/users", idToken)
+  return data
 };
 
 export default function Index() {
