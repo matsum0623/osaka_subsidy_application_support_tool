@@ -9,7 +9,7 @@ exports.handler = async (event, context) => {
     }
 
     const post_data = JSON.parse(event.body)
-    const user_data = await user.get_item(decode_token.email)
+    const user_data = await user.get_item(decode_token['cognito:username'])
 
     // 管理者、または自分自身のみ編集が可能
     if(!user_data.Admin && post_data.user_id != user_data.SK.split('#')[1]){

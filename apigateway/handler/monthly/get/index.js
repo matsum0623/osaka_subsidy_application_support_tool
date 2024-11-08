@@ -76,7 +76,7 @@ exports.handler = async (event, context) => {
     }
     })
 
-    const user_data = await user.get_item(decode_token.email)
+    const user_data = await user.get_item(decode_token['cognito:username'])
     return response_ok({
         list: res_list,
         config: {

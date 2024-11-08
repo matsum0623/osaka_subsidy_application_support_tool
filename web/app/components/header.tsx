@@ -11,15 +11,17 @@ export function Header(user_data:any) {
               <img className="h-8 w-auto" src="https://tailwindui.com/plus/img/logos/mark.svg?color=indigo&shade=600" alt=""/>
               </Link>
           </div>
-          <div className="flex sm:gap-x-12">
-            <Link to="/monthly" className="text-sm font-semibold leading-6 text-gray-900">月次報告</Link>
-            {
-              user_data.admin &&
-              <Link to="/admin" className="hidden sm:flex text-sm font-semibold leading-6 text-gray-900">管理画面</Link>
-            }
-          </div>
-          <div className="flex sm:flex-1 sm:justify-end">
-            <Link to="/logout" className="text-sm font-semibold leading-6 text-gray-900">ログアウト<span aria-hidden="true">&rarr;</span></Link>
+          <div className='flex gap-9'>
+            <div className="flex sm:gap-x-12">
+              <Link to="/monthly" className="text-sm sm:text-xl font-semibold leading-6 text-gray-900 underline">月次報告</Link>
+              {
+                user_data.admin &&
+                <Link to="/admin" className="hidden sm:flex text-sm sm:text-xl font-semibold leading-6 text-gray-900 underline">管理画面</Link>
+              }
+            </div>
+            <div className="flex sm:flex-1 sm:justify-end">
+              <Link to="/logout" className="text-sm sm:text-xl font-semibold leading-6 text-gray-900">ログアウト<span aria-hidden="true">&rarr;</span></Link>
+            </div>
           </div>
         </nav>
       </header>

@@ -8,7 +8,7 @@ exports.handler = async (event, context) => {
         return response_403
     }
 
-    const user_data = await user.get_item(decode_token.email)
+    const user_data = await user.get_item(decode_token['cognito:username'])
 
     const response = {
         list: []

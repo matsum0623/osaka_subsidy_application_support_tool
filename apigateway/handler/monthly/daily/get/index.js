@@ -72,7 +72,7 @@ exports.handler = async (event, context) => {
 
   const after_school_info = await after_school.get_item(after_school_id)
   const open_types = await app_const.get_open_types()
-  const user_data = await user.get_item(decode_token.email)
+  const user_data = await user.get_item(decode_token['cognito:username'])
 
   res_data["config"] = {
     "open_types": {}

@@ -13,7 +13,7 @@ exports.handler = async (event, context) => {
     }
 
     const post_data = JSON.parse(event.body)
-    const request_user = await user.get_item(decode_token.email)
+    const request_user = await user.get_item(decode_token['cognito:username'])
 
     // 管理者のみユーザ追加が可能
     if(!request_user.Admin){
