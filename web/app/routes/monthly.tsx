@@ -6,6 +6,7 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useMatches,
+  useNavigation,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { getIdToken } from "~/api/auth";
@@ -81,6 +82,8 @@ export default function Index() {
 
   const changeParams = async (ym:string, school_id:string) => {
     setIsLoading("loading")
+    setSearchDate(ym)
+    setSearchSchoolId(school_id)
     const res = await getData(`/monthly?ym=${ym}&school_id=${school_id}`, data.idToken)
     setSearchResults(res.list)
     setIsLoading("idle")

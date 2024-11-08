@@ -52,6 +52,21 @@ Resources:
         - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
         - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
 
+  UserAdminLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+          - Effect: "Allow"
+            Action: "sts:AssumeRole"
+            Principal:
+              Service: lambda.amazonaws.com
+      ManagedPolicyArns:
+        - arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole
+        - arn:aws:iam::aws:policy/AmazonDynamoDBFullAccess
+        - arn:aws:iam::aws:policy/AmazonCognitoPowerUser
+
   NodeModuleLayer:
     Type: AWS::Serverless::LayerVersion
     Properties:
@@ -99,7 +114,7 @@ Resources:
     Type: AWS::Serverless::Function
     Properties:
       CodeUri: ./handler/user/post
-      Role: !GetAtt LambdaRole.Arn
+      Role: !GetAtt UserAdminLambdaRole.Arn
       Events:
         GetApi:
           Type: Api
@@ -108,6 +123,9 @@ Resources:
             Method: POST
             RestApiId:
               Ref: CommonAPI
+      Environment:
+        Variables:
+          USER_POOL_ID: !Ref LoginUserPool
 
   UserUserIdGetLambda:
     Type: AWS::Serverless::Function
@@ -307,3 +325,43 @@ Resources:
       OpenApiVersion: 3.0.1
       StageName: development
       EndpointConfiguration: REGIONAL
+
+  LoginUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Sub ${AWS::StackName}-user-pool
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: true
+      AutoVerifiedAttributes:
+        - email
+      AccountRecoverySetting:
+        RecoveryMechanisms:
+          - Name: verified_email
+            Priority: 1
+      Policies:
+        PasswordPolicy:
+          MinimumLength: 8
+          RequireLowercase: true
+          RequireNumbers: true
+          RequireSymbols: true
+          RequireUppercase: true
+      Schema:
+        - Name: email
+          Required: true
+          Mutable: false
+        - Name: name
+          Required: true
+          Mutable: true
+
+  LoginUserPoolClient:
+    Type: AWS::Cognito::UserPoolClient
+    Properties:
+      ClientName: !Sub ${AWS::StackName}-user-pool-client
+      GenerateSecret: false
+      RefreshTokenValidity: 1800
+      ExplicitAuthFlows:
+        - ALLOW_ADMIN_USER_PASSWORD_AUTH
+        - ALLOW_USER_SRP_AUTH
+        - ALLOW_REFRESH_TOKEN_AUTH
+      UserPoolId:
+        Ref: LoginUserPool

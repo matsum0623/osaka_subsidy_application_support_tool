@@ -5,7 +5,6 @@ import {
   Form,
 } from "@remix-run/react";
 import { useState } from "react";
-import { getIdToken } from "~/api/auth";
 import { getData, postData, putData } from "~/api/fetchApi";
 import { getLs } from "~/lib/ls";
 
@@ -66,7 +65,6 @@ export default function Index() {
 
   const handleSubmit = async (e:any) => {
     e.preventDefault()
-    const after_schools:string[] = []
     const post_data = {
       user_id: user_id,
       user_name: user_name,
@@ -130,8 +128,9 @@ export default function Index() {
       <table className="table table-bordered text-center mt-3 w-full">
         <thead>
           <tr>
-            <td>ユーザID(メールアドレス)</td>
+            <td>ユーザID</td>
             <td>ユーザ名</td>
+            <td>メールアドレス</td>
             <td>管理学童数</td>
             <td colSpan={3}></td>
           </tr>
@@ -141,6 +140,7 @@ export default function Index() {
             <tr key={user.user_id}>
               <td className="col-sm-4 align-middle">{user.user_id}</td>
               <td className="col-sm-4 align-middle">{user.user_name}</td>
+              <td className="col-sm-4 align-middle">{user.email}</td>
               <td className="col-sm-1 align-middle">{user.after_schools.length}</td>
               <td className="col-sm-1 align-middle">{(user.status == 'active') ? '有効' : '無効'}</td>
               <td className="col-sm-1">
@@ -201,7 +201,7 @@ export default function Index() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-danger w-28" onClick={() => setModalOpen(false)}>キャンセル</button>
-                <button type="button" className="ms-3 btn-primary w-28" onClick={() => setModalOpen(false)}>登録</button>
+                <button type="submit" className="ms-3 btn-primary w-28" onClick={() => setModalOpen(false)}>登録</button>
               </div>
             </Form>
           </div>

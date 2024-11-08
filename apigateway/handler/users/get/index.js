@@ -15,6 +15,7 @@ exports.handler = async (event, context) => {
         response.list.push({
             user_id: user.SK.split('#')[1],
             user_name: user.UserName,
+            email: user.Email,
             after_schools: user.AfterSchools,
             status: user.Status,
         })

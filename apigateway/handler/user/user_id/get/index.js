@@ -16,7 +16,7 @@ exports.handler = async (event, context) => {
         return response_400
     }
 
-    const request_user = await user.get_item(decode_token.email)
+    const request_user = await user.get_item(decode_token['cognito:username'])
     const user_data = await user.get_item(pp.user_id)
 
     // 管理者、または自分自身のみ取得が可能
@@ -27,6 +27,7 @@ exports.handler = async (event, context) => {
     const response = {
         user_data: {
             user_name: user_data.UserName,
+            email: user_data.Email,
             after_schools: user_data.AfterSchools
         }
     }

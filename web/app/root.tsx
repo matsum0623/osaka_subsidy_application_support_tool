@@ -5,11 +5,13 @@ import {
   Outlet,
   Scripts,
   ScrollRestoration,
+  useNavigation,
 } from "@remix-run/react";
 import { LinksFunction } from "@remix-run/node";
 import stylesheet from "./globals.css?url"
 import { Amplify } from "aws-amplify"
 import awsExports from '~/aws-exports';
+import { Loading } from "./components/util";
 Amplify.configure(awsExports);
 
 export const meta: MetaFunction = () => {
@@ -44,7 +46,12 @@ export function Layout({ children }: { children: React.ReactNode }) {
 }
 
 export default function App() {
-  return <Outlet />;
+  return (
+    <>
+      {Loading(useNavigation())}
+      <Outlet />
+    </>
+  );
 }
 
 export function HydrateFallback() {

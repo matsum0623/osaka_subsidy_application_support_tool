@@ -18,9 +18,10 @@ exports.handler = async (event, context) => {
     // 管理者のみが管理者権限を付与できる
     const admin_flag = user_data.Admin ? post_data.admin_flag : false
 
-    const response = user.put(
+    const response = await user.put(
         post_data.user_id,
         post_data.user_name,
+        post_data.email,
         post_data.after_schools,
         admin_flag,
     )
