@@ -1,15 +1,12 @@
 import {
   useNavigate,
   useLoaderData,
-  redirect,
   Outlet,
   ClientLoaderFunctionArgs,
   Form,
   useMatches,
-  useNavigation,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
-import { getIdToken } from "~/api/auth";
 import { Header } from "~/components/header";
 import { useRef, useState } from "react";
 import Encoding from 'encoding-japanese';

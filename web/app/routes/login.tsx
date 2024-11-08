@@ -9,6 +9,7 @@ import {
 import { signIn, signOut, confirmSignIn } from 'aws-amplify/auth'
 import { useState } from "react";
 import { Loading } from "~/components/util";
+import { setLs } from "~/lib/ls";
 
 export const clientLoader = async () => {
   // この画面にくる場合はサインアウトさせる
@@ -33,6 +34,7 @@ export const clientAction = async({
     }
   })
   if(sign_in_res.nextStep.signInStep === "DONE"){
+    setLs('user_id', formData.get("username")?.toString() || '')
     return redirect(`/`,);
   }else if(sign_in_res.nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"){
     // 新しいパスワードを設定する画面に遷移
@@ -123,7 +125,7 @@ export default function Index() {
       </div>
 
       {/** パスワード変更ダイアログ */}
-      <div id="edit-modal" tabIndex={-1} aria-hidden="true"
+      <div id="edit-modal" tabIndex={-1}
         className={(searchParams.has('confirm_new_password') ? "block" : "hidden") + " modal-back-ground"}>
         <div className="modal-dialog">
           <div className="modal-content">
@@ -133,7 +135,7 @@ export default function Index() {
                   パスワードを更新してください
                 </h3>
                 <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setSearchParams('')}>
-                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                   </svg>
                   <span className="sr-only">Close modal</span>

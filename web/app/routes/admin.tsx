@@ -26,17 +26,10 @@ export const clientLoader = async () => {
 
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
-  const navigate = useNavigate()
   if (!data.idToken){
     redirect("/");
   }
 
-  const ChangePage = (page:string) => {
-    navigate(page)
-    setNow(page)
-  }
-
-  const [now, setNow] = useState('./')
   const child_data = {
     after_schools: data.user_data.after_schools
   }

@@ -10,8 +10,10 @@ import { getLs } from "~/lib/ls";
 
 export const clientLoader = async () => {
   const idToken = getLs('idToken') || ''
+  const user_id = getLs('user_id') || ''
   const data = JSON.parse(getLs('user_data') || '{}')
   data.idToken = idToken
+  data.user_id = user_id
   data.after_schools = await getData("/after_school", idToken)
   data.users = await getData("/users", idToken)
   return data
@@ -132,7 +134,7 @@ export default function Index() {
             <td>ユーザ名</td>
             <td>メールアドレス</td>
             <td>管理学童数</td>
-            <td colSpan={3}></td>
+            <td colSpan={2}></td>
           </tr>
         </thead>
         <tbody>
@@ -142,18 +144,17 @@ export default function Index() {
               <td className="col-sm-4 align-middle">{user.user_name}</td>
               <td className="col-sm-4 align-middle">{user.email}</td>
               <td className="col-sm-1 align-middle">{user.after_schools.length}</td>
-              <td className="col-sm-1 align-middle">{(user.status == 'active') ? '有効' : '無効'}</td>
               <td className="col-sm-1">
                 <button className="btn btn-primary" onClick={() => openModal('edit', user.user_id, user.user_name, user.email, user.after_schools)}>編集</button>
               </td>
-              <td className="col-sm-1"><button className="btn btn-danger" onClick={() => DeleteUser(user.user_id)}>削除</button></td>
+              <td className="col-sm-1">{(data.user_id != user.user_id) && <button className="btn btn-danger" onClick={() => DeleteUser(user.user_id)}>削除</button>}</td>
             </tr>
           ))}
         </tbody>
       </table>
 
       {/** ユーザ追加・編集ダイアログ */}
-      <div id="edit-modal" tabIndex={-1} aria-hidden="true"
+      <div id="edit-modal" tabIndex={-1}
         className={(modal_open ? "block" : "hidden") + " modal-back-ground"}
         onClick={(e) => {
           if((e.target as HTMLElement).id == 'edit-modal'){
@@ -168,7 +169,7 @@ export default function Index() {
                   ユーザ{modal_type == 'add' ? '追加' : '編集'}
                 </h3>
                 <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setModalOpen(false)}>
-                  <svg className="w-3 h-3" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
                     <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
                   </svg>
                   <span className="sr-only">Close modal</span>

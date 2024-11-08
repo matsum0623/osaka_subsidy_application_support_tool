@@ -17,7 +17,6 @@ exports.handler = async (event, context) => {
             user_name: user.UserName,
             email: user.Email,
             after_schools: user.AfterSchools,
-            status: user.Status,
         })
     });
     return response_ok(response);
