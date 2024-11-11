@@ -1,21 +1,12 @@
-import { LinksFunction } from "@remix-run/node";
 import {
   useLoaderData,
   redirect,
   Outlet,
-  useNavigate,
+  useNavigation,
 } from "@remix-run/react";
-import { useState } from "react";
-import { getIdToken } from "~/api/auth";
-import { getData } from "~/api/fetchApi";
 import { Header } from "~/components/header";
+import { Loading } from "~/components/util";
 import { getLs } from "~/lib/ls";
-
-const pages = [
-  {link: './after_school', name: '学童情報'},
-  {link: './instructor', name: '指導員情報'},
-  {link: './users', name: 'ユーザ設定'},
-]
 
 export const clientLoader = async () => {
   const idToken = getLs('idToken') || ''
@@ -36,6 +27,7 @@ export default function Index() {
 
   return (
     <div>
+      {Loading(useNavigation())}
       {Header(data.user_data)}
       <Outlet context={child_data}/>
     </div>

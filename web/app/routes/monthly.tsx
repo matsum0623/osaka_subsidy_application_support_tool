@@ -5,6 +5,7 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useMatches,
+  useNavigation,
 } from "@remix-run/react";
 import { getData } from "~/api/fetchApi";
 import { Header } from "~/components/header";
@@ -103,10 +104,11 @@ export default function Index() {
   }
 
   const anchorRef = useRef<HTMLAnchorElement>(null)
+  const navigation = useNavigation()
 
   return (
     <div>
-      {Loading({state: is_loading})}
+      {Loading((navigation.state == 'loading' || navigation.state == 'submitting') ? navigation : {state: is_loading})}
       {Header(data.user_data)}
       {
         (matches.length < 3 || (matches.length == 3 && !matches[2].pathname.includes('/edit/'))) &&
