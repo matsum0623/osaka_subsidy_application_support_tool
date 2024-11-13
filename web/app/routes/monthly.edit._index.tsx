@@ -155,7 +155,7 @@ export default function Index() {
         sum_min += parseInt(min)
       }
     })
-    const res = Object.values(context.instructors).filter((inst) => inst.hours).reduce((result:any, inst:any) => {
+    Object.values(context.instructors).filter((inst) => inst.hours).reduce((result:any, inst:any) => {
       const [hour, min] = inst.hours.split(':').map((i:any) => (parseInt(i)))
       result.sum_hour += hour
       result.sum_min += min

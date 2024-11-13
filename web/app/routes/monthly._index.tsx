@@ -31,6 +31,20 @@ export default function Index() {
     'close_non_qualification': 0,
   });
 
+  const check_row = (i:any) => {
+    if (
+      i[4] != '' && i[4] > 0
+        || i[7] != '' && i[7] > 0
+        || i[8] != '' && i[8] > 0
+        || i[9] != '' && i[9] > 0
+        || i[10] != '' && i[10] > 0
+    ){
+      return true
+    }else{
+      return false
+    }
+  }
+
   return (
     <>
       {<table className="w-full">
@@ -82,21 +96,21 @@ export default function Index() {
               <td className="hidden sm:table-cell">{i[1]}</td>
               <td className="hidden sm:table-cell">{weekday[i[2]]}</td>
               <td className="table-cell sm:hidden">{i[1]}（{weekday[i[2]]}）</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? context.config.open_types[i[3]]?.TypeName : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[4]  : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[5]  : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[6]  : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[7]  : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[8]  : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[9]  : ''}</td>
-              <td className="hidden sm:table-cell">{(i[4] != '' && i[4] > 0) ? i[10] : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? context.config.open_types[i[3]]?.TypeName : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[4]  : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[5]  : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[6]  : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[7]  : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[8]  : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[9]  : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? i[10] : ''}</td>
               <td>
                 <span className={(i[7] + i[8] >= 2 && i[9] + i[10] >= 2) ? 'text-green-500' : 'text-red-500 font-bold'}>
-                  {(i[4] != '' && i[4] > 0) ? (i[3] != '' ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
+                  {check_row(i) ? (i[3] >= 0 ? ((i[7] + i[8] >= 2 && i[9] + i[10] >= 2)  ? 'OK' : 'NG') : '') : ''}
                 </span>
               </td>
               <td>
-                <span className={i[3] != '' ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{(i[4] != '' && i[4] > 0) ? (i[3] != '' ? (i[11] ? 'OK' : 'NG') : '') : ''}</span>
+                <span className={i[3] >= 0 ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{check_row(i) ? (i[3] >= 0 ? (i[11] ? 'OK' : 'NG') : '') : ''}</span>
               </td>
               <td>
                 <button type="button" className="btn-primary" onClick={() => context.setEditParams(context.search_school_id, i[0])}>
