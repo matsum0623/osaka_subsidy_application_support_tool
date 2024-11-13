@@ -12,12 +12,14 @@ export default function Index() {
   const context: {
     id_token: string,
     search_school_id: string,
+    search_ym: string,
     edit_date: string,
     search_results: object[],
     config: {
       open_types: any,
     }
     setEditParams(school_id: string, date: string): void,
+    changeParams(ym: string, school_id: string): void,
     instructors: { [key: string]: { start: string, end: string, hours: string, additional_check?: boolean } },
     open_type: string,
     sum_hours: string,
@@ -180,6 +182,7 @@ export default function Index() {
   }
 
   const CancelClick = () => {
+    context.changeParams(context.search_ym, context.search_school_id)
     navigate(`/monthly`)
   }
 

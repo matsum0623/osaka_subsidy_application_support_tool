@@ -152,6 +152,7 @@ export default function Index() {
         children_disability: children_disability,
         children_medical_care: children_medical_care,
         setEditParams: setEditParams,
+        changeParams: changeParams,
         setInstructors: setInstructors,
         setOpenType: setOpenType,
         setChildrenSum: setChildrenSum,
