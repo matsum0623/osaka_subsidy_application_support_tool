@@ -10,7 +10,6 @@ import {
 import { getData } from "~/api/fetchApi";
 import { Header } from "~/components/header";
 import { useRef, useState } from "react";
-import Encoding from 'encoding-japanese';
 import { Loading, viewMonth, viewMonthList } from "~/components/util";
 import { getLs } from "~/lib/ls";
 
@@ -34,27 +33,6 @@ export const clientLoader = async ({
 
   return data
 };
-
-export const downloadCsv = async (school_id:string, ym:string, idToken:string, anchorRef:any) => {
-  // TODO: 将来的にはサーバサイドでエクセルを作成したい
-  const data = await getData("/monthly?ym=" + ym + '&school_id=' + school_id, idToken)
-  const blob = new Blob([
-    new Uint8Array(
-      Encoding.convert(Encoding.stringToCode(data.list.map((row:any) => ([
-        ...row.slice(0,1),
-        ...row.slice(4,11),
-        ...row.slice(12),
-      ]).join(',')).join('\n')), {
-        from: 'UNICODE',
-        to: 'SJIS',
-      })
-    )
-  ], {type: 'text/csv;charset=cp932;'})
-  const link = anchorRef.current
-  link.setAttribute('href', URL.createObjectURL(blob))
-  link.setAttribute('download', `${school_id}_${ym}.csv`)
-  link.click()
-}
 
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
@@ -100,6 +78,16 @@ export default function Index() {
     setEditSchoolId(school_id)
     setEditDate(date)
     navigate('/monthly/edit/')
+    setIsLoading("idle")
+  }
+
+  const downloadCsv = async (school_id:string, ym:string, idToken:string, anchorRef:any) => {
+    setIsLoading("loading")
+    const data = await getData("/monthly/download?ym=" + ym + '&school_id=' + school_id, idToken)
+    const link = anchorRef.current
+    link.setAttribute('href', data.url)
+    link.setAttribute('download', `【1307】月次報告（令和${ym}年${ym}月分）`)
+    link.click()
     setIsLoading("idle")
   }
 

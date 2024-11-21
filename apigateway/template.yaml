@@ -310,6 +310,23 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
+  MonthlyDownloadLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/monthly/download
+      Role: !GetAtt LambdaRole.Arn
+      Environment:
+        Variables:
+          FILE_DOWNLOAD_BUCKET_NAME: !Ref FileDownloadBucket
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /monthly/download
+            Method: GET
+            RestApiId:
+              Ref: CommonAPI
+
   CommonAPI: # API Gateway
     Type: AWS::Serverless::Api
     Properties:
@@ -325,6 +342,11 @@ Resources:
       OpenApiVersion: 3.0.1
       StageName: development
       EndpointConfiguration: REGIONAL
+
+  FileDownloadBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: osaka-subsidy-app-download-bucket
 
   LoginUserPool:
     Type: AWS::Cognito::UserPool
