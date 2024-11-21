@@ -40,6 +40,7 @@ export default function Index() {
   const [user_name, setUserName] = useState('')
   const [email, setEmail] = useState('')
   const [after_schools, setAfterSchools] = useState([''])
+  const [admin_flag, setAdminFlag] = useState(false)
   const [modal_open, setModalOpen] = useState(false)
 
   const openModal = (
@@ -48,6 +49,7 @@ export default function Index() {
     user_name:string = '',
     email:string = '',
     after_schools:string[] = [],
+    admin_flag:boolean = false,
   ) => {
     setModalOpen(true)
     setModalType(modal_type)
@@ -55,6 +57,7 @@ export default function Index() {
     setUserName(user_name)
     setEmail(email)
     setAfterSchools(after_schools)
+    setAdminFlag(admin_flag)
   }
 
   const changeAfterSchools = (e:any) => {
@@ -72,7 +75,7 @@ export default function Index() {
       user_name: user_name,
       email: email,
       after_schools: after_schools,
-      admin_flag: false,
+      admin_flag: admin_flag,
     }
     // TODO:モーダルを無理やり閉じてる
     document.getElementById('add_modal_cancel')?.click()
@@ -134,6 +137,7 @@ export default function Index() {
             <td>ユーザ名</td>
             <td>メールアドレス</td>
             <td>管理学童数</td>
+            {data.user_data.admin && <td>管理者</td>}
             <td colSpan={2}></td>
           </tr>
         </thead>
@@ -144,8 +148,11 @@ export default function Index() {
               <td className="col-sm-4 align-middle">{user.user_name}</td>
               <td className="col-sm-4 align-middle">{user.email}</td>
               <td className="col-sm-1 align-middle">{user.after_schools.length}</td>
+              {data.user_data.admin &&
+                <td>{user.admin && '〇'}</td>
+              }
               <td className="col-sm-1">
-                <button className="btn btn-primary" onClick={() => openModal('edit', user.user_id, user.user_name, user.email, user.after_schools)}>編集</button>
+                <button className="btn btn-primary" onClick={() => openModal('edit', user.user_id, user.user_name, user.email, user.after_schools, user.admin)}>編集</button>
               </td>
               <td className="col-sm-1">{(data.user_id != user.user_id) && <button className="btn btn-danger" onClick={() => DeleteUser(user.user_id)}>削除</button>}</td>
             </tr>
@@ -198,6 +205,10 @@ export default function Index() {
                       </div>
                     ))}
                   </div>
+                </div>
+                <div className="mb-3">
+                  <label htmlFor="Admin" className="form-label">管理者</label>
+                  <input type="checkbox" name="admin_flag" id="Admin" className="ml-2" checked={admin_flag} onChange={(e) => setAdminFlag(e.target.checked)}/>
                 </div>
               </div>
               <div className="modal-footer">

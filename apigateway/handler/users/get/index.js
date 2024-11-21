@@ -16,6 +16,7 @@ exports.handler = async (event, context) => {
             user_id: user.SK.split('#')[1],
             user_name: user.UserName,
             email: user.Email,
+            admin: user.Admin,
             after_schools: user.AfterSchools,
         })
     });
