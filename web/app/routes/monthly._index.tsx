@@ -8,7 +8,7 @@ export default function Index() {
     config: {
       open_types: any,
     },
-    setEditParams(school_id: string, date: string): void
+    setEditParams(school_id: string, date: string, child:boolean): void
   } = useOutletContext();
 
   const check_plus = (val:string) => {return parseInt(val) > 0 ? parseInt(val)  : 0}
@@ -113,7 +113,7 @@ export default function Index() {
                 <span className={i[3] >= 0 ? (i[11] ? 'text-green-500' : 'text-red-500 font-bold') : ''}>{check_row(i) ? (i[3] >= 0 ? (i[11] ? 'OK' : 'NG') : '') : ''}</span>
               </td>
               <td>
-                <button type="button" className="btn-primary" onClick={() => context.setEditParams(context.search_school_id, i[0])}>
+                <button type="button" className="btn-primary" onClick={() => context.setEditParams(context.search_school_id, i[0], true)}>
                   入力
                 </button>
               </td>

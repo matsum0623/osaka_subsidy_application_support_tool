@@ -12,6 +12,7 @@ import { Header } from "~/components/header";
 import { useRef, useState } from "react";
 import { Loading, viewMonth, viewMonthList } from "~/components/util";
 import { getLs } from "~/lib/ls";
+import { checkInstructor } from "~/lib/common_check";
 
 export const clientLoader = async ({
   params,
@@ -54,6 +55,10 @@ export default function Index() {
   const [children_disability, setChildrenDisability] = useState(data.daily_data.instructors)
   const [children_medical_care, setChildrenMedicalCare] = useState(data.daily_data.instructors)
 
+  //const [instChk, setInstChk] = useState(checkInstructor(context.instructors, context.config.open_types[context.open_type]).check) // 指導員の配置チェック
+  const [instChk, setInstChk] = useState(false)
+  const [excess_shortage_config, setExcessShortageConfig] = useState({})
+
   const [is_loading, setIsLoading] = useState("idle")
 
   const changeParams = async (ym:string, school_id:string) => {
@@ -65,7 +70,39 @@ export default function Index() {
     setIsLoading("idle")
   }
 
-  const setEditParams = async (school_id:string, date:string) => {
+  const calcExcessShortageConfig = (config:any) => {
+    const open = config.OpenTime
+    const close = config.CloseTime
+    let [open_h, open_m] = open.split(':').map((s:string) => parseInt(s))
+    const time_dict: { [key: string]: any[] } = {}
+    let tmp_list = []
+    let pre_hour = undefined
+    while(true){
+      if(pre_hour == undefined){
+        pre_hour = open_h
+      }else if(pre_hour != open_h){
+        time_dict[('00' + String(pre_hour)).slice(-2)] = tmp_list
+        pre_hour = open_h
+        tmp_list = []
+      }
+      const start_key = ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)
+      if(start_key >= close){
+          break
+      }
+      open_m += 15
+      if(open_m >= 60){
+          open_h += 1
+          open_m -= 60
+      }
+      tmp_list.push([start_key, ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)])
+    }
+    if(tmp_list.length > 0){
+      time_dict[('00' + String(pre_hour)).slice(-2)] = tmp_list
+    }
+    return time_dict
+  }
+
+  const setEditParams = async (school_id:string, date:string, child:boolean = false) => {
     setIsLoading("loading")
     await getData(`/monthly/daily?school_id=${school_id}&date=${date}`, data.idToken).then((res) => {
       setInstructors(res.instructors)
@@ -74,10 +111,14 @@ export default function Index() {
       setChildrenSum(res.children.sum)
       setChildrenDisability(res.children.disability)
       setChildrenMedicalCare(res.children.medical_care)
+      setInstChk(checkInstructor(res.instructors, data.config.open_types[res.open_type]).check)
+      setExcessShortageConfig(calcExcessShortageConfig(data.config.open_types[res.open_type]))
     })
     setEditSchoolId(school_id)
     setEditDate(date)
-    navigate('/monthly/edit/')
+    if (child){
+      navigate(`/monthly/edit`)
+    }
     setIsLoading("idle")
   }
 
@@ -139,6 +180,8 @@ export default function Index() {
         children_sum: children_sum,
         children_disability: children_disability,
         children_medical_care: children_medical_care,
+        instChk: instChk,
+        excess_shortage_config: excess_shortage_config,
         setEditParams: setEditParams,
         changeParams: changeParams,
         setInstructors: setInstructors,
@@ -148,6 +191,9 @@ export default function Index() {
         setChildrenMedicalCare: setChildrenMedicalCare,
         setSumHours: setSumHours,
         setIsLoading: setIsLoading,
+        setInstChk: setInstChk,
+        setExcessShortageConfig: setExcessShortageConfig,
+        calcExcessShortageConfig: calcExcessShortageConfig,
       }}/>
     </div>
   );

@@ -3,6 +3,7 @@ import {
   useNavigate,
   useOutletContext,
 } from "@remix-run/react"
+import React from "react";
 import { useState } from "react";
 import { postData } from "~/api/fetchApi";
 import { createDates, weekday } from "~/components/util";
@@ -26,6 +27,8 @@ export default function Index() {
     children_sum: string,
     children_disability: string,
     children_medical_care: string,
+    instChk: boolean,
+    excess_shortage_config: any,
     setInstructors(instructors:{ [key: string]: { start: string, end: string, hours: string, additional_check?: boolean } }): void
     setOpenType(open_type: string): void,
     setChildrenSum(children_sum: string): void,
@@ -33,6 +36,9 @@ export default function Index() {
     setChildrenMedicalCare(children_medical_care: string): void,
     setSumHours(sum_hour: string): void,
     setIsLoading(is_loading: string): void,
+    setInstChk(inst_chk: boolean): void,
+    setExcessShortageConfig(excess_shortage_config: any): void,
+    calcExcessShortageConfig(open_type: any): any,
   } = useOutletContext();
 
   const navigate = useNavigate()
@@ -40,9 +46,9 @@ export default function Index() {
   const [modal_open, setModalOpen] = useState(false)
   const [go_next, setGoNext] = useState(false)
 
-  const [instChk, setInstChk] = useState(checkInstructor(context.instructors, context.config.open_types[context.open_type]).check) // 指導員の配置チェック
   const [ct, setCt] = useState(0) // 再描画用のState
-  const [excess_shortage, setExcessShortage] = useState<JSX.Element>(<div key="default">過不足はありません</div>)
+
+  const [excess_shortage, setExcessShortage] = useState({})
 
   const [now_dt, prev_dt, next_dt] = createDates(context.edit_date)
 
@@ -76,53 +82,42 @@ export default function Index() {
 
   const changeOpenType = (value:string) => {
     context.setOpenType(value)
-    setInstChk(checkInstructor(context.instructors, context.config.open_types[value]).check)
+    context.setInstChk(checkInstructor(context.instructors, context.config.open_types[value]).check)
+    context.setExcessShortageConfig(context.calcExcessShortageConfig(context.config.open_types[value]))
   }
 
   const instructorCheck = () => {
     const check_response = checkInstructor(context.instructors, context.config.open_types[context.open_type])
-    setInstChk(check_response.check)
-    updateExcessShortage(check_response.excess_shortage)
+    context.setInstChk(check_response.check)
+    setExcessShortage(check_response.excess_shortage)
   }
 
-  const updateExcessShortage = (excess_shortage:any) => {
-    console.log(excess_shortage)
-    const excess:any[] = []
-    const shortage:any[] = []
-    console.log(excess_shortage)
-    let pre_key:string = ''
-    let pre_num:number = 0
-    Object.keys(excess_shortage).sort().map((key:string) => {
-      if(pre_key == ''){
-        pre_key = key
-        pre_num = excess_shortage[key].excess.num
-      }else{
+  const check_cell_class = (start:string, end:string, chk_start:string, chk_end:string, qua:boolean, add:boolean) => {
+    // 勤務時間外はfalse
+    if (start == "" || end == "" || start > chk_start || end < chk_end) return ''
+    if (add) return 'bg-blue-200'
+    if (qua) return 'bg-green-200'
+    return 'bg-lime-200'
+  }
 
-      }
-    })
-    return
-    /*
-    Object.keys(excess_shortage).map((key:string) => {
-      if(excess_shortage[key].excess.num > 0){
-        excess.push([key, excess_shortage[key].excess.num])
-      }else if(excess_shortage[key].shortage.num > 0){
-        shortage.push([key, excess_shortage[key].shortage.num])
-      }
-    })
-    if(excess.length == 0 || shortage.length == 0){
-      setExcessShortage(<div key="default">過不足はありません</div>)
-      return
+  const excess_shortage_cell = (excess_shortage:any, chk_start:string, type:string) => {
+    if (!(chk_start in excess_shortage)){
+      return <td></td>
     }
-    console.log(excess.length)
-    const excess_html = (
-      <div>
-        {construct_html(excess, 'excess')}
-      </div>
-    )
-
-    console.log(excess_html, shortage)
-    setExcessShortage(excess_html)
-    */
+    if (type == 'qua'){
+      if (excess_shortage[chk_start].shortage.qua > 0){
+        return <td className="bg-red-400"></td>
+      }else if (excess_shortage[chk_start].excess.qua > 0){
+        return <td className="bg-blue-400">{excess_shortage[chk_start].excess.qua}</td>
+      }
+    } else if (type == 'sub'){
+      if ((excess_shortage[chk_start].shortage.num - excess_shortage[chk_start].shortage.qua) > 0){
+        return <td className="bg-red-200"></td>
+      }else if ((excess_shortage[chk_start].excess.num - excess_shortage[chk_start].excess.qua) > 0){
+        return <td className="bg-blue-200">{excess_shortage[chk_start].excess.num - excess_shortage[chk_start].excess.qua}</td>
+      }
+    }
+    return <td></td>
   }
 
   const setHour = (target:any) => {
@@ -175,8 +170,8 @@ export default function Index() {
   const changeAdditional = (id:string, checked:boolean) => {
     context.instructors[id].additional_check = checked
     const check_response = checkInstructor(context.instructors, context.config.open_types[context.open_type])
-    setInstChk(check_response.check)
-    updateExcessShortage(check_response.excess_shortage)
+    context.setInstChk(check_response.check)
+    setExcessShortage(check_response.excess_shortage)
     context.setInstructors(context.instructors)
     setCt(ct + 1)
   }
@@ -194,7 +189,7 @@ export default function Index() {
             <input type="date" value={context.edit_date} onChange={(e) => changeDate(e.target.value)} className="input-default sm:text-xl sm:py-1" />
             <span className="hidden sm:block py-2">({weekday[now_dt.getDay()]})</span>
           </div>
-          <span className={'py-2 ' + (instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{instChk ? "OK" : "NG"}</span>
+          <span className={'py-2 ' + (context.instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{context.instChk ? "OK" : "NG"}</span>
             <button type="button" className="btn-primary" onClick={() => changeDate(prev_dt.toISOString().slice(0, 10))}>前日</button>
             <button type="button" className="btn-primary" onClick={() => changeDate(next_dt.toISOString().slice(0, 10))}>翌日</button>
           </div>
@@ -207,27 +202,80 @@ export default function Index() {
       <div id="excess-shortage-modal" tabIndex={-1}
         className={(modal_open ? "block" : "hidden") + " modal-back-ground"}
         onClick={(e) => {
-          if((e.target as HTMLElement).id == 'edit-modal'){
+          if((e.target as HTMLElement).id == 'excess-shortage-modal'){
             setModalOpen(false)
           }
         }}>
-        <div className="modal-dialog">
+        <div className="modal-dialog max-w-7xl">
           <div className="modal-content">
-              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                  指導員過不足確認
-                </h3>
-                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setModalOpen(false)}>
-                  <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
-              </div>
-              <div className="modal-body">
-              </div>
-              <div className="modal-footer">
-              </div>
+            <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+              <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                指導員過不足確認
+              </h3>
+              <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setModalOpen(false)}>
+                <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                  <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                </svg>
+                <span className="sr-only">Close modal</span>
+              </button>
+            </div>
+            <div className="modal-body">
+              <table className="w-full">
+                <thead>
+                  <tr>
+                    <td rowSpan={3}>指導員名</td>
+                    <td colSpan={99}>勤務時間</td>
+                  </tr>
+                  <tr>
+                    {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => (
+                      <td colSpan={context.excess_shortage_config[key].length} key={key}>{key}</td>
+                    ))}
+                  </tr>
+                  <tr>
+                    {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
+                      return context.excess_shortage_config[key].map((time:any) => {
+                        return <td key={key + time} className="px-0">{time[0].split(':')[1]}</td>
+                      })
+                    })}
+                  </tr>
+                </thead>
+                <tbody>
+                  {
+                    Object.values(context.instructors).sort((a:any, b:any) => (a.order - b.order)).map((inst: any) => {
+                      return (
+                        <tr key={'es' + inst.id}>
+                          <td className="text-base table-cell sm:hidden">{inst.name.slice(0,2)}</td>
+                          <td className="text-base hidden sm:table-cell">{inst.name}</td>
+                          {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
+                            return context.excess_shortage_config[key].map((time:any) => {
+                              return <td className={check_cell_class(inst.start, inst.end, time[0], time[1], inst.qualification, inst.additional_check)} key={time[0]}></td>
+                            })
+                          })}
+                        </tr>
+                      )
+                    })
+                  }
+                  <tr className="border-t-4" key='es_inst'>
+                    <td>過不足(指)</td>
+                    {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
+                      return context.excess_shortage_config[key].map((time:any) => {
+                        return <React.Fragment key={time[0]}>{excess_shortage_cell(excess_shortage, time[0], 'qua')}</React.Fragment>
+                      })
+                    })}
+                  </tr>
+                  <tr key='es_sub'>
+                    <td>過不足(補)</td>
+                    {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
+                      return context.excess_shortage_config[key].map((time:any) => {
+                        return <React.Fragment key={time[0]}>{excess_shortage_cell(excess_shortage, time[0], 'sub')}</React.Fragment>
+                      })
+                    })}
+                  </tr>
+                </tbody>
+              </table>
+
+
+            </div>
           </div>
         </div>
       </div>
@@ -290,7 +338,7 @@ export default function Index() {
                 </tr>
               )})
             }
-            <tr>
+            <tr key='sum'>
               <td>合計</td>
               <td colSpan={2} className="table-cell sm:hidden"></td>
               <td colSpan={5} className="hidden sm:table-cell"></td>
