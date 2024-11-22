@@ -58,6 +58,7 @@ export default function Index() {
   //const [instChk, setInstChk] = useState(checkInstructor(context.instructors, context.config.open_types[context.open_type]).check) // 指導員の配置チェック
   const [instChk, setInstChk] = useState(false)
   const [excess_shortage_config, setExcessShortageConfig] = useState({})
+  const [excess_shortage, setExcessShortage] = useState({})
 
   const [is_loading, setIsLoading] = useState("idle")
 
@@ -111,7 +112,9 @@ export default function Index() {
       setChildrenSum(res.children.sum)
       setChildrenDisability(res.children.disability)
       setChildrenMedicalCare(res.children.medical_care)
-      setInstChk(checkInstructor(res.instructors, data.config.open_types[res.open_type]).check)
+      const check_response = checkInstructor(res.instructors, data.config.open_types[res.open_type])
+      setInstChk(check_response.check)
+      setExcessShortage(check_response.excess_shortage)
       setExcessShortageConfig(calcExcessShortageConfig(data.config.open_types[res.open_type]))
     })
     setEditSchoolId(school_id)
@@ -181,6 +184,7 @@ export default function Index() {
         children_disability: children_disability,
         children_medical_care: children_medical_care,
         instChk: instChk,
+        excess_shortage: excess_shortage,
         excess_shortage_config: excess_shortage_config,
         setEditParams: setEditParams,
         changeParams: changeParams,
@@ -192,6 +196,7 @@ export default function Index() {
         setSumHours: setSumHours,
         setIsLoading: setIsLoading,
         setInstChk: setInstChk,
+        setExcessShortage: setExcessShortage,
         setExcessShortageConfig: setExcessShortageConfig,
         calcExcessShortageConfig: calcExcessShortageConfig,
       }}/>

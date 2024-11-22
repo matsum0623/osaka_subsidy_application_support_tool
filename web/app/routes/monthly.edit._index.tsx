@@ -28,6 +28,7 @@ export default function Index() {
     children_disability: string,
     children_medical_care: string,
     instChk: boolean,
+    excess_shortage: any,
     excess_shortage_config: any,
     setInstructors(instructors:{ [key: string]: { start: string, end: string, hours: string, additional_check?: boolean } }): void
     setOpenType(open_type: string): void,
@@ -37,6 +38,7 @@ export default function Index() {
     setSumHours(sum_hour: string): void,
     setIsLoading(is_loading: string): void,
     setInstChk(inst_chk: boolean): void,
+    setExcessShortage(excess_shortage: any): void,
     setExcessShortageConfig(excess_shortage_config: any): void,
     calcExcessShortageConfig(open_type: any): any,
   } = useOutletContext();
@@ -47,8 +49,6 @@ export default function Index() {
   const [go_next, setGoNext] = useState(false)
 
   const [ct, setCt] = useState(0) // 再描画用のState
-
-  const [excess_shortage, setExcessShortage] = useState({})
 
   const [now_dt, prev_dt, next_dt] = createDates(context.edit_date)
 
@@ -89,7 +89,7 @@ export default function Index() {
   const instructorCheck = () => {
     const check_response = checkInstructor(context.instructors, context.config.open_types[context.open_type])
     context.setInstChk(check_response.check)
-    setExcessShortage(check_response.excess_shortage)
+    context.setExcessShortage(check_response.excess_shortage)
   }
 
   const check_cell_class = (start:string, end:string, chk_start:string, chk_end:string, qua:boolean, add:boolean) => {
@@ -171,7 +171,7 @@ export default function Index() {
     context.instructors[id].additional_check = checked
     const check_response = checkInstructor(context.instructors, context.config.open_types[context.open_type])
     context.setInstChk(check_response.check)
-    setExcessShortage(check_response.excess_shortage)
+    context.setExcessShortage(check_response.excess_shortage)
     context.setInstructors(context.instructors)
     setCt(ct + 1)
   }
@@ -259,7 +259,7 @@ export default function Index() {
                     <td>過不足(指)</td>
                     {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
                       return context.excess_shortage_config[key].map((time:any) => {
-                        return <React.Fragment key={time[0]}>{excess_shortage_cell(excess_shortage, time[0], 'qua')}</React.Fragment>
+                        return <React.Fragment key={time[0]}>{excess_shortage_cell(context.excess_shortage, time[0], 'qua')}</React.Fragment>
                       })
                     })}
                   </tr>
@@ -267,7 +267,7 @@ export default function Index() {
                     <td>過不足(補)</td>
                     {Object.keys(context.excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
                       return context.excess_shortage_config[key].map((time:any) => {
-                        return <React.Fragment key={time[0]}>{excess_shortage_cell(excess_shortage, time[0], 'sub')}</React.Fragment>
+                        return <React.Fragment key={time[0]}>{excess_shortage_cell(context.excess_shortage, time[0], 'sub')}</React.Fragment>
                       })
                     })}
                   </tr>
