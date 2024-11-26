@@ -51,14 +51,16 @@ export default function Index() {
   const [instructors, setInstructors] = useState(data.daily_data.instructors)
   const [sum_hours, setSumHours] = useState(data.daily_data.sum_hours)
   const [open_type, setOpenType] = useState(data.daily_data.open_type)
+  const open = data.daily_data.open_type != '9' ? data.config.open_types[data.daily_data.open_type].OpenTime : data.daily_data.open_time.start
+  const close = data.daily_data.open_type != '9' ? data.config.open_types[data.daily_data.open_type].CloseTime : data.daily_data.open_time.end
+  const [open_time, setOpenTime] = useState({ start: open, end: close })
   const [children_sum, setChildrenSum] = useState(data.daily_data.instructors)
   const [children_disability, setChildrenDisability] = useState(data.daily_data.instructors)
   const [children_medical_care, setChildrenMedicalCare] = useState(data.daily_data.instructors)
 
-  //const [instChk, setInstChk] = useState(checkInstructor(context.instructors, context.config.open_types[context.open_type]).check) // 指導員の配置チェック
-  const [instChk, setInstChk] = useState(false)
-  const [excess_shortage_config, setExcessShortageConfig] = useState({})
-  const [excess_shortage, setExcessShortage] = useState({})
+  const check_inst = checkInstructor(data.daily_data.instructors, open, close)
+  const [instChk, setInstChk] = useState(check_inst.check)
+  const [excess_shortage, setExcessShortage] = useState(check_inst.excess_shortage)
 
   const [is_loading, setIsLoading] = useState("idle")
 
@@ -71,9 +73,7 @@ export default function Index() {
     setIsLoading("idle")
   }
 
-  const calcExcessShortageConfig = (config:any) => {
-    const open = config.OpenTime
-    const close = config.CloseTime
+  const calcExcessShortageConfig = (open:any, close:any) => {
     let [open_h, open_m] = open.split(':').map((s:string) => parseInt(s))
     const time_dict: { [key: string]: any[] } = {}
     let tmp_list = []
@@ -102,6 +102,7 @@ export default function Index() {
     }
     return time_dict
   }
+  const [excess_shortage_config, setExcessShortageConfig] = useState(calcExcessShortageConfig(open, close))
 
   const setEditParams = async (school_id:string, date:string, child:boolean = false) => {
     setIsLoading("loading")
@@ -112,10 +113,13 @@ export default function Index() {
       setChildrenSum(res.children.sum)
       setChildrenDisability(res.children.disability)
       setChildrenMedicalCare(res.children.medical_care)
-      const check_response = checkInstructor(res.instructors, data.config.open_types[res.open_type])
+      const open = res.open_type != '9' ? data.config.open_types[res.open_type].OpenTime : res.open_time.start
+      const close = res.open_type != '9' ? data.config.open_types[res.open_type].CloseTime : res.open_time.end
+      const check_response = checkInstructor(res.instructors, open, close)
       setInstChk(check_response.check)
       setExcessShortage(check_response.excess_shortage)
-      setExcessShortageConfig(calcExcessShortageConfig(data.config.open_types[res.open_type]))
+      setOpenTime({start: open, end: close})
+      setExcessShortageConfig(calcExcessShortageConfig(open, close))
     })
     setEditSchoolId(school_id)
     setEditDate(date)
@@ -180,6 +184,7 @@ export default function Index() {
         instructors: instructors,
         sum_hours: sum_hours,
         open_type: open_type,
+        open_time: open_time,
         children_sum: children_sum,
         children_disability: children_disability,
         children_medical_care: children_medical_care,
@@ -190,6 +195,7 @@ export default function Index() {
         changeParams: changeParams,
         setInstructors: setInstructors,
         setOpenType: setOpenType,
+        setOpenTime: setOpenTime,
         setChildrenSum: setChildrenSum,
         setChildrenDisability: setChildrenDisability,
         setChildrenMedicalCare: setChildrenMedicalCare,

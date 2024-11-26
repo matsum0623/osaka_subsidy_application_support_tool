@@ -96,7 +96,7 @@ export default function Index() {
               <td className="hidden sm:table-cell">{i[1]}</td>
               <td className="hidden sm:table-cell">{weekday[i[2]]}</td>
               <td className="table-cell sm:hidden">{i[1]}（{weekday[i[2]]}）</td>
-              <td className="hidden sm:table-cell">{check_row(i) ? context.config.open_types[i[3]]?.TypeName : ''}</td>
+              <td className="hidden sm:table-cell">{check_row(i) ? (i[3] != '9' ? context.config.open_types[i[3]]?.TypeName : '日曜加算') : ''}</td>
               <td className="hidden sm:table-cell">{check_row(i) ? i[4]  : ''}</td>
               <td className="hidden sm:table-cell">{check_row(i) ? i[5]  : ''}</td>
               <td className="hidden sm:table-cell">{check_row(i) ? i[6]  : ''}</td>

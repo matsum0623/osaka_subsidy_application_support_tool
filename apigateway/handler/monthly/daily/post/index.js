@@ -19,7 +19,9 @@ exports.handler = async (event, context) => {
   const instructor_work_hours_tmp = post_data.instructors
 
   const after_school_info = await after_school.get_item(after_school_id)
-  open_type = after_school_info.Config.OpenTypes[post_data.open_type]
+  const open_type = after_school_info.Config.OpenTypes[post_data.open_type]
+  const open  = post_data.open_type != '9' ? open_type.OpenTime : post_data.open_time.start
+  const close = post_data.open_type != '9' ? open_type.CloseTime : post_data.open_time.end
   const instructor_work_hours =[]
   const open_instructor = {
     "Qualification": 0,
@@ -46,14 +48,14 @@ exports.handler = async (event, context) => {
     const instructor_info = await instructor.get_item(after_school_id, ins_id)
     instructor_info_tmp[ins_id] = instructor_info
     // 開所・閉所時間の指導員数をカウント
-    if (instructor_work_hours_tmp[ins_id]['start'] <= open_type['OpenTime'].padStart(5, '0')){
+    if (instructor_work_hours_tmp[ins_id]['start'] <= open.padStart(5, '0')){
       if (instructor_info.Qualification){
         open_instructor['Qualification'] += 1
       }else{
         open_instructor['NonQualification'] += 1
       }
     }
-    if (instructor_work_hours_tmp[ins_id]['end'] >= open_type['CloseTime'].padStart(5, '0')){
+    if (instructor_work_hours_tmp[ins_id]['end'] >= close.padStart(5, '0')){
       if (instructor_info.Qualification){
         close_instructor['Qualification'] += 1
       }else{
@@ -63,12 +65,13 @@ exports.handler = async (event, context) => {
   }
 
   // 指導員配置チェック
-  const [ins_check, excess_shortage, work_member] = checkInstructor(instructor_work_hours, open_type, instructor_info_tmp)
+  const [ins_check, excess_shortage, work_member] = checkInstructor(instructor_work_hours, open, close, instructor_info_tmp)
   // 再登録する
   const response = await daily.put(
     after_school_id,
     post_data.date,
     post_data.open_type,
+    post_data.open_type == '9' ? post_data.open_time : undefined,
     children,
     disability,
     medical_care,
@@ -84,14 +87,13 @@ exports.handler = async (event, context) => {
     },
     ins_check,
   )
+  console.log(response)
   return response_ok({});
 };
 
 // TODO: 過剰過少時間をチェックして保存しておく
 // 結果をGETで返して表示する
-function checkInstructor(instData, config, instructor_info_tmp) {
-  const open = config.OpenTime
-  const close = config.CloseTime
+function checkInstructor(instData, open, close, instructor_info_tmp) {
   // 開所・閉所時間から勤務ボックス作成
   let [open_h, open_m] = open.split(':').map((s) => parseInt(s))
   const work_member = {}

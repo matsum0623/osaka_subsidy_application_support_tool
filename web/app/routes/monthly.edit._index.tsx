@@ -23,6 +23,7 @@ export default function Index() {
     changeParams(ym: string, school_id: string): void,
     instructors: { [key: string]: { start: string, end: string, hours: string, additional_check?: boolean } },
     open_type: string,
+    open_time: any,
     sum_hours: string,
     children_sum: string,
     children_disability: string,
@@ -32,6 +33,7 @@ export default function Index() {
     excess_shortage_config: any,
     setInstructors(instructors:{ [key: string]: { start: string, end: string, hours: string, additional_check?: boolean } }): void
     setOpenType(open_type: string): void,
+    setOpenTime(open_time: any): void,
     setChildrenSum(children_sum: string): void,
     setChildrenDisability(children_disability: string): void,
     setChildrenMedicalCare(children_medical_care: string): void,
@@ -40,7 +42,7 @@ export default function Index() {
     setInstChk(inst_chk: boolean): void,
     setExcessShortage(excess_shortage: any): void,
     setExcessShortageConfig(excess_shortage_config: any): void,
-    calcExcessShortageConfig(open_type: any): any,
+    calcExcessShortageConfig(open: any, close:any): any,
   } = useOutletContext();
 
   const navigate = useNavigate()
@@ -63,6 +65,7 @@ export default function Index() {
       school_id: context.search_school_id,
       date: now_dt.toISOString().slice(0, 10),
       open_type: context.open_type,
+      open_time: context.open_time,
       instructors: context.instructors,
       children: {
           sum: context.children_sum,
@@ -81,13 +84,28 @@ export default function Index() {
   }
 
   const changeOpenType = (value:string) => {
+    const open = value != '9' ? context.config.open_types[value].OpenTime : context.open_time.start
+    const close = value != '9' ? context.config.open_types[value].CloseTime : context.open_time.end
     context.setOpenType(value)
-    context.setInstChk(checkInstructor(context.instructors, context.config.open_types[value]).check)
-    context.setExcessShortageConfig(context.calcExcessShortageConfig(context.config.open_types[value]))
+    context.setOpenTime({
+      start: open,
+      end: close
+    })
+    context.setInstChk(checkInstructor(context.instructors, open, close).check)
+    context.setExcessShortageConfig(context.calcExcessShortageConfig(open, close))
+  }
+
+  const changeOpenTime = (start:any, end:any) => {
+    context.setOpenTime({
+      start: start,
+      end: end
+    })
   }
 
   const instructorCheck = () => {
-    const check_response = checkInstructor(context.instructors, context.config.open_types[context.open_type])
+    const open = context.open_type != '9' ? context.config.open_types[context.open_type].OpenTime : context.open_time.start
+    const close = context.open_type != '9' ? context.config.open_types[context.open_type].CloseTime : context.open_time.end
+    const check_response = checkInstructor(context.instructors, open, close)
     context.setInstChk(check_response.check)
     context.setExcessShortage(check_response.excess_shortage)
   }
@@ -169,7 +187,9 @@ export default function Index() {
 
   const changeAdditional = (id:string, checked:boolean) => {
     context.instructors[id].additional_check = checked
-    const check_response = checkInstructor(context.instructors, context.config.open_types[context.open_type])
+    const open = context.open_type != '9' ? context.config.open_types[context.open_type].OpenTime : context.open_time.start
+    const close = context.open_type != '9' ? context.config.open_types[context.open_type].CloseTime : context.open_time.end
+    const check_response = checkInstructor(context.instructors, open, close)
     context.setInstChk(check_response.check)
     context.setExcessShortage(check_response.excess_shortage)
     context.setInstructors(context.instructors)
@@ -288,10 +308,18 @@ export default function Index() {
               <select className="p-2" name="open_type" value={context.open_type} onChange={(e) => changeOpenType(e.target.value)}>
                 {
                   Object.keys(context.config.open_types).map((key:string) => (
-                    <option value={key} key={key}>{context.config.open_types[key].TypeName + "(" + context.config.open_types[key].OpenTime + "-" + context.config.open_types[key].CloseTime + ")"}</option>
+                    <option value={key} key={key}>{context.config.open_types[key].TypeName}</option>
                   ))
                 }
+                <option value={9} key={9}>{"日曜加算"}</option>
               </select>
+            </div>
+          </div>
+          <div className="flex sm:block w-full border">
+            <div className="w-1/4 sm:w-full border-b font-bold p-1">開所時間</div>
+            <div className="w-3/4 sm:w-full px-2 p-2">
+              <input name={"times.open.start"} value={context.open_time.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => changeOpenTime(e.target.value, context.open_time.end)} onBlur={() => instructorCheck()} disabled={context.open_type != '9'}/>
+              <input name={"times.open.end"} value={context.open_time.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => changeOpenTime(context.open_time.start, e.target.value)} onBlur={() => instructorCheck()} disabled={context.open_type != '9'}/>
             </div>
           </div>
           <div className="flex sm:block w-full border">

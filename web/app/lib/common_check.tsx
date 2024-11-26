@@ -1,8 +1,6 @@
 // 共通のチェック処理を実装する
 
-export function checkInstructor(instData: any, config:any) {
-    const open = config.OpenTime
-    const close = config.CloseTime
+export function checkInstructor(instData: any, open:any, close:any) {
     // 開所・閉所時間から勤務ボックス作成
     let [open_h, open_m] = open.split(':').map((s:string) => parseInt(s))
     const work_member:{[key: string]: {

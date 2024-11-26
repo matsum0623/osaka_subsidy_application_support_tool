@@ -32,7 +32,8 @@ exports.handler = async (event, context) => {
   try {
     const daily_item = await daily.get_item(after_school_id, qsp.date)
     if(daily_item){
-      res_data['open_type'] = daily_item.OpenType,
+      res_data['open_type'] = daily_item.OpenType
+      res_data['open_time'] = daily_item.OpenTime
       res_data['children'] = {
         'sum': daily_item.Children,
         'disability': daily_item.Disability,

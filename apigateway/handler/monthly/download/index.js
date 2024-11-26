@@ -111,6 +111,7 @@ exports.handler = async (event, context) => {
     '2': 0,
     '3': 0,
     '4': 0,
+    '9': 0,   // 日曜加算の時刻変動型
   }
   while (dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) == ym) {
     const dt_str = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2)
@@ -139,13 +140,13 @@ exports.handler = async (event, context) => {
   }
 
   console.log('start input month sheet2')
-  // 報告書１記載
+  // 報告書２記載
   const month_sheet_2 = book.sheet("月次報告書２")
   input_cell(month_sheet_2, "F10", open_type_count['0'], 'number')
   input_cell(month_sheet_2, "F11", open_type_count['1'], 'number')
   input_cell(month_sheet_2, "F12", open_type_count['2'], 'number')
   input_cell(month_sheet_2, "F13", open_type_count['3'], 'number')
-  input_cell(month_sheet_2, "F14", open_type_count['4'], 'number')
+  input_cell(month_sheet_2, "F14", open_type_count['4'] + open_type_count['9'], 'number')
 
   input_cell(month_sheet_2, "M10", after_school_info.Children.c6, 'number')
   input_cell(month_sheet_2, "O10", after_school_info.Children.c6, 'number')
