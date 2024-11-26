@@ -44,6 +44,7 @@ exports.handler = async (event, context) => {
     const response = {
         school_id: pp.school_id,
         school_name: school_info.Name,
+        school_number: school_info.Number,
         open_types: [
         ],
         instructor_num: instructors.length,

@@ -127,11 +127,15 @@ export default function Index() {
         <div className="mt-2 px-5">
           <div>
             <label htmlFor="AfterSchoolId" className="text-xl">学童ID</label>
-            <input type="text" className="input-default" name="after_school_id" id="AfterSchoolId" defaultValue={data.school_id} readOnly={data.school_id != ''}/>
+            <input type="text" className="input-default" name="after_school_id" id="AfterSchoolId" defaultValue={data.school_id} readOnly={data.school_id != ''} placeholder="学童を一意に区別するID"/>
           </div>
           <div className="mt-2">
             <label htmlFor="AfterSchoolName" className="text-xl">学童名称</label>
-            <input type="text" className="input-default" name="after_school_name" id="AfterSchoolName" defaultValue={data.school_name} />
+            <input type="text" className="input-default" name="after_school_name" id="AfterSchoolName" defaultValue={data.school_name} placeholder="学童の正式名称"/>
+          </div>
+          <div className="mt-2">
+            <label htmlFor="AfterSchoolNumber" className="text-xl">大阪市学童ID</label>
+            <input type="text" className="input-default" name="after_school_number" id="AfterSchoolNumber" defaultValue={data.school_number} placeholder="大阪市から配布された学童番号"/>
           </div>
           <div className="mt-2">
             <label htmlFor="ChildrenCount" className="text-xl">児童数</label>

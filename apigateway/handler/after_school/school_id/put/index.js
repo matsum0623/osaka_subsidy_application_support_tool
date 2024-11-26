@@ -62,9 +62,10 @@ exports.handler = async (event, context) => {
     }
   })
 
-  const response = await after_school.put(
+  await after_school.put(
     pp.school_id,
     post_data.after_school_name,
+    post_data.after_school_number,
     open_types,
     child_data
   )

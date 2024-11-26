@@ -101,8 +101,8 @@ exports.handler = async (event, context) => {
   const month_sheet_1 = book.sheet("月次報告書１")
   month_sheet_1.cell("M1").value(year - 2018)    // 年（令和）
   month_sheet_1.cell("O1").value(month)   // 月
-  month_sheet_1.cell("O4").value(1307)    // 事業所番号
-  month_sheet_1.cell("Q4").value('ありんこ学童クラブ')    // 児童クラブ名
+  month_sheet_1.cell("O4").value(after_school_info.Number)    // 事業所番号
+  month_sheet_1.cell("Q4").value(after_school_info.Name)    // 児童クラブ名
 
   let dt = start_month_date
   const open_type_count = {

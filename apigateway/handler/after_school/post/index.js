@@ -61,6 +61,7 @@ exports.handler = async (event, context) => {
   await after_school.post(
     post_data.after_school_id,
     post_data.after_school_name,
+    post_data.after_school_number,
     open_types,
     child_data
   )
