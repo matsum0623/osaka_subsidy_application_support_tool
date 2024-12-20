@@ -51,16 +51,13 @@ export default function Index() {
   const [instructors, setInstructors] = useState(data.daily_data.instructors)
   const [sum_hours, setSumHours] = useState(data.daily_data.sum_hours)
   const [open_type, setOpenType] = useState(data.daily_data.open_type)
-  const open = data.daily_data.open_type != '9' ? data.config.open_types[data.daily_data.open_type].OpenTime : data.daily_data.open_time.start
-  const close = data.daily_data.open_type != '9' ? data.config.open_types[data.daily_data.open_type].CloseTime : data.daily_data.open_time.end
-  const [open_time, setOpenTime] = useState({ start: open, end: close })
+  const [open_time, setOpenTime] = useState({ start: data.daily_data.open_time.start, end: data.daily_data.open_time.end })
   const [children_sum, setChildrenSum] = useState(data.daily_data.instructors)
   const [children_disability, setChildrenDisability] = useState(data.daily_data.instructors)
   const [children_medical_care, setChildrenMedicalCare] = useState(data.daily_data.instructors)
 
-  const check_inst = checkInstructor(data.daily_data.instructors, open, close)
+  const check_inst = checkInstructor(data.daily_data.instructors, data.daily_data.open_time.start, data.daily_data.open_time.end)
   const [instChk, setInstChk] = useState(check_inst.check)
-  const [excess_shortage, setExcessShortage] = useState(check_inst.excess_shortage)
 
   const [is_loading, setIsLoading] = useState("idle")
 
@@ -73,37 +70,6 @@ export default function Index() {
     setIsLoading("idle")
   }
 
-  const calcExcessShortageConfig = (open:any, close:any) => {
-    let [open_h, open_m] = open.split(':').map((s:string) => parseInt(s))
-    const time_dict: { [key: string]: any[] } = {}
-    let tmp_list = []
-    let pre_hour = undefined
-    while(true){
-      if(pre_hour == undefined){
-        pre_hour = open_h
-      }else if(pre_hour != open_h){
-        time_dict[('00' + String(pre_hour)).slice(-2)] = tmp_list
-        pre_hour = open_h
-        tmp_list = []
-      }
-      const start_key = ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)
-      if(start_key >= close){
-          break
-      }
-      open_m += 15
-      if(open_m >= 60){
-          open_h += 1
-          open_m -= 60
-      }
-      tmp_list.push([start_key, ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)])
-    }
-    if(tmp_list.length > 0){
-      time_dict[('00' + String(pre_hour)).slice(-2)] = tmp_list
-    }
-    return time_dict
-  }
-  const [excess_shortage_config, setExcessShortageConfig] = useState(calcExcessShortageConfig(open, close))
-
   const setEditParams = async (school_id:string, date:string, child:boolean = false) => {
     setIsLoading("loading")
     await getData(`/monthly/daily?school_id=${school_id}&date=${date}`, data.idToken).then((res) => {
@@ -113,13 +79,8 @@ export default function Index() {
       setChildrenSum(res.children.sum)
       setChildrenDisability(res.children.disability)
       setChildrenMedicalCare(res.children.medical_care)
-      const open = res.open_type != '9' ? data.config.open_types[res.open_type].OpenTime : res.open_time.start
-      const close = res.open_type != '9' ? data.config.open_types[res.open_type].CloseTime : res.open_time.end
-      const check_response = checkInstructor(res.instructors, open, close)
-      setInstChk(check_response.check)
-      setExcessShortage(check_response.excess_shortage)
-      setOpenTime({start: open, end: close})
-      setExcessShortageConfig(calcExcessShortageConfig(open, close))
+      setInstChk(checkInstructor(res.instructors, res.open_time.start, res.open_time.end).check)
+      setOpenTime({start: res.open_time.start, end: res.open_time.end})
     })
     setEditSchoolId(school_id)
     setEditDate(date)
@@ -166,7 +127,10 @@ export default function Index() {
                 </select>
               </div>
               <div className="ms-auto p-2 hidden sm:block">
-                <button type="button" onClick={() => downloadCsv(search_school_id, search_ym, data.idToken, anchorRef)} className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">CSVダウンロード</button>
+                <button type="button" onClick={() => downloadCsv(search_school_id, search_ym, data.idToken, anchorRef)}
+                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
+                    報告書ダウンロード
+                </button>
                 <a ref={anchorRef} className='hidden'></a>
               </div>
             </div>
@@ -189,8 +153,6 @@ export default function Index() {
         children_disability: children_disability,
         children_medical_care: children_medical_care,
         instChk: instChk,
-        excess_shortage: excess_shortage,
-        excess_shortage_config: excess_shortage_config,
         setEditParams: setEditParams,
         changeParams: changeParams,
         setInstructors: setInstructors,
@@ -202,9 +164,6 @@ export default function Index() {
         setSumHours: setSumHours,
         setIsLoading: setIsLoading,
         setInstChk: setInstChk,
-        setExcessShortage: setExcessShortage,
-        setExcessShortageConfig: setExcessShortageConfig,
-        calcExcessShortageConfig: calcExcessShortageConfig,
       }}/>
     </div>
   );

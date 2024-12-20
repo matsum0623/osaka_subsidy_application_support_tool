@@ -71,7 +71,7 @@ exports.handler = async (event, context) => {
     after_school_id,
     post_data.date,
     post_data.open_type,
-    post_data.open_type == '9' ? post_data.open_time : undefined,
+    {start: open, end: close},
     children,
     disability,
     medical_care,

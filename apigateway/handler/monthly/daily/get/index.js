@@ -15,17 +15,22 @@ exports.handler = async (event, context) => {
 
   const after_school_id = qsp.school_id
 
+  const after_school_info = await after_school.get_item(after_school_id)
+  const open_types = await app_const.get_open_types()
+  const user_data = await user.get_item(decode_token['cognito:username'])
+
   // その日の情報を取得
   const res_data = {
-    'open_type': 0,
-    'instructors': {},
-    'children': {
-      'sum': '',
-      'disability': '',
-      'medical_care': '',
+    open_type: '0',
+    open_time: {start: after_school_info['Config']['OpenTypes']['0'].OpenTime, end: after_school_info['Config']['OpenTypes']['0'].CloseTime},
+    instructors: {},
+    children: {
+      sum: '',
+      disability: '',
+      medical_care: '',
     },
-    'summary': {
-      'hours': ''
+    summary: {
+      hours: ''
     }
   }
   const instructor_data = {}
@@ -33,7 +38,7 @@ exports.handler = async (event, context) => {
     const daily_item = await daily.get_item(after_school_id, qsp.date)
     if(daily_item){
       res_data['open_type'] = daily_item.OpenType
-      res_data['open_time'] = daily_item.OpenTime
+      res_data['open_time'] = daily_item.OpenTime ? daily_item.OpenTime : {start: after_school_info['Config']['OpenTypes'][daily_item.OpenType].OpenTime, end: after_school_info['Config']['OpenTypes'][daily_item.OpenType].CloseTime}
       res_data['children'] = {
         'sum': daily_item.Children,
         'disability': daily_item.Disability,
@@ -70,10 +75,6 @@ exports.handler = async (event, context) => {
   } catch (error) {
       console.log(error.message)
   }
-
-  const after_school_info = await after_school.get_item(after_school_id)
-  const open_types = await app_const.get_open_types()
-  const user_data = await user.get_item(decode_token['cognito:username'])
 
   res_data["config"] = {
     "open_types": {}
