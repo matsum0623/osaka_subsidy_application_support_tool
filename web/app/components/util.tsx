@@ -30,7 +30,7 @@ export function viewMonthList() {
   const ym_list = []
   for(let i=0; i < 13; i++){
     ym_list.push({
-      value: ((i<=today_month) ? today_year : today_year-1) + '-' + ('0' + ( (i < today_month) ? today_month - i : today_month - i + 12)).slice(-2),
+      value: ((i<today_month) ? today_year : today_year-1) + '-' + ('0' + ( (i < today_month) ? today_month - i : today_month - i + 12)).slice(-2),
       confirm: false
     })
   }

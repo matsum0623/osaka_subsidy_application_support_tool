@@ -66,25 +66,31 @@ export function checkInstructor(instData: any, open:any, close:any) {
         配置をチェックする
             １．全時間帯で2人以上
             ２．全時間帯にquaが1人以上
-            TODO: 加配の条件をどうするか
     */
     let check_response = true
     Object.keys(work_member).map((key) => {
         if(work_member[key].num < 2){
             check_response = false
-            work_member[key]['shortage']['num'] = 2 - work_member[key].num
+            work_member[key].shortage.num = 2 - work_member[key].num
         }else if(work_member[key].num > 2){
             work_member[key].excess.num = work_member[key].num - 2
         }
         // 資格者が1人以上配置されているか
         if(work_member[key].qua < 1){
             check_response = false
-            work_member[key]['shortage']['qua'] = 1 - work_member[key].qua
+            work_member[key].shortage.qua = 1 - work_member[key].qua
         }else if(work_member[key].qua > 1){
-            work_member[key].excess.qua = work_member[key].qua - 1
+            // 資格者の余りがあっても、人数が2の場合は余っていないとみなす
+            if (work_member[key].num == 2){
+                work_member[key].excess.qua = 0
+            }else if(work_member[key].num == work_member[key].qua){
+                work_member[key].excess.qua = work_member[key].qua - 2
+            }else{
+                work_member[key].excess.qua = work_member[key].qua - 1
+            }
         }
     })
-    const excess_shortage: { [key: string]: { key: string, shortage: { num: number, qua: number }, excess: { num: number, qua: number } } } = {}
+    const excess_shortage: { [key: string]: { key: string, shortage: { num: number, qua: number }, excess: { num: number, qua: number }, sum: { num: number, qua: number }  } } = {}
     Object.keys(work_member).map((key) => {
         if(work_member[key].shortage.num > 0 || work_member[key].shortage.qua > 0 ||
             work_member[key].excess.num > 0 || work_member[key].excess.qua > 0){
@@ -97,6 +103,10 @@ export function checkInstructor(instData: any, open:any, close:any) {
                 'excess': {
                     'num': work_member[key].excess.num,
                     'qua': work_member[key].excess.qua,
+                },
+                'sum': {
+                    'num': work_member[key].num,
+                    'qua': work_member[key].qua,
                 }
             }
         }

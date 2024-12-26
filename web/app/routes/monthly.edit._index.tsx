@@ -6,6 +6,7 @@ import {
 import React from "react";
 import { useState } from "react";
 import { postData } from "~/api/fetchApi";
+import { ExcessShortage, calcExcessShortageConfig } from "~/components/ExcessShortage";
 import { createDates, weekday } from "~/components/util";
 import { checkInstructor } from "~/lib/common_check";
 
@@ -15,7 +16,6 @@ export default function Index() {
     search_school_id: string,
     search_ym: string,
     edit_date: string,
-    search_results: object[],
     config: {
       open_types: any,
     }
@@ -49,10 +49,6 @@ export default function Index() {
 
   const [now_dt, prev_dt, next_dt] = createDates(context.edit_date)
 
-  const changeDate = (dt:string) => {
-    context.setEditParams(context.search_school_id, dt);
-  }
-
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     context.setIsLoading("submitting")
     e.preventDefault();
@@ -73,7 +69,7 @@ export default function Index() {
     }
     await postData("/monthly/daily", post_data, context.id_token)
     if(go_next){
-      changeDate(next_dt.toISOString().slice(0, 10))
+      context.setEditParams(context.search_school_id, next_dt.toISOString().slice(0, 10));
     }
     context.setIsLoading("idle")
   }
@@ -89,48 +85,11 @@ export default function Index() {
     context.setInstChk(checkInstructor(context.instructors, open, close).check)
   }
 
-  const changeOpenTime = (start:any, end:any) => {
-    context.setOpenTime({
-      start: start,
-      end: end
-    })
-  }
-
   const instructorCheck = () => {
     const open = context.open_type != '9' ? context.config.open_types[context.open_type].OpenTime : context.open_time.start
     const close = context.open_type != '9' ? context.config.open_types[context.open_type].CloseTime : context.open_time.end
     const check_response = checkInstructor(context.instructors, open, close)
     context.setInstChk(check_response.check)
-  }
-
-  const check_cell_class = (start:string, end:string, chk_start:string, chk_end:string, qua:boolean, add:boolean) => {
-    // 勤務時間外はfalse
-    const border_right = chk_start.split(':')[1] == '45' ? ' border-r-gray-500' : ''
-    if (start == "" || end == "" || start > chk_start || end < chk_end) return '' + border_right
-    if (add) return 'bg-blue-200' + border_right
-    if (qua) return 'bg-green-200' + border_right
-    return 'bg-lime-200' + border_right
-  }
-
-  const excess_shortage_cell = (excess_shortage:any, chk_start:string, type:string) => {
-    const border_right = chk_start.split(':')[1] == '45' ? ' border-r-gray-500' : ''
-    if (!(chk_start in excess_shortage)){
-      return <td className={"px-0 sm:p-2" + border_right}></td>
-    }
-    if (type == 'qua'){
-      if (excess_shortage[chk_start].shortage.qua > 0){
-        return <td className={"bg-red-400 px-0 sm:p-2" + border_right}></td>
-      }else if (excess_shortage[chk_start].excess.qua > 0){
-        return <td className={"bg-blue-400 px-0 sm:p-2" + border_right}>{excess_shortage[chk_start].excess.qua}</td>
-      }
-    } else if (type == 'sub'){
-      if ((excess_shortage[chk_start].shortage.num - excess_shortage[chk_start].shortage.qua) > 0){
-        return <td className={"bg-red-200 px-0 sm:p-2" + border_right}></td>
-      }else if ((excess_shortage[chk_start].excess.num - excess_shortage[chk_start].excess.qua) > 0){
-        return <td className={"bg-blue-200 px-0 sm:p-2" + border_right}>{excess_shortage[chk_start].excess.num - excess_shortage[chk_start].excess.qua}</td>
-      }
-    }
-    return <td className={"px-0 sm:p-2" + border_right}></td>
   }
 
   const setHour = (target:any) => {
@@ -195,65 +154,26 @@ export default function Index() {
     navigate(`/monthly`)
   }
 
-  const calcExcessShortageConfig = (open:any, close:any) => {
-    let [open_h, open_m] = open.split(':').map((s:string) => parseInt(s))
-    const time_dict: { [key: string]: any[] } = {}
-    let tmp_list = []
-    let pre_hour = undefined
-    while(true){
-      if(pre_hour == undefined){
-        pre_hour = open_h
-      }else if(pre_hour != open_h){
-        time_dict[('00' + String(pre_hour)).slice(-2)] = tmp_list
-        pre_hour = open_h
-        tmp_list = []
-      }
-      const start_key = ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)
-      if(start_key >= close){
-          break
-      }
-      open_m += 15
-      if(open_m >= 60){
-          open_h += 1
-          open_m -= 60
-      }
-      tmp_list.push([start_key, ('00' + String(open_h)).slice(-2) + ':' + ('00' + String(open_m)).slice(-2)])
-    }
-    if(tmp_list.length > 0){
-      time_dict[('00' + String(pre_hour)).slice(-2)] = tmp_list
-    }
-    return time_dict
-  }
-
-  let excess_shortage_config = calcExcessShortageConfig(context.open_time.start, context.open_time.end)
-  let excess_shortage = checkInstructor(context.instructors, context.open_time.start, context.open_time.end).excess_shortage
-
-  const OpenExcessShortageModal = () => {
-    excess_shortage = checkInstructor(context.instructors, context.open_time.start, context.open_time.end).excess_shortage
-    excess_shortage_config = calcExcessShortageConfig(context.open_time.start, context.open_time.end)
-    setModalOpen(true)
-  }
-
   return (
     <div>
       <div className="bg-white flex justify-between border-t-2 sticky top-12 sm:top-20 pt-2">
         <div className="text-base sm:text-2xl flex gap-3 justify-center sm:justify-start">
           <div className="flex">
-            <input type="date" value={context.edit_date} onChange={(e) => changeDate(e.target.value)} className="input-default sm:text-xl sm:py-1" />
+            <input type="date" value={context.edit_date} onChange={(e) => context.setEditParams(context.search_school_id, e.target.value)} className="input-default sm:text-xl sm:py-1" />
             <span className="hidden sm:block py-2">({weekday[now_dt.getDay()]})</span>
           </div>
           <span className={'py-2 ' + (context.instChk ? 'text-green-500' : 'text-red-500 font-bold')}>{context.instChk ? "OK" : "NG"}</span>
-            <button type="button" className="btn-primary min-w-10" onClick={() => changeDate(prev_dt.toISOString().slice(0, 10))}>
+            <button type="button" className="btn-primary min-w-10" onClick={() => context.setEditParams(context.search_school_id, prev_dt.toISOString().slice(0, 10))}>
               <span className="hidden sm:block">前日</span>
               <span className="sm:hidden">前</span>
             </button>
-            <button type="button" className="btn-primary min-w-10" onClick={() => changeDate(next_dt.toISOString().slice(0, 10))}>
+            <button type="button" className="btn-primary min-w-10" onClick={() => context.setEditParams(context.search_school_id, next_dt.toISOString().slice(0, 10))}>
               <span className="hidden sm:block">翌日</span>
               <span className="sm:hidden">翌</span>
             </button>
           </div>
         <div className="text-base sm:text-2xl flex">
-          <button type="button" className="btn-primary min-w-10" onClick={() => OpenExcessShortageModal()}>
+          <button type="button" className="btn-primary min-w-10" onClick={() => setModalOpen(true)}>
             <span className="hidden sm:block">チェック</span>
             <span className="sm:hidden">CHK</span>
           </button>
@@ -281,69 +201,7 @@ export default function Index() {
                 <span className="sr-only">Close modal</span>
               </button>
             </div>
-            <div className="modal-body overflow-scroll">
-              <table className="w-full text-xs sm:text-base">
-                <thead>
-                  <tr>
-                    <td rowSpan={3}><span className="hidden sm:block">指導員名</span></td>
-                    <td colSpan={99} className="py-1 sm:p-2">勤務時間</td>
-                  </tr>
-                  <tr>
-                    {Object.keys(excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => (
-                      <td className="py-1 sm:p-2" colSpan={excess_shortage_config[key].length} key={key}>{key}</td>
-                    ))}
-                  </tr>
-                  <tr className="hidden sm:table-row">
-                    {Object.keys(excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
-                      return excess_shortage_config[key].map((time:any) => {
-                        return <td key={key + time} className="px-0"><span className="hidden sm:block">{time[0].split(':')[1]}</span></td>
-                      })
-                    })}
-                  </tr>
-                </thead>
-                <tbody>
-                  {
-                    Object.values(context.instructors).sort((a:any, b:any) => (a.order - b.order)).map((inst: any) => {
-                      return (
-                        <tr key={'es' + inst.id}>
-                          <td className="table-cell sm:hidden px-0">{inst.name.slice(0,2)}</td>
-                          <td className="hidden sm:table-cell">{inst.name}</td>
-                          {Object.keys(excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
-                            return excess_shortage_config[key].map((time:any) => {
-                              return <td className={check_cell_class(inst.start, inst.end, time[0], time[1], inst.qualification, inst.additional_check) + " px-0 sm:p-2"} key={time[0]}></td>
-                            })
-                          })}
-                        </tr>
-                      )
-                    })
-                  }
-                  <tr className="border-t-4" key='es_inst'>
-                    <td>
-                      <span className="hidden sm:block">過不足(指)</span>
-                      <span className="sm:hidden">指</span>
-                    </td>
-                    {Object.keys(excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
-                      return excess_shortage_config[key].map((time:any) => {
-                        return <React.Fragment key={time[0]}>{excess_shortage_cell(excess_shortage, time[0], 'qua')}</React.Fragment>
-                      })
-                    })}
-                  </tr>
-                  <tr key='es_sub'>
-                    <td>
-                      <span className="hidden sm:block">過不足(補)</span>
-                      <span className="sm:hidden">補</span>
-                    </td>
-                    {Object.keys(excess_shortage_config).sort((a:any, b:any) => (a - b)).map((key:string) => {
-                      return excess_shortage_config[key].map((time:any) => {
-                        return <React.Fragment key={time[0]}>{excess_shortage_cell(excess_shortage, time[0], 'sub')}</React.Fragment>
-                      })
-                    })}
-                  </tr>
-                </tbody>
-              </table>
-
-
-            </div>
+            {ExcessShortage(context.open_time.start, context.open_time.end, context.instructors)}
           </div>
         </div>
       </div>
@@ -367,9 +225,11 @@ export default function Index() {
             <div className="flex sm:block w-full border justify-between">
               <div className="hidden sm:block w-1/4 sm:w-full border-b font-bold p-1">開所時間</div>
               <div className="w-full sm:px-2 py-2 flex justify-center gap-1 sm:gap-2">
-                <input className={context.open_type != '9' ? "icon-del" : ""} name={"times.open.start"} value={context.open_time.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => changeOpenTime(e.target.value, context.open_time.end)} onBlur={() => instructorCheck()} disabled={context.open_type != '9'}/>
+                <input className={context.open_type != '9' ? "icon-del" : ""} name={"times.open.start"} value={context.open_time.start} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"}
+                  onChange={(e) => context.setOpenTime({start: e.target.value, end: context.open_time.end})} onBlur={() => instructorCheck()} disabled={context.open_type != '9'}/>
                 <span>～</span>
-                <input className={context.open_type != '9' ? "icon-del" : ""} name={"times.open.end"} value={context.open_time.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"} onChange={(e) => changeOpenTime(context.open_time.start, e.target.value)} onBlur={() => instructorCheck()} disabled={context.open_type != '9'}/>
+                <input className={context.open_type != '9' ? "icon-del" : ""} name={"times.open.end"} value={context.open_time.end} type="time" min={"06:00:00"} max={"22:00:00"} step={"900"}
+                  onChange={(e) => context.setOpenTime({start: context.open_time.start, end: e.target.value})} onBlur={() => instructorCheck()} disabled={context.open_type != '9'}/>
               </div>
             </div>
           </div>
