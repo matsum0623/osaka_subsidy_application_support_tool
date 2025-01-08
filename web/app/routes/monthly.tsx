@@ -90,17 +90,18 @@ export default function Index() {
     setIsLoading("idle")
   }
 
-  const downloadCsv = async (school_id:string, ym:string, idToken:string, anchorRef:any) => {
+  const anchorRef = useRef<HTMLAnchorElement>(null)
+  const downloadMonthlyReport = async (output_type:string = 'monthly_report') => {
     setIsLoading("loading")
-    const data = await getData("/monthly/download?ym=" + ym + '&school_id=' + school_id, idToken)
+    const report_data = await getData(`/monthly/download?ym=${search_ym}&school_id=${search_school_id}&type=${output_type}`, data.idToken)
     const link = anchorRef.current
-    link.setAttribute('href', data.url)
-    link.setAttribute('download', `【1307】月次報告（令和${ym}年${ym}月分）`)
-    link.click()
+    if (link) {
+      link.setAttribute('href', report_data.url)
+      link.click()
+    }
     setIsLoading("idle")
   }
 
-  const anchorRef = useRef<HTMLAnchorElement>(null)
   const navigation = useNavigation()
 
   return (
@@ -126,15 +127,23 @@ export default function Index() {
                   ))}
                 </select>
               </div>
-              <div className="ms-auto p-2 hidden sm:block">
-                <button type="button" onClick={() => downloadCsv(search_school_id, search_ym, data.idToken, anchorRef)}
-                  className="text-white bg-blue-700 hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-blue-600 dark:hover:bg-blue-700 focus:outline-none dark:focus:ring-blue-800">
-                    報告書ダウンロード
-                </button>
-                <a ref={anchorRef} className='hidden'></a>
-              </div>
             </div>
           </Form>
+          <div className="flex">
+            <div className="ms-auto p-2 hidden sm:block">
+              <button type="button" onClick={() => downloadMonthlyReport()}
+                className="btn-download">
+                  報告書ダウンロード
+              </button>
+            </div>
+            <div className="ms-auto p-2 hidden sm:block">
+              <button type="button" onClick={() => downloadMonthlyReport('work_schedule')}
+                className="btn-download">
+                  勤務表ダウンロード
+              </button>
+            </div>
+            <a ref={anchorRef} className='hidden' download={'テストファイル'}></a>
+          </div>
         </div>
       }
       <Outlet context={{

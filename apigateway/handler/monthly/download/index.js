@@ -2,7 +2,7 @@ const fs = require('fs');
 const AWS = require("aws-sdk");
 const s3 = new AWS.S3();
 
-const { response_ok, response_403 } = require('lambda_response')
+const { response_ok, response_403, response_400 } = require('lambda_response')
 const { after_school, daily, instructor } = require('connect_dynamodb')
 const { Auth } = require('Auth')
 
@@ -22,10 +22,21 @@ exports.handler = async (event, context) => {
   const ym = qsp.ym
   const after_school_id = qsp.school_id
 
-  const start_month_date = new Date(ym + '-01')
-  const year = start_month_date.getFullYear()
-  const month = start_month_date.getMonth() + 1
+  // 出力タイプ（勤務表ダウンロード時はtyp=work_schedule)
+  const output_type = qsp.type || 'monthly_report'
 
+  if(output_type == 'monthly_report'){
+    // 月次報告書ダウンロード
+    return await output_monthly_report(after_school_id, ym)
+  } else if(output_type == 'work_schedule') {
+    // 勤務表ダウンロード
+    return await output_work_schedule(after_school_id, ym)
+  } else {
+    return response_400
+  }
+};
+
+const get_daily_dict = async (after_school_id, ym) => {
   const daily_dict = {}
   try {
       const result = await daily.get_list(after_school_id, ym)
@@ -36,19 +47,50 @@ exports.handler = async (event, context) => {
   } catch (error) {
       console.log(error.message)
   }
+  return daily_dict
+}
+
+const upload_file_and_get_url = async (dir, file_name) => {
+  const random_number = Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
+
+  const key = `${dir}/${random_number}.xlsx`
+  try {
+    await s3.putObject({
+      Bucket: process.env.FILE_DOWNLOAD_BUCKET_NAME,
+      Key: key,
+      Body: fs.createReadStream('/tmp/Output.xlsx'),
+    }).promise();
+  } catch (error) {
+    console.log(error)
+  }
+  return await s3.getSignedUrl('getObject', {
+    Bucket: process.env.FILE_DOWNLOAD_BUCKET_NAME,
+    Key: key,
+    Expires: 60,
+    ResponseContentDisposition: `attachment; filename="${encodeURIComponent(file_name)}"`
+  })
+}
+
+const input_cell = (sheet, cell, val, type='text') => {
+  if(type == 'text'){
+    sheet.cell(cell).value(val)
+  }else if(type == 'number'){
+    const num = val == '' ? '' : parseInt(val)
+    sheet.cell(cell).value(num)
+  }
+}
+
+const output_monthly_report = async (after_school_id, ym) => {
+  const start_month_date = new Date(ym + '-01')
+  const year = start_month_date.getFullYear()
+  const month = start_month_date.getMonth() + 1
+
+  const daily_dict = await get_daily_dict(after_school_id, ym)
 
   const instructors = {}
   const all_instructors = await instructor.get_all(after_school_id)
   const after_school_info = await after_school.get_item(after_school_id)
 
-  const input_cell = (sheet, cell, val, type='text') => {
-    if(type == 'text'){
-      sheet.cell(cell).value(val)
-    }else if(type == 'number'){
-      const num = val == '' ? '' : parseInt(val)
-      sheet.cell(cell).value(num)
-    }
-  }
   const seiki_dict = {
     '1': '正規',
     '2': '非正規',
@@ -175,30 +217,75 @@ exports.handler = async (event, context) => {
   await book.toFileAsync("/tmp/Output.xlsx")
   console.log('output Excel done')
 
-  const read_stream = fs.createReadStream('/tmp/Output.xlsx')
+  const url = await upload_file_and_get_url('monthly', `【${after_school_info.Number}】月次報告（令和${year - 2018}年${month}月分）.xlsx`)
 
-  const random_nNumber = Math.floor(1000000000000000 + Math.random() * 9000000000000000).toString();
-
-  try {
-    await s3.putObject({
-      Bucket: process.env.FILE_DOWNLOAD_BUCKET_NAME,
-      Key: `monthly/${random_nNumber}.xlsx`,
-      Body: read_stream,
-    }).promise();
-  } catch (error) {
-    console.log(error)
-  }
-  const url = await s3.getSignedUrl('getObject', {
-    Bucket: process.env.FILE_DOWNLOAD_BUCKET_NAME,
-    Key: `monthly/${random_nNumber}.xlsx`,
-    Expires: 60,
-  })
-
-  const res = {
-    'headers': { "Content-Type": "image/png" },
-    'statusCode': 200,
-    'body': url,
-    'isBase64Encoded': true
-  }
   return response_ok({url: url})
-};
+}
+
+const output_work_schedule = async (after_school_id, ym) => {
+  const start_month_date = new Date(ym + '-01')
+  const year = start_month_date.getFullYear()
+  const month = start_month_date.getMonth() + 1
+
+  const daily_dict = await get_daily_dict(after_school_id, ym)
+
+  const all_instructors = await instructor.get_all(after_school_id)
+
+  // 指導員ごとにループ
+  console.log('start create Excel')
+  const book = await XlsxPopulate.fromFileAsync("./template/template_work_schedule.xlsx")
+  console.log('open Excel done')
+
+  // 勤務表作成
+  const sheet = book.sheet("template")
+  sheet.cell("C1").value(`${year}-${month}-01`)
+  // TODO: 日付のStyleが変
+
+  const instructor_id_index = {}
+  all_instructors.sort((a, b) => (a.Order - b.Order)).forEach((value, index) => {
+    // 名前を入れていく
+    const instructor_name = value['Name']
+    sheet.cell(`A${index * 3 + 4}`).value(instructor_name)
+    instructor_id_index[value['SK'].split('#')[1]] = index
+  })
+  // 使わない行を非表示にする
+  for(let i = all_instructors.length * 3 + 4; i < 49; i++){
+    sheet.row(i).hidden(true)
+  }
+
+  const daily_col = [
+    'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O', 'P', 'Q',
+    'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'AA', 'AB', 'AC', 'AD', 'AE', 'AF', 'AG', 'AH'
+  ]
+
+  let dt = start_month_date
+  let col_ct = 0
+  while (dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) == ym) {
+    const dt_str = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2)
+    if(dt_str in daily_dict) {
+      const col = daily_col[col_ct]
+      daily_dict[dt_str]['Details']['InstructorWorkHours'].forEach((inst_work_info) => {
+        const row = instructor_id_index[inst_work_info.InstructorId] * 3 + 4
+        input_cell(sheet, col + row, inst_work_info.StartTime || '', 'text')
+        input_cell(sheet, col + (row + 1), inst_work_info.EndTime || '', 'text')
+        // 加配対象の場合はセル色を変える
+        if(inst_work_info.AdditionalCheck){
+          sheet.range(`${col}${row}:${col}${row + 2}`).style({fill: {type: 'solid', color: 'CAEDFB'}})
+        }
+      })
+    }
+    col_ct++
+    dt = new Date(dt.setDate(dt.getDate() + 1));
+  }
+
+  // シート名の変更
+  sheet.name(year + '年' + month + '月')
+
+  console.log('output Excel')
+  await book.toFileAsync("/tmp/Output.xlsx")
+  console.log('output Excel done')
+
+  const url = await upload_file_and_get_url('work_schedule', `勤務表${year}年${month}月.xlsx`)
+
+  return response_ok({url: url})
+}
