@@ -12,6 +12,10 @@ exports.handler = async (event, context) => {
         return response_400
     }
 
-    const res = await holidays.get_item(pp.school_id)
-    return response_ok(holidays.Holidays)
+    const qsp = event.queryStringParameters
+    if(qsp == undefined || !qsp.year){
+        return response_400
+    }
+    const res = await holidays.get_item(pp.school_id, qsp.year)
+    return response_ok(res.Holidays)
 };
