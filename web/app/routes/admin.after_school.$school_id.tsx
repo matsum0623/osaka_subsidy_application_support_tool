@@ -56,8 +56,12 @@ export default function Index() {
     console.log('cancel')
     return navigate('/admin')
   }
-  const EditInstructors = (school_id:string) => {
-    return navigate(`../instructors/${school_id}`)
+  const EditInstructors = () => {
+    return navigate(`../instructors/${data.school_id}`)
+  }
+  const EditHoliday = () => {
+    console.log('EditHoliday', data.school_id)
+    return navigate(`../holidays/${data.school_id}`)
   }
 
   const [c6, setC6] = useState(data.children.c6)
@@ -192,12 +196,13 @@ export default function Index() {
           </div>
           <div className="mt-4">
             <label htmlFor="InstructorCount" className="text-xl">指導員数</label>
-            <button type="button" className="btn btn-primary ml-3" onClick={() => EditInstructors(data.school_id)}>指導員編集</button>
+            <button type="button" className="btn btn-primary ml-3" onClick={EditInstructors}>指導員編集</button>
             <input type="text" className="input-default mt-1" id="InstructorCount" defaultValue={data.instructor_num} disabled/>
           </div>
           <div className="mt-4">
             <label htmlFor="ChildrenCount" className="text-xl">開所タイプ</label>
-            <table className="">
+            <button type="button" className="btn btn-primary ml-6" onClick={EditHoliday}>休日設定</button>
+            <table className="mt-1">
               <thead>
                 <tr>
                   <th>開所タイプ名称</th>
@@ -223,8 +228,14 @@ export default function Index() {
             </table>
           </div>
           <div className="col">
-            <button type="submit" className="btn btn-primary ml-2 mr-2 mt-3">保存</button>
-            <button type="button" className="btn btn-danger mt-3" onClick={Cancel}>キャンセル</button>
+            <div className="flex justify-start">
+              <div className="flex">
+                <button type="submit" className="btn btn-primary ml-2 mr-2 mt-3">保存</button>
+                <button type="button" className="btn btn-danger mt-3" onClick={Cancel}>キャンセル</button>
+              </div>
+              <div className="flex ml-96">
+              </div>
+            </div>
           </div>
         </div>
       </Form>
