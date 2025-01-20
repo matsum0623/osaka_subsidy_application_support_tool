@@ -35,8 +35,12 @@ export const clientLoader = async ({
     }).catch(
         error => {throw error}
     )
+    const holiday_dict: { [key: string]: { Name: string, Add: boolean } } = {}
+    Object.keys(holidays).map((item:string) => {
+      holiday_dict[item] = {Name: holidays[item], Add: false}
+    })
     const data = {
-      holidays: holidays,
+      holidays: holiday_dict,
       japan_holidays: japan_holidays,
       idToken: idToken,
       school_id: params.school_id,
@@ -56,23 +60,44 @@ export default function Index() {
   const navigate = useNavigate()
 
   const [selected_year, setSelectedYear] = useState((new Date().getFullYear()).toString())
-  const [holidays, setHolyDays] = useState<{ [key: string]: string }>(data.holidays)
+  const [holidays, setHolyDays] = useState<{ [key: string]: {Name: string, Add:boolean} }>(data.holidays)
   const [change_flag, setChangeFlag] = useState(false)
+  const [addDay, setAddDay] = useState("")
+  const [addName, setAddName] = useState("")
   const [ct, setCt] = useState(0)
   const [is_loading, setIsLoading] = useState("idle")
 
   const handleSubmit = async () => {
     setIsLoading("submitting")
-    await putData(`/after_school/${data.school_id}/holidays`, {year: selected_year, holidays: holidays}, data.idToken)
+    const post_holidays: { [key: string]: string } = {}
+    Object.keys(holidays).map((item:string) => {
+      post_holidays[item] = holidays[item].Name
+    })
+    await putData(`/after_school/${data.school_id}/holidays`, {year: selected_year, holidays: post_holidays}, data.idToken)
+    setChangeFlag(false)
+    const holiday_dict: { [key: string]: { Name: string, Add: boolean } } = {}
+    Object.keys(holidays).map((item:string) => {
+      holiday_dict[item] = {Name: holidays[item].Name, Add: false}
+    })
+    setHolyDays(holiday_dict);
+    setCt(ct + 1);
     setIsLoading("idle")
   }
 
   const setAllJapanHolydays =  () => {
     Object.keys(data.japan_holidays).filter((item:string) => item.includes(selected_year)).map((item:string) => (
-      holidays[item] = data.japan_holidays[item]
+      holidays[item] = {Name: data.japan_holidays[item], Add: true}
     ))
     setChangeFlag(true)
     setCt(ct+1)
+  }
+  const addHoliday = () => {
+    const newHolidays = { ...holidays };
+    newHolidays[addDay] = {Name: addName, Add: true};
+    console.log(newHolidays)
+    setHolyDays(newHolidays);
+    setChangeFlag(true)
+    setCt(ct + 1);
   }
   const deleteHoliday = (item:string) => {
     const newHolidays = { ...holidays };
@@ -90,7 +115,11 @@ export default function Index() {
     }
     setSelectedYear(year)
     const holidays: { [key: string]: string } = await getData(`/after_school/${data.school_id}/holidays/?year=${year}`, data.idToken)
-    setHolyDays(holidays)
+    const holiday_dict: { [key: string]: { Name: string, Add: boolean } } = {}
+    Object.keys(holidays).map((item:string) => {
+      holiday_dict[item] = {Name: holidays[item], Add: false}
+    })
+    setHolyDays(holiday_dict)
     setChangeFlag(false)
     setCt(ct+1)
   }
@@ -129,10 +158,19 @@ export default function Index() {
                 </tr>
               </thead>
               <tbody>
+                <tr>
+                  <td className="py-1">
+                    <input type="date" min={selected_year + '-01-01'} max={selected_year + '-12-31'} className="input-default py-2" value={addDay} onChange={(e) => setAddDay(e.target.value)}/>
+                  </td>
+                  <td className="py-1">
+                    <input type="text" className="input-default py-2" value={addName} onChange={(e) => setAddName(e.target.value)}/>
+                  </td>
+                  <td className="p-0"><button type="button" className="btn-add p-2 py-1" onClick={addHoliday}>追加</button></td>
+                </tr>
                 {Object.keys(holidays).sort().map((item:string) => (
                   <tr key={item} className={(new Date(item)).getDay()==6 ? "bg-cyan-100" : ((new Date(item)).getDay()==0 ? "bg-red-100" : "")}>
-                    <td>{item}({weekday[(new Date(item)).getDay()]})</td>
-                    <td>{holidays[item]}</td>
+                    <td className={holidays[item].Add ? "text-red-600" : ""}>{item}({weekday[(new Date(item)).getDay()]})</td>
+                    <td className={holidays[item].Add ? "text-red-600" : ""}>{holidays[item].Name}</td>
                     <td className="p-0"><button type="button" className="btn-danger p-2 py-1" onClick={() => deleteHoliday(item)}>削除</button></td>
                   </tr>
                 ))}
