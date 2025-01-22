@@ -8,6 +8,7 @@ export default function Index() {
     config: {
       open_types: any,
     },
+    holidays: string[],
     setEditParams(school_id: string, date: string, child:boolean): void
   } = useOutletContext();
 
@@ -92,7 +93,7 @@ export default function Index() {
 
         <tbody>
           {Object.values(context.search_results)?.map((i:any) => (
-            <tr key={i[0]} className={i[2]==6 ? "bg-cyan-100" : (i[2]==0 ? "bg-red-100" : "")}>
+            <tr key={i[0]} className={i[2]==6 ? "bg-cyan-100" : ((i[2]==0 || context.holidays.includes(i[0])) ? "bg-red-100" : "")}>
               <td className="hidden sm:table-cell">{i[1]}</td>
               <td className="hidden sm:table-cell">{weekday[i[2]]}</td>
               <td className="table-cell sm:hidden">{i[1]}（{weekday[i[2]]}）</td>

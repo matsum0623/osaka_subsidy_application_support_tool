@@ -1,5 +1,5 @@
 const { response_ok, response_403 } = require('lambda_response')
-const { after_school, daily, user, app_const, instructor } = require('connect_dynamodb')
+const { after_school, daily, user, app_const, instructor, holidays } = require('connect_dynamodb')
 const { Auth } = require('Auth')
 
 exports.handler = async (event, context) => {
@@ -36,6 +36,7 @@ exports.handler = async (event, context) => {
     all_instructors.forEach((value) => {
         instructors[value['SK'].split('#')[1]] = value['Name']
     })
+    const holidays_res = await holidays.get_item(after_school_id, ym.split('-')[0])
 
     while (dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) == ym) {
         const dt_str = dt.getFullYear() + '-' + ('0' + (dt.getMonth() + 1)).slice(-2) + '-' + ('0' + dt.getDate()).slice(-2)
@@ -79,6 +80,7 @@ exports.handler = async (event, context) => {
     const user_data = await user.get_item(decode_token['cognito:username'])
     return response_ok({
         list: res_list,
+        holidays: holidays_res.Holidays,
         config: {
             open_types: open_types_res
         },

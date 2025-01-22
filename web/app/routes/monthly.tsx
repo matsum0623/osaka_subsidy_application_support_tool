@@ -26,6 +26,7 @@ export const clientLoader = async ({
   const res = await getData(`/monthly?ym=${data.ym}&school_id=${data.school_id}`, idToken)
   data.search_results = res.list
   data.config = res.config
+  data.holidays = Object.keys(res.holidays)
 
   data.ym_list = viewMonthList()
 
@@ -45,6 +46,7 @@ export default function Index() {
   const [search_ym, setSearchDate] = useState(data.ym)
   const [search_school_id, setSearchSchoolId] = useState(data.school_id)
   const [search_results, setSearchResults] = useState(data.search_results)
+  const [holidays, setHolidays] = useState(data.holidays)
 
   const [edit_school_id, setEditSchoolId] = useState(data.school_id)
   const [edit_date, setEditDate] = useState(`${data.ym}-01`)
@@ -67,6 +69,7 @@ export default function Index() {
     setSearchSchoolId(school_id)
     const res = await getData(`/monthly?ym=${ym}&school_id=${school_id}`, data.idToken)
     setSearchResults(res.list)
+    setHolidays(Object.keys(res.holidays))
     setIsLoading("idle")
   }
 
@@ -154,6 +157,7 @@ export default function Index() {
         edit_date: edit_date,
         search_results: search_results,
         config: data.config,
+        holidays: holidays,
         instructors: instructors,
         sum_hours: sum_hours,
         open_type: open_type,
