@@ -52,7 +52,7 @@ export default function Index() {
   const [edit_date, setEditDate] = useState(`${data.ym}-01`)
   const [instructors, setInstructors] = useState(data.daily_data.instructors)
   const [sum_hours, setSumHours] = useState(data.daily_data.sum_hours)
-  const [open_type, setOpenType] = useState(data.daily_data.open_type)
+  const [open_type, setOpenType] = useState(data.daily_data.open_type || '0')
   const [open_time, setOpenTime] = useState({ start: data.daily_data.open_time.start, end: data.daily_data.open_time.end })
   const [children_sum, setChildrenSum] = useState(data.daily_data.instructors)
   const [children_disability, setChildrenDisability] = useState(data.daily_data.instructors)
@@ -78,7 +78,7 @@ export default function Index() {
     await getData(`/monthly/daily?school_id=${school_id}&date=${date}`, data.idToken).then((res) => {
       setInstructors(res.instructors)
       setSumHours(res.summary.hours)
-      setOpenType(res.open_type)
+      setOpenType(res.open_type || '0')
       setChildrenSum(res.children.sum)
       setChildrenDisability(res.children.disability)
       setChildrenMedicalCare(res.children.medical_care)
