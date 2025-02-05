@@ -14,9 +14,12 @@ exports.handler = async (event, context) => {
 
     const post_data = JSON.parse(event.body)
 
+    // 指導員IDを自動採番する
+    const instructor_id = await instructor.get_new_id(pp.school_id)
+
     const response = await instructor.put(
         pp.school_id,
-        post_data.instructor_id,
+        instructor_id,
         post_data.instructor_Name,
         post_data.qualification,
         post_data.additional,

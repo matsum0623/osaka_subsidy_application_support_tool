@@ -273,7 +273,7 @@ export default function Index() {
           </thead>
           <tbody>
             {
-              Object.values(context.instructors).sort((a:any, b:any) => (a.order - b.order)).map((inst: any) => {
+              Object.values(context.instructors).filter((inst:any) => (!inst.retirement_date || context.edit_date <= inst.retirement_date)).sort((a:any, b:any) => (a.order - b.order)).map((inst: any) => {
                 return (
                 <tr key={inst.id}>
                   <td className="py-0.5 sm:py-2 text-base table-cell sm:hidden">{inst.name.slice(0,2)}</td>

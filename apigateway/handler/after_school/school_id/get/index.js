@@ -47,7 +47,7 @@ exports.handler = async (event, context) => {
         school_number: school_info.Number,
         open_types: [
         ],
-        instructor_num: instructors.length,
+        instructor_num: instructors.filter(instructor => !instructor.RetirementDate).length,
         children: school_info.Children,
     }
     for(const id in school_info.Config.OpenTypes){

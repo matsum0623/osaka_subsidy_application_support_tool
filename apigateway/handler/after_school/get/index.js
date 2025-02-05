@@ -18,13 +18,14 @@ exports.handler = async (event, context) => {
         const school_id = school_info.SK.split('#')[1]
         const child_count = Object.values(school_info.Children).reduce((sum, value) => sum + parseInt(value), 0)
         const instructors = await instructor.get_all(school_id)
+        // RetirementDateが設定されていないものだけをカウント
         if (user_data.AfterSchools.includes(school_id) || user_data.Admin){
             response.list.push({
                 school_id: school_id,
                 school_name: school_info.Name,
                 open_types: school_info.Config.OpenTypes,
                 child_count: child_count,
-                instructor_count: instructors.length,
+                instructor_count: instructors.filter(instructor => !instructor.RetirementDate).length,
             })
         }
     }

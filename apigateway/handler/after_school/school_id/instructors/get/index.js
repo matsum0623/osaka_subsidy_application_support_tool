@@ -20,6 +20,7 @@ exports.handler = async (event, context) => {
 
     const response = {instructors: []}
     instructors.forEach(item => {
+        // 削除フラグが立っている場合はスキップ
         response.instructors.push({
             id: item.SK.split('#')[1],
             name: item.Name,
@@ -29,6 +30,7 @@ exports.handler = async (event, context) => {
             seiki: item.Seiki,
             koyou: item.Koyou,
             order: item.Order ? item.Order : 99,
+            retirement_date: item.RetirementDate ? item.RetirementDate : null,
         })
     });
 

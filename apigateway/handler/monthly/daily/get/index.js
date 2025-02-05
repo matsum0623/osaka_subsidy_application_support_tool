@@ -54,22 +54,23 @@ exports.handler = async (event, context) => {
   }
   // 指導員情報を取得
   try {
-    const result = await instructor.get_all(after_school_id)
+    const instructors = await instructor.get_all(after_school_id)
 
     // 結果を日付をキーにしたオブジェクトに変換
-    result.forEach(item => {
+    instructors.forEach(item => {
       const instructor_id = item.SK.substring(11)
       res_data['instructors'][instructor_id] = {
-        "id": instructor_id,
-        "name": item.Name,
-        "qualification": item.Qualification,
-        "additional": item.Additional,
-        "medical_care": item.MedicalCare,
-        "start": instructor_data[instructor_id]?.StartTime ?? '',
-        "end": instructor_data[instructor_id]?.EndTime ?? '',
-        "hours": instructor_data[instructor_id]?.WorkHours ?? '',
-        "order": item.Order ? item.Order : 99,
-        "additional_check": instructor_data[instructor_id]?.AdditionalCheck ?? false,
+        id: instructor_id,
+        name: item.Name,
+        qualification: item.Qualification,
+        additional: item.Additional,
+        medical_care: item.MedicalCare,
+        start: instructor_data[instructor_id]?.StartTime ?? '',
+        end: instructor_data[instructor_id]?.EndTime ?? '',
+        hours: instructor_data[instructor_id]?.WorkHours ?? '',
+        order: item.Order ? item.Order : 99,
+        additional_check: instructor_data[instructor_id]?.AdditionalCheck ?? false,
+        retirement_date: item.RetirementDate ? item.RetirementDate : null,
       }
     });
   } catch (error) {

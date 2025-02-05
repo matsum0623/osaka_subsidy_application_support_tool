@@ -129,6 +129,7 @@ const output_monthly_report = async (after_school_id, ym) => {
   const instructor_sheet = book.sheet("職員一覧")
   let row_idx = 2
   all_instructors.forEach((value) => {
+    if(value.RetirementDate < ym + '-01') return
     instructors[value['SK'].split('#')[1]] = value['Name']
     input_cell(instructor_sheet, "B" + row_idx, value['Name'], 'text')
     input_cell(instructor_sheet, "C" + row_idx, value.Qualification ? '放課後児童支援員' : '補助員', 'text')
@@ -242,14 +243,17 @@ const output_work_schedule = async (after_school_id, ym) => {
   // TODO: 日付のStyleが変
 
   const instructor_id_index = {}
-  all_instructors.sort((a, b) => (a.Order - b.Order)).forEach((value, index) => {
+  let instructor_count = -1
+  all_instructors.sort((a, b) => (a.Order - b.Order)).forEach((value) => {
+    if(value.RetirementDate < ym + '-01') return
     // 名前を入れていく
+    instructor_count++
     const instructor_name = value['Name']
-    sheet.cell(`A${index * 3 + 4}`).value(instructor_name)
-    instructor_id_index[value['SK'].split('#')[1]] = index
+    sheet.cell(`A${instructor_count * 3 + 4}`).value(instructor_name)
+    instructor_id_index[value['SK'].split('#')[1]] = instructor_count
   })
   // 使わない行を非表示にする
-  for(let i = all_instructors.length * 3 + 4; i < 49; i++){
+  for(let i = instructor_count * 3 + 4; i < 49; i++){
     sheet.row(i).hidden(true)
   }
 

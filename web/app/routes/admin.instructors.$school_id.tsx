@@ -4,10 +4,12 @@ import {
   ClientLoaderFunctionArgs,
   Form,
   useNavigate,
+  useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
 import { getIdToken } from "~/api/auth";
 import { getData, putData, postData, deleteData } from "~/api/fetchApi";
+import { Loading  } from "~/components/util";
 
 export const clientLoader = async ({
   params,
@@ -24,20 +26,18 @@ export const clientLoader = async ({
   }
 };
 
-export const clientAction = async () => {
-  console.log("clientAction")
-}
-
-
 export default function Index() {
   const data = useLoaderData<typeof clientLoader>()
   if (!data.idToken){
     redirect("/");
   }
 
+  const [is_loading, setIsLoading] = useState('')
+
   const navigate = useNavigate()
 
   const handleSubmit = async (e:any) => {
+    setIsLoading('submitting')
     const post_data = {
       instructor_id: instructorId,
       instructor_Name: instructorName,
@@ -56,17 +56,21 @@ export default function Index() {
       await putData("/after_school/" + data.school_id + '/instructors', post_data, data.idToken)
     }
     setModalOpenAdd(false)
+    setIsLoading('idle')
     navigate('./')
   }
 
   const handleDeleteSubmit = async (e:any) => {
+    setIsLoading('submitting')
     e.preventDefault();
     const post_data = {
       instructor_id: instructorId,
       instructor_Name: instructorName,
+      retirement_date: retirement_date,
     }
     await deleteData("/after_school/" + data.school_id + '/instructors', post_data, data.idToken)
     setModalOpenDelete(false)
+    setIsLoading('idle')
     navigate('./')
   }
 
@@ -83,6 +87,8 @@ export default function Index() {
 
   const [modal_open_add, setModalOpenAdd] = useState<boolean>(false)
   const [modal_open_delete, setModalOpenDelete] = useState<boolean>(false)
+
+  const [retirement_date, setRetirementDate] = useState<string>("")
 
   const openModal = (
     type:string = "add",
@@ -104,14 +110,18 @@ export default function Index() {
   const openDeleteConfirmModal = (id:string, name:string) => {
     setInstructorId(id)
     setInstructorName(name)
+    setRetirementDate('')
     setModalOpenDelete(true)
   }
 
   // 表示順に並び替え
   data.instructors.sort((a:any, b:any) => a.order - b.order)
 
+  const navigation = useNavigation()
+
   return (
     <div className="border-t-2">
+      {Loading((navigation.state == 'loading' || navigation.state == 'submitting') ? navigation : {state: is_loading})}
       <div className="flex justify-between my-2">
         <div>
           <p className="text-2xl font-bold">指導員情報</p>
@@ -136,7 +146,7 @@ export default function Index() {
         </thead>
         <tbody>
           {data.instructors.map((ins:any) => (
-            <tr key={ins.id}>
+            <tr key={ins.id} className={ins.retirement_date && "bg-gray-300"}>
               <td className="align-middle">{ins.id}</td>
               <td className="align-middle">{ins.name}</td>
               <td className="align-middle">{ins.qualification && '○'}</td>
@@ -144,8 +154,9 @@ export default function Index() {
               <td className="align-middle">{ins.medical_care && '○'}</td>
               <td>{ins.seiki == '1' ? '正規' : (ins.seiki == '2' ? '非正規' : '')}・{ins.koyou == '1' ? '常勤' : (ins.koyou == '2' ? '非常勤（みなし常勤）' : (ins.koyou == '3' ? '非常勤' : ''))}</td>
               <td className="align-middle">{ins.order}</td>
-              <td><button className="btn btn-primary" onClick={() => (openModal("edit", ins))}>編集</button></td>
-              <td><button className="btn btn-danger" onClick={() => (openDeleteConfirmModal(ins.id, ins.name))}>削除</button></td>
+              <td className={!ins.retirement_date ? "hidden" : ""} colSpan={2}>退職済み({ins.retirement_date})</td>
+              <td className={ins.retirement_date && "hidden"}><button className="btn btn-primary" onClick={() => (openModal("edit", ins))}>編集</button></td>
+              <td className={ins.retirement_date && "hidden"}><button className="btn btn-danger" onClick={() => (openDeleteConfirmModal(ins.id, ins.name))}>削除</button></td>
             </tr>
           ))}
             <tr key={'new'}>
@@ -162,6 +173,7 @@ export default function Index() {
         </tbody>
       </table>
 
+      {/** 指導員追加ダイアログ */}
       <Form onSubmit={(e) => handleSubmit(e)}>
         <div id="add_modal" tabIndex={-1} className={(modal_open_add ? "block" : "hidden") + " modal-back-ground"}
         onClick={(e) => {
@@ -181,9 +193,9 @@ export default function Index() {
                 </button>
               </div>
               <div className="modal-body">
-                <div className="mb-3">
+                <div className={"mb-3" + (modalType == 'add' ? " hidden" : "")}>
                   <label htmlFor="InstructorIdInput" className="form-label">指導員ID</label>
-                  <input type="text" name="instructor_id" className="input-default" id="InstructorIdInput" placeholder="指導員ID" value={instructorId} required onChange={(e) => setInstructorId(e.target.value)} disabled={modalType == 'edit'}/>
+                  <input type="text" name="instructor_id" className="input-default" id="InstructorIdInput" placeholder="指導員ID" value={instructorId} required={modalType == 'edit'} onChange={(e) => setInstructorId(e.target.value)} disabled={modalType == 'edit'}/>
                 </div>
                 <div className="mb-3">
                   <label htmlFor="InstructorNameInput" className="form-label">指導員氏名</label>
@@ -249,6 +261,7 @@ export default function Index() {
         </div>
       </Form>
 
+      {/** 指導員削除確認ダイアログ */}
       <Form onSubmit={(e) => handleDeleteSubmit(e)}>
         <div id="delete_modal" tabIndex={-1} className={(modal_open_delete ? "block" : "hidden") + " modal-back-ground"}
         onClick={(e) => {
@@ -269,6 +282,8 @@ export default function Index() {
               </div>
               <div className="modal-body">
                 <div className="mb-3">[{instructorId}:{instructorName}]を削除します。よろしいですか？</div>
+                <label htmlFor="RetirementDate" className="form-label">退職日を入力してください。</label>
+                <input type="date" name="retirement_date" id="RetirementDate" value={retirement_date} required className="ml-8 input-default w-40 inline" onChange={(e) => setRetirementDate(e.target.value)}/>
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-gray" onClick={() => setModalOpenDelete(false)}>キャンセル</button>

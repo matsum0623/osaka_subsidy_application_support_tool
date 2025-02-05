@@ -14,9 +14,23 @@ exports.handler = async (event, context) => {
 
     const post_data = JSON.parse(event.body)
 
-    const response = await instructor.delete(
+    // いったん指導員情報を取得
+    const instructor_info = await instructor.get_item(
         pp.school_id,
         post_data.instructor_id,
+    )
+    // 削除フラグを立てて再登録
+    await instructor.put(
+        pp.school_id,
+        post_data.instructor_id,
+        instructor_info.Name,
+        instructor_info.Qualification,
+        instructor_info.Additional,
+        instructor_info.MedicalCare,
+        instructor_info.Seiki,
+        instructor_info.Koyou,
+        instructor_info.Order,
+        post_data.retirement_date,
     )
 
     return response_ok({});
