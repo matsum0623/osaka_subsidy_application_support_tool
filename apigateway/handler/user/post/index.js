@@ -33,8 +33,6 @@ exports.handler = async (event, context) => {
                 Value: post_data.user_name,
             },
         ],
-        TemporaryPassword: 'Qwerty1@', // パスワードリセットが必要
-        MessageAction: 'SUPPRESS', // To suppress sending the welcome email
     };
 
     try {

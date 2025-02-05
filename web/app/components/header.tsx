@@ -18,6 +18,10 @@ export function Header(user_data:any) {
                 user_data.admin &&
                 <Link to="/admin" className="hidden sm:flex text-sm sm:text-xl font-semibold leading-6 text-gray-900 underline">管理画面</Link>
               }
+              {
+                !user_data.admin &&
+                <Link to="/after_school_settings" className="hidden sm:flex text-sm sm:text-xl font-semibold leading-6 text-gray-900 underline">学童設定</Link>
+              }
             </div>
             <div className="flex sm:flex-1 sm:justify-end">
               <Link to="/logout" className="text-sm sm:text-xl font-semibold leading-6 text-gray-900">ログアウト<span aria-hidden="true">&rarr;</span></Link>

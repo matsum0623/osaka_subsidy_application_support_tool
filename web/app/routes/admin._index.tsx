@@ -3,10 +3,12 @@ import {
   redirect,
   useNavigate,
   Form,
+  useNavigation,
 } from "@remix-run/react";
 import { useState } from "react";
-import { getData, postData, putData } from "~/api/fetchApi";
+import { getData, postData, putData, deleteData } from "~/api/fetchApi";
 import { getLs } from "~/lib/ls";
+import { Loading  } from "~/components/util";
 
 export const clientLoader = async () => {
   const idToken = getLs('idToken') || ''
@@ -42,6 +44,8 @@ export default function Index() {
   const [after_schools, setAfterSchools] = useState([''])
   const [admin_flag, setAdminFlag] = useState(false)
   const [modal_open, setModalOpen] = useState(false)
+  const [is_loading, setIsLoading] = useState('')
+  const [users, setUsers] = useState(data.users.list)
 
   const openModal = (
     modal_type:string = 'add',
@@ -69,6 +73,7 @@ export default function Index() {
   }
 
   const handleSubmit = async (e:any) => {
+    setIsLoading('submitting')
     e.preventDefault()
     const post_data = {
       user_id: user_id,
@@ -80,17 +85,31 @@ export default function Index() {
     // TODO:モーダルを無理やり閉じてる
     document.getElementById('add_modal_cancel')?.click()
     if(modal_type == 'add'){
+      // 追加
       const response = await postData(`/user`, post_data, data.idToken)
     }else{
+      // 更新
       const response = await putData(`/user/${user_id}`, post_data, data.idToken)
     }
+    const users = await getData("/users", data.idToken)
+    setUsers(users.list)
+    setIsLoading('idle')
     navigate('./')
   }
 
-  const DeleteUser = async (user_id:string) => {}
+  const DeleteUser = async (user_id:string) => {
+    setIsLoading('submitting')
+    const response = await deleteData(`/user/${user_id}`, {}, data.idToken)
+    const users = await getData("/users", data.idToken)
+    setUsers(users.list)
+    setIsLoading('idle')
+  }
+
+  const navigation = useNavigation()
 
   return (
     <div className="border-t-2 ">
+      {Loading((navigation.state == 'loading' || navigation.state == 'submitting') ? navigation : {state: is_loading})}
       <div className="flex gap-24 mt-2">
         <div className="">
           <p className="text-2xl font-bold">学童一覧</p>
@@ -142,7 +161,7 @@ export default function Index() {
           </tr>
         </thead>
         <tbody>
-          {data.users.list.map((user:any) => (
+          {users.map((user:any) => (
             <tr key={user.user_id}>
               <td className="col-sm-4 align-middle">{user.user_id}</td>
               <td className="col-sm-4 align-middle">{user.user_name}</td>

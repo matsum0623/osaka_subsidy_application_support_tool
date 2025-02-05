@@ -38,6 +38,7 @@ export const clientAction = async({
     return redirect(`/`,);
   }else if(sign_in_res.nextStep.signInStep === "CONFIRM_SIGN_IN_WITH_NEW_PASSWORD_REQUIRED"){
     // 新しいパスワードを設定する画面に遷移
+    setLs('user_id', formData.get("username")?.toString() || '')
     return redirect(`/login?confirm_new_password`)
   }else{
     return redirect(`/login?auth_error`)
@@ -50,6 +51,7 @@ export default function Index() {
 
   const [is_invalid, setIsInvalid] = useState(false)
   const [is_confirm_submit, setIsConfirmSubmit] = useState(false)
+  const [is_reset_password, setIsResetPassword] = useState(false)
 
   const commitNewPassword = async (e: React.FormEvent<HTMLFormElement>) => {
     setIsConfirmSubmit(true)
@@ -77,7 +79,7 @@ export default function Index() {
       }
     })
     if(confirm_sign_in_res.nextStep.signInStep === "DONE"){
-      navigate(`/monthly`,);
+      return redirect(`/`,);
     }else if(confirm_sign_in_res.nextStep.signInStep == 'invalid'){
       setIsInvalid(true)
     }else{
@@ -86,6 +88,11 @@ export default function Index() {
       navigate(`/login`)
     }
     setIsConfirmSubmit(false)
+  }
+
+  const resetPassword = async (e: React.FormEvent<HTMLFormElement>) => {
+    console.log('reset')
+    console.log(e)
   }
 
   return (
@@ -107,17 +114,17 @@ export default function Index() {
                 <input type="password" name="password" id="password" placeholder="••••••••" className="input-default" required />
               </div>
               <p className="text-red-500">{searchParams.has('auth_error') && "※ユーザ、またはパスワードが間違っています。"}</p>
-              {/*<div className="flex items-center justify-between">
-                  <div className="flex items-start">
-                      <div className="flex items-center h-5">
-                        <input id="remember" aria-describedby="remember" type="checkbox" className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800" required />
-                      </div>
-                      <div className="ml-3 text-sm">
-                        <label htmlFor="remember" className="text-gray-500 dark:text-gray-300">Remember me</label>
-                      </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-start">
+                  {/*<div className="flex items-center h-5">
+                    <input id="remember" aria-describedby="remember" type="checkbox" className="w-4 h-4 border border-gray-300 rounded bg-gray-50 focus:ring-3 focus:ring-primary-300 dark:bg-gray-700 dark:border-gray-600 dark:focus:ring-primary-600 dark:ring-offset-gray-800" required />
                   </div>
-                  <a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500">Forgot password?</a>
-              </div>*/}
+                  <div className="ml-3 text-sm">
+                    <label htmlFor="remember" className="text-gray-500 dark:text-gray-300">Remember me</label>
+                  </div>*/}
+                </div>
+                {/*<a href="#" className="text-sm font-medium text-primary-600 hover:underline dark:text-primary-500" onClick={() => setIsResetPassword(true)}>パスワードを忘れましたか?</a>*/}
+              </div>
               <button type="submit" className="w-full text-white bg-blue-600 hover:bg-primary-700 focus:ring-4 focus:outline-none focus:ring-primary-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-primary-600 dark:hover:bg-primary-700 dark:focus:ring-primary-800">ログイン</button>
             </Form>
           </div>
@@ -134,12 +141,6 @@ export default function Index() {
                 <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
                   パスワードを更新してください
                 </h3>
-                <button type="button" className="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" onClick={() => setSearchParams('')}>
-                  <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
-                    <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
-                  </svg>
-                  <span className="sr-only">Close modal</span>
-                </button>
               </div>
               <div className="modal-body">
                 <div>
@@ -164,6 +165,43 @@ export default function Index() {
               </div>
               <div className="modal-footer">
                 <button type="button" className="btn-danger w-28" onClick={() => setSearchParams('')}>キャンセル</button>
+                <button type="submit" className="ms-3 btn-primary w-28">登録</button>
+              </div>
+            </Form>
+          </div>
+        </div>
+      </div>
+
+      {/** パスワードリセットダイアログ */}
+      <div id="reset-modal" tabIndex={-1}
+        className={(is_reset_password ? "block" : "hidden") + " modal-back-ground"}
+        onClick={(e) => {
+          if((e.target as HTMLElement).id == 'reset-modal'){
+            setIsResetPassword(false)
+          }
+        }}>
+        <div className="modal-dialog">
+          <div className="modal-content">
+            <Form onSubmit={(e) => resetPassword(e)}>
+              <div className="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                  パスワードをリセット
+                </h3>
+                <button type="button" className="btn-close" onClick={() => setIsResetPassword(false)}>
+                  <svg className="w-3 h-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 14 14">
+                    <path stroke="currentColor" strokeLinecap={"round"} strokeLinejoin={"round"} strokeWidth={2} d="m1 1 6 6m0 0 6 6M7 7l6-6M7 7l-6 6"/>
+                  </svg>
+                  <span className="sr-only">Close modal</span>
+                </button>
+              </div>
+              <div className="modal-body">
+                <div>
+                  <label htmlFor="reset_email" className="block mb-2 text-sm font-medium text-gray-900 dark:text-white">登録メールアドレス</label>
+                  <input type="email" name="reset_email" id="reset_email" placeholder="sample@email.com" className="bg-gray-50 border border-gray-300 text-gray-900 rounded-lg focus:ring-primary-600 focus:border-primary-600 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white dark:focus:ring-blue-500 dark:focus:border-blue-500" required disabled={is_confirm_submit}/>
+                </div>
+              </div>
+              <div className="modal-footer">
+                <button type="button" className="btn-danger w-28" onClick={() => setIsResetPassword(false)}>キャンセル</button>
                 <button type="submit" className="ms-3 btn-primary w-28">登録</button>
               </div>
             </Form>

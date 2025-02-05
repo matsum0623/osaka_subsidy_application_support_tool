@@ -155,6 +155,23 @@ Resources:
             RestApiId:
               Ref: CommonAPI
 
+  UserUserIdDeleteLambda:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: ./handler/user/user_id/delete
+      Role: !GetAtt UserAdminLambdaRole.Arn
+      Events:
+        GetApi:
+          Type: Api
+          Properties:
+            Path: /user/{user_id}
+            Method: DELETE
+            RestApiId:
+              Ref: CommonAPI
+      Environment:
+        Variables:
+          USER_POOL_ID: !Ref LoginUserPool
+
   AfterSchoolGetLambda:
     Type: AWS::Serverless::Function
     Properties:
@@ -383,6 +400,15 @@ Resources:
       UserPoolName: !Sub ${AWS::StackName}-user-pool
       AdminCreateUserConfig:
         AllowAdminCreateUserOnly: true
+        InviteMessageTemplate:
+          EmailMessage: |-
+            大阪市学童補助金支援ツールへようこそ。<br><br>
+            管理者によりユーザ登録を行いました。<br><br>
+            ユーザ名は {username} です。<br>
+            仮パスワードは {####} です。<br><br>
+            初回ログイン時にパスワードを変更してください。<br><br>
+            ※このメールは送信専用です。返信はできません。<br>
+          EmailSubject: "大阪市学童補助金支援ツール 招待メール"
       AutoVerifiedAttributes:
         - email
       AccountRecoverySetting:
